@@ -20,8 +20,8 @@ def main():
     # you might want to experiment with different sizes; -1 keeps the original size
     processor.max_internal_size = 480
 
-    image_path = './examples/images/judo'
-    mask_path = './examples/masks/judo'
+    image_path = 'images/judo'
+    mask_path = 'masks/judo'
     # ordering is important
     images = sorted(os.listdir(image_path))
 

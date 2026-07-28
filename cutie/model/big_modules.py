@@ -2,7 +2,7 @@
 big_modules.py - This file stores higher-level network blocks.
 
 x - usually denotes features that are shared between objects.
-g - usually denotes features that are not shared between objects 
+g - usually denotes features that are not shared between objects
     with an extra "num_objects" dimension (batch_size * num_objects * num_channels * H * W).
 
 The trailing number of a variable usually denotes the stride
@@ -19,6 +19,7 @@ from cutie.model.modules import *
 
 
 class PixelEncoder(nn.Module):
+
     def __init__(self, model_cfg: DictConfig):
         super().__init__()
 
@@ -62,6 +63,7 @@ class PixelEncoder(nn.Module):
 
 
 class KeyProjection(nn.Module):
+
     def __init__(self, model_cfg: DictConfig):
         super().__init__()
         in_dim = model_cfg.pixel_encoder.ms_dims[0]
@@ -88,6 +90,7 @@ class KeyProjection(nn.Module):
 
 
 class MaskEncoder(nn.Module):
+
     def __init__(self, model_cfg: DictConfig, single_object=False):
         super().__init__()
         pixel_dim = model_cfg.pixel_dim
@@ -100,9 +103,13 @@ class MaskEncoder(nn.Module):
 
         resnet_model_path = model_cfg.get('resnet_model_path')
         if model_cfg.mask_encoder.type == 'resnet18':
-            network = resnet.resnet18(pretrained=True, extra_dim=extra_dim, model_dir=resnet_model_path)
+            network = resnet.resnet18(pretrained=True,
+                                      extra_dim=extra_dim,
+                                      model_dir=resnet_model_path)
         elif model_cfg.mask_encoder.type == 'resnet50':
-            network = resnet.resnet50(pretrained=True, extra_dim=extra_dim, model_dir=resnet_model_path)
+            network = resnet.resnet50(pretrained=True,
+                                      extra_dim=extra_dim,
+                                      model_dir=resnet_model_path)
         else:
             raise NotImplementedError
         self.conv1 = network.conv1
@@ -190,6 +197,7 @@ class MaskEncoder(nn.Module):
 
 
 class PixelFeatureFuser(nn.Module):
+
     def __init__(self, model_cfg: DictConfig, single_object=False):
         super().__init__()
         value_dim = model_cfg.value_dim
@@ -236,6 +244,7 @@ class PixelFeatureFuser(nn.Module):
 
 
 class MaskDecoder(nn.Module):
+
     def __init__(self, model_cfg: DictConfig):
         super().__init__()
         embed_dim = model_cfg.embed_dim

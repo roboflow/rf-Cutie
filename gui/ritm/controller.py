@@ -1,7 +1,7 @@
 import torch
 try:
     from torch import mps
-except:
+except ImportError:
     pass
 from torchvision import transforms
 
@@ -10,6 +10,7 @@ from ..ritm.inference.predictors import get_predictor
 
 
 class InteractiveController:
+
     def __init__(self, net, device, predictor_params, prob_thresh=0.5):
         self.net = net.to(device)
         self.prob_thresh = prob_thresh

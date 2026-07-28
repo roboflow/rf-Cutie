@@ -109,7 +109,7 @@ docker run -v "$PWD":/tmp/ \
 <p align="center">
   <img src="./assets/img/modifying_external_mask.jpg" alt="drawing" width="80%"/>
 </p>
-  
+
 According to our paper, ITER-M models take an image, encoded user input, and a previous step mask as their input. Moreover, a user can initialize the model with an external mask before placing any clicks and correct this mask using the same interface.  As it turns out, our models successfully handle this situation and make it possible to change the mask.
 
 To initialize any ITER-M model with an external mask use the "Load mask" button in the menu bar.
@@ -128,7 +128,7 @@ To initialize any ITER-M model with an external mask use the "Load mask" button 
     <li>BRS parameters (BRS type can be changed using the dropdown menu)</li>
     <ul>
         <li><i>Network clicks</i> - the number of first clicks that are included in the network's input. Subsequent clicks are processed only using BRS  (NoBRS ignores this option).</li>
-        <li><i>L-BFGS-B max iterations</i> - the maximum number of function evaluation for each step of optimization in BRS (increase for better accuracy and longer computational time for each click).</li>  
+        <li><i>L-BFGS-B max iterations</i> - the maximum number of function evaluation for each step of optimization in BRS (increase for better accuracy and longer computational time for each click).</li>
     </ul>
     <li>Visualisation parameters</li>
     <ul>

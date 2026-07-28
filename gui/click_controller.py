@@ -4,6 +4,7 @@ from .ritm.inference import utils
 
 
 class ClickController:
+
     def __init__(self, checkpoint_path: str, device: str = 'cuda', max_size: int = 800):
         model = utils.load_is_model(checkpoint_path, device, cpu_dist_maps=True)
 

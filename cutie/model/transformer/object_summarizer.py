@@ -24,6 +24,7 @@ def _weighted_pooling(masks: torch.Tensor, value: torch.Tensor,
 
 
 class ObjectSummarizer(nn.Module):
+
     def __init__(self, model_cfg: DictConfig):
         super().__init__()
 

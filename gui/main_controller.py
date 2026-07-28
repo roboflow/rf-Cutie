@@ -10,15 +10,16 @@ os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
 import torch
 try:
     from torch import mps
-except:
+except ImportError:
     print('torch.MPS not available.')
 from torch import autocast
 from torchvision.transforms.functional import to_tensor
 import numpy as np
 from omegaconf import DictConfig, open_dict
 
-from cutie.model.cutie import CUTIE
 from cutie.inference.inference_core import InferenceCore
+from cutie.model.cutie import CUTIE
+from cutie.utils.download_models import download_models_if_needed
 
 from gui.interaction import *
 from gui.interactive_utils import *
@@ -27,12 +28,13 @@ from gui.gui import GUI
 from gui.click_controller import ClickController
 from gui.reader import PropagationReader, get_data_loader
 from gui.exporter import convert_frames_to_video, convert_mask_to_binary
-from cutie.utils.download_models import download_models_if_needed
 
 log = logging.getLogger()
 
 
+# pylint: disable-next=too-many-public-methods
 class MainController():
+    """Coordinate interactive segmentation state, UI actions, and persistence."""
 
     def __init__(self, cfg: DictConfig) -> None:
         super().__init__()

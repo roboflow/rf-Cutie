@@ -10,10 +10,13 @@ def get_predictor(net,
                   device,
                   prob_thresh=0.49,
                   with_flip=True,
-                  zoom_in_params=dict(),
+                  zoom_in_params=None,
                   predictor_params=None,
                   brs_opt_func_params=None,
                   lbfgs_params=None):
+    if zoom_in_params is None:
+        zoom_in_params = {}
+
     lbfgs_params_ = {
         'm': 20,
         'factr': 0,

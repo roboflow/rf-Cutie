@@ -22,13 +22,13 @@ for vid in videos:
     direction = 1
     for _ in range(multiplier):
         for _ in range(num_frames):
-            copy2(path.join(image_path, vid, frames[counter]), 
-                    path.join(output_path, 'JPEGImages', vid, f'{output_counter:05d}.jpg'))
+            copy2(path.join(image_path, vid, frames[counter]),
+                  path.join(output_path, 'JPEGImages', vid, f'{output_counter:05d}.jpg'))
 
             mask_path = path.join(gt_path, vid, frames[counter].replace('.jpg', '.png'))
             if path.exists(mask_path):
-                copy2(mask_path, 
-                    path.join(output_path, 'Annotations', vid, f'{output_counter:05d}.png'))
+                copy2(mask_path,
+                      path.join(output_path, 'Annotations', vid, f'{output_counter:05d}.png'))
 
             counter += direction
             output_counter += 1

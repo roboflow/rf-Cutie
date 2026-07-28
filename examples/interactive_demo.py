@@ -11,6 +11,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 from argparse import ArgumentParser
 
+
 def get_arguments():
     parser = ArgumentParser()
     """
@@ -27,7 +28,8 @@ def get_arguments():
                         help='directory for storing buffered images (if needed) and output masks',
                         default=None)
     parser.add_argument('--num_objects', type=int, default=1)
-    parser.add_argument('--workspace_init_only', action='store_true',
+    parser.add_argument('--workspace_init_only',
+                        action='store_true',
                         help='initialize the workspace and exit')
 
     args = parser.parse_args()

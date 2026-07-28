@@ -4,6 +4,7 @@ import logging
 from typing import Dict, List, Tuple
 
 import torch
+# pylint: disable=too-many-nested-blocks
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms
 from torchvision.transforms import InterpolationMode
@@ -20,15 +21,15 @@ local_rank = int(os.environ['LOCAL_RANK'])
 class VOSMergeTrainDataset(Dataset):
     """
     Note: data normalization happens within the model instead of here
-    
+
     For VOS data training
     data_configs is a Dict indexed by the name of the dataset, each containing:
     - im_root: path to the image directory
     - gt_root: path to the ground-truth directory
     - max_skip: maximum number of allowed separations between consecutive frames
     - subset: a list of video names to use. If None, all videos are used.
-    - empty_masks: a Dict[video_name, list of frames as string without extensions] 
-                    that contain no objects. 
+    - empty_masks: a Dict[video_name, list of frames as string without extensions]
+                    that contain no objects.
                     Can be None. (used to speed up data selection -- not mandatory)
     - multiplier: number of times to oversample this dataset
 
@@ -39,8 +40,9 @@ class VOSMergeTrainDataset(Dataset):
     - Apply random transform to each of the frames
     - The distance between frames is limited by max_skip
 
-    With merge_probability, we sample another sequence and merge them as a single training sample 
+    With merge_probability, we sample another sequence and merge them as a single training sample
     """
+
     def __init__(self, data_configs, seq_length=3, max_num_obj=3, size=480, merge_probability=0.0):
 
         self.configs = data_configs
@@ -131,6 +133,7 @@ class VOSMergeTrainDataset(Dataset):
         ])
 
     def _get_sample(self, idx=None):
+        """Sample one admissible augmented video sequence with bounded retries."""
         # pick, augment, and return a video sequence
         # We look at the sequence given by idx first, but there is no guarantee that we will use it
         if idx is None:
@@ -159,7 +162,7 @@ class VOSMergeTrainDataset(Dataset):
                 """
                 From the seed frame, we expand it to a sequence without exceeding max_skip
                 The first frame in the sequence should not be empty
-                empty_masks contains a list of empty masks (as str, without extension) 
+                empty_masks contains a list of empty masks (as str, without extension)
                 (from external pre-processing)
                 """
                 for seq_trial in range(self.max_seq_trials):
@@ -199,10 +202,9 @@ class VOSMergeTrainDataset(Dataset):
                     if seed_trial == self.max_seed_trials - 1:
                         # search for a new video-frame
                         break
-                    else:
-                        # reset seed frame and try again
-                        frames_idx = [np.random.randint(length)]
-                        continue
+                    # reset seed frame and try again
+                    frames_idx = [np.random.randint(length)]
+                    continue
                 """
                 Read the frames in frames_idx one-by-one and augments them
                 We want to find a good crop such that the first frame is not empty
@@ -260,10 +262,9 @@ class VOSMergeTrainDataset(Dataset):
                     if seed_trial == self.max_seed_trials - 1:
                         # search for a new video-frame
                         break
-                    else:
-                        # reset seed frame and try again
-                        frames_idx = [np.random.randint(length)]
-                        continue
+                    # reset seed frame and try again
+                    frames_idx = [np.random.randint(length)]
+                    continue
                 """
                 Everything should be good if the code reaches here -- proceed to output
                 """

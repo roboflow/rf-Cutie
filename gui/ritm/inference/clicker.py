@@ -4,6 +4,7 @@ import cv2
 
 
 class Clicker(object):
+
     def __init__(self, gt_mask=None, init_clicks=None, ignore_label=-1, click_indx_offset=0):
         self.click_indx_offset = click_indx_offset
         if gt_mask is not None:
@@ -104,6 +105,7 @@ class Clicker(object):
 
 
 class Click:
+
     def __init__(self, is_positive, coords, indx=None):
         self.is_positive = is_positive
         self.coords = coords

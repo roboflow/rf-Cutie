@@ -1,6 +1,5 @@
-
-
 class LRMult(object):
+
     def __init__(self, lr_mult=1.):
         self.lr_mult = lr_mult
 

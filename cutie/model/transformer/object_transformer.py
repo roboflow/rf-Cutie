@@ -10,6 +10,7 @@ from cutie.model.transformer.transformer_layers import *
 
 
 class QueryTransformerBlock(nn.Module):
+
     def __init__(self, model_cfg: DictConfig):
         super().__init__()
 
@@ -74,6 +75,7 @@ class QueryTransformerBlock(nn.Module):
 
 
 class QueryTransformer(nn.Module):
+
     def __init__(self, model_cfg: DictConfig):
         super().__init__()
 

@@ -21,12 +21,13 @@ class SyntheticVideoDataset(Dataset):
     Note: data normalization happens within the model instead of here
     Generate pseudo VOS data by applying random transforms on static images.
 
-    parameters is a list of tuples 
+    parameters is a list of tuples
         (data_root, how data is structured (method 0 or 1), and an oversample multiplier)
 
     Method 0 - FSS style (class/1.jpg class/1.png)
     Method 1 - Others style (XXX.jpg XXX.png)
     """
+
     def __init__(self, parameters, *, size=384, seq_length=3, max_num_obj=1):
         self.seq_length = seq_length
         self.max_num_obj = max_num_obj

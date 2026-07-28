@@ -9,6 +9,7 @@ from .base import BaseTransform
 
 
 class Crops(BaseTransform):
+
     def __init__(self, crop_size=(320, 480), min_overlap=0.2):
         super().__init__()
         self.crop_height, self.crop_width = crop_size
@@ -43,7 +44,9 @@ class Crops(BaseTransform):
         clicks_lists = []
         for dy in self.y_offsets:
             for dx in self.x_offsets:
-                crop_clicks = [x.copy(coords=(x.coords[0] - dy, x.coords[1] - dx)) for x in clicks_list]
+                crop_clicks = [
+                    x.copy(coords=(x.coords[0] - dy, x.coords[1] - dx)) for x in clicks_list
+                ]
                 clicks_lists.append(crop_clicks)
 
         return image_crops, clicks_lists
@@ -53,12 +56,14 @@ class Crops(BaseTransform):
             return prob_map
 
         new_prob_map = torch.zeros((1, 1, *self._counts.shape),
-                                   dtype=prob_map.dtype, device=prob_map.device)
+                                   dtype=prob_map.dtype,
+                                   device=prob_map.device)
 
         crop_indx = 0
         for dy in self.y_offsets:
             for dx in self.x_offsets:
-                new_prob_map[0, 0, dy:dy + self.crop_height, dx:dx + self.crop_width] += prob_map[crop_indx, 0]
+                new_prob_map[0, 0, dy:dy + self.crop_height,
+                             dx:dx + self.crop_width] += prob_map[crop_indx, 0]
                 crop_indx += 1
         new_prob_map = torch.div(new_prob_map, self._counts)
 

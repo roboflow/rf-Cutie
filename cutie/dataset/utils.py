@@ -4,6 +4,7 @@ import torch
 
 im_mean = (124, 116, 104)
 
+
 def reseed(seed):
     random.seed(seed)
     torch.manual_seed(seed)

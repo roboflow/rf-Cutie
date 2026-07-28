@@ -7,6 +7,7 @@ from ..model.modifiers import LRMult
 
 
 class ISModel(nn.Module):
+
     def __init__(self,
                  use_rgb_conv=True,
                  with_aux_output=False,

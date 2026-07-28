@@ -7,6 +7,7 @@ from ..model.modifiers import LRMult
 
 
 class HRNetModel(ISModel):
+
     @serialize
     def __init__(self,
                  width=48,

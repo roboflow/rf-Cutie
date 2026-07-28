@@ -5,6 +5,7 @@ from ...inference.transforms import AddHorizontalFlip, SigmoidForPred, LimitLong
 
 
 class BasePredictor(object):
+
     def __init__(self,
                  model,
                  device,

@@ -143,3 +143,6 @@ dmypy.json
 # IDEs
 .vscode/
 .idea/
+
+# AI assets
+.reports/

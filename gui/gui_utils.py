@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QHBoxLayout, QLabel, QSpinBox, QProgressBar)
 
 
-def create_parameter_box(min_val: float, max_val: float, text: str, step: float=1, callback=None):
+def create_parameter_box(min_val: float, max_val: float, text: str, step: float = 1, callback=None):
     layout = QHBoxLayout()
 
     dial = QSpinBox()

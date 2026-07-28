@@ -13,6 +13,7 @@ class ImageFeatureStore:
 
     Feature of a frame should be associated with a unique index -- typically the frame id.
     """
+
     def __init__(self, network: CUTIE, no_warning: bool = False):
         self.network = network
         self._store = {}

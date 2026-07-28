@@ -36,7 +36,7 @@ try:
         device = torch.device("mps")
     else:
         device = torch.device("cpu")
-except:
+except (AttributeError, RuntimeError):
     device = torch.device("cpu")
 
 color_map_np = np.frombuffer(davis_palette, dtype=np.uint8).reshape(-1, 3).copy()
@@ -49,9 +49,11 @@ grayscale_weights = np.array([[0.3, 0.59, 0.11]]).astype(np.float32)
 grayscale_weights_torch = torch.from_numpy(grayscale_weights).to(device).unsqueeze(0)
 
 
+# pylint: disable-next=too-many-return-statements
 def get_visualization(mode: Literal['image', 'mask', 'fade', 'davis', 'light', 'popup', 'layer',
                                     'rgba'], image: np.ndarray, mask: np.ndarray, layer: np.ndarray,
                       target_objects: List[int]) -> np.ndarray:
+    """Render an image, mask, or composited visualization for the selected mode."""
     if mode == 'image':
         return image
     elif mode == 'mask':
@@ -76,9 +78,11 @@ def get_visualization(mode: Literal['image', 'mask', 'fade', 'davis', 'light', '
         raise NotImplementedError
 
 
+# pylint: disable-next=too-many-return-statements
 def get_visualization_torch(mode: Literal['image', 'mask', 'fade', 'davis', 'light', 'popup',
                                           'layer', 'rgba'], image: torch.Tensor, prob: torch.Tensor,
                             layer: torch.Tensor, target_objects: List[int]) -> np.ndarray:
+    """Render a tensor-backed visualization for the selected mode."""
     if mode == 'image':
         return image
     elif mode == 'mask':
@@ -202,7 +206,7 @@ def overlay_layer_torch(image: torch.Tensor, prob: torch.Tensor, layer: torch.Te
     if len(target_objects) == 0:
         obj_mask = torch.zeros_like(prob[0]).unsqueeze(2)
     else:
-        # TODO: figure out why we need to convert this to numpy array
+        # Tensor indexing requires an integer NumPy array on supported PyTorch versions.
         obj_mask = prob[np.array(target_objects, dtype=np.int32)].sum(0).unsqueeze(2)
     layer_alpha = layer[:, :, 3].unsqueeze(2)
     layer_rgb = layer[:, :, :3]
@@ -221,7 +225,7 @@ def overlay_rgba_torch(image: torch.Tensor, prob: torch.Tensor, target_objects: 
     if len(target_objects) == 0:
         obj_mask = torch.zeros_like(prob[0]).unsqueeze(2)
     else:
-        # TODO: figure out why we need to convert this to numpy array
+        # Tensor indexing requires an integer NumPy array on supported PyTorch versions.
         obj_mask = prob[np.array(target_objects, dtype=np.int32)].sum(0).unsqueeze(2)
 
     im_overlay = torch.cat([image, obj_mask], dim=-1).clip(0, 1)

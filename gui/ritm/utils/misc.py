@@ -29,8 +29,10 @@ def save_checkpoint(net, checkpoints_path, epoch=None, prefix='', verbose=True, 
         logger.info(f'Save checkpoint to {str(checkpoint_path)}')
 
     net = net.module if multi_gpu else net
-    torch.save({'state_dict': net.state_dict(),
-                'config': net._config}, str(checkpoint_path))
+    torch.save({
+        'state_dict': net.state_dict(),
+        'config': getattr(net, '_config')
+    }, str(checkpoint_path))
 
 
 def get_bbox_from_mask(mask):
@@ -61,8 +63,7 @@ def expand_bbox(bbox, expand_ratio, min_crop_size=None):
 
 
 def clamp_bbox(bbox, rmin, rmax, cmin, cmax):
-    return (max(rmin, bbox[0]), min(rmax, bbox[1]),
-            max(cmin, bbox[2]), min(cmax, bbox[3]))
+    return (max(rmin, bbox[0]), min(rmax, bbox[1]), max(cmin, bbox[2]), min(cmax, bbox[3]))
 
 
 def get_bbox_iou(b1, b2):

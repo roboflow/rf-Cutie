@@ -20,6 +20,7 @@ from cutie.utils.time_estimator import TimeEstimator
 
 
 class Trainer:
+
     def __init__(self, cfg: DictConfig, stage_cfg: DictConfig, log: TensorboardLogger, run_path):
         self.exp_id = cfg['exp_id']
         self.stage = stage_cfg['name']
@@ -39,14 +40,12 @@ class Trainer:
         self.log = log
         self.run_path = run_path
         self.log.log_string('model_size',
-                            str(sum([param.nelement() for param in self.cutie.parameters()])))
+                            str(sum(param.nelement() for param in self.cutie.parameters())))
         self.log.log_string(
             'number_of_parameters_that_require_gradient',
             str(
-                sum([
-                    param.nelement()
-                    for param in filter(lambda p: p.requires_grad, self.cutie.parameters())
-                ])))
+                sum(param.nelement()
+                    for param in filter(lambda p: p.requires_grad, self.cutie.parameters()))))
         self.log.log_string('torch version', torch.__version__)
         self.log.log_string('PIL version', PIL.__version__)
         self.train_integrator = Integrator(self.log, distributed=True)

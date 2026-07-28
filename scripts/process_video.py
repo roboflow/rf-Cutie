@@ -204,8 +204,8 @@ def process_video(cfg: DictConfig):
     print(f'Total processing time: {total_process_time}')
     print(f'Total processed frames: {current_frame_index}')
     print(f'FPS: {current_frame_index / total_process_time}')
-    print(f'Max allocated memory (MB): {torch.cuda.max_memory_allocated() / (2**20)}'
-          ) if device == 'cuda' else None
+    if device == 'cuda':
+        print(f'Max allocated memory (MB): {torch.cuda.max_memory_allocated() / (2**20)}')
     print(
         '------------------------------------------------------------------------------------------------------------------------------------------------'
     )
@@ -213,7 +213,7 @@ def process_video(cfg: DictConfig):
 
 def check_to_clear_non_permanent_cuda_memory(processor: InferenceCore, device, mem_cleanup_ratio):
     if 'cuda' in device:
-        if mem_cleanup_ratio > 0 and mem_cleanup_ratio <= 1:
+        if 0 < mem_cleanup_ratio <= 1:
             info = torch.cuda.mem_get_info()
 
             global_free, global_total = info

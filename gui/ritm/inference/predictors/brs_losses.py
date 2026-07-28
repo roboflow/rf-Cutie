@@ -4,19 +4,20 @@ from ...model.losses import SigmoidBinaryCrossEntropyLoss
 
 
 class BRSMaskLoss(torch.nn.Module):
+
     def __init__(self, eps=1e-5):
         super().__init__()
         self._eps = eps
 
     def forward(self, result, pos_mask, neg_mask):
         pos_diff = (1 - result) * pos_mask
-        pos_target = torch.sum(pos_diff ** 2)
+        pos_target = torch.sum(pos_diff**2)
         pos_target = pos_target / (torch.sum(pos_mask) + self._eps)
 
         neg_diff = result * neg_mask
-        neg_target = torch.sum(neg_diff ** 2)
+        neg_target = torch.sum(neg_diff**2)
         neg_target = neg_target / (torch.sum(neg_mask) + self._eps)
-        
+
         loss = pos_target + neg_target
 
         with torch.no_grad():
@@ -27,6 +28,7 @@ class BRSMaskLoss(torch.nn.Module):
 
 
 class OracleMaskLoss(torch.nn.Module):
+
     def __init__(self):
         super().__init__()
         self.gt_mask = None
@@ -43,7 +45,10 @@ class OracleMaskLoss(torch.nn.Module):
         if self.predictor.object_roi is not None:
             r1, r2, c1, c2 = self.predictor.object_roi[:4]
             gt_mask = gt_mask[:, :, r1:r2 + 1, c1:c2 + 1]
-            gt_mask = torch.nn.functional.interpolate(gt_mask, result.size()[2:],  mode='bilinear', align_corners=True)
+            gt_mask = torch.nn.functional.interpolate(gt_mask,
+                                                      result.size()[2:],
+                                                      mode='bilinear',
+                                                      align_corners=True)
 
         if result.shape[0] == 2:
             gt_mask_flipped = torch.flip(gt_mask, dims=[3])

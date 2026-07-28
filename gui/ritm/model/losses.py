@@ -7,6 +7,7 @@ from ..utils import misc
 
 
 class NormalizedFocalLossSigmoid(nn.Module):
+
     def __init__(self,
                  axis=-1,
                  alpha=0.25,
@@ -89,6 +90,7 @@ class NormalizedFocalLossSigmoid(nn.Module):
 
 
 class FocalLoss(nn.Module):
+
     def __init__(self,
                  axis=-1,
                  alpha=0.25,
@@ -144,6 +146,7 @@ class FocalLoss(nn.Module):
 
 
 class SoftIoU(nn.Module):
+
     def __init__(self, from_sigmoid=False, ignore_label=-1):
         super().__init__()
         self._from_sigmoid = from_sigmoid
@@ -163,6 +166,7 @@ class SoftIoU(nn.Module):
 
 
 class SigmoidBinaryCrossEntropyLoss(nn.Module):
+
     def __init__(self, from_sigmoid=False, weight=None, batch_axis=0, ignore_label=-1):
         super(SigmoidBinaryCrossEntropyLoss, self).__init__()
         self._from_sigmoid = from_sigmoid

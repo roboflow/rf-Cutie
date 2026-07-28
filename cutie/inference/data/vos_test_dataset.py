@@ -7,6 +7,7 @@ from cutie.inference.data.video_reader import VideoReader
 
 
 class VOSTestDataset:
+
     def __init__(self,
                  image_dir: str,
                  mask_dir: str,

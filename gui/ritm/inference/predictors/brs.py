@@ -7,6 +7,7 @@ from .base import BasePredictor
 
 
 class BRSBasePredictor(BasePredictor):
+
     def __init__(self, model, device, opt_functor, optimize_after_n_clicks=1, **kwargs):
         super().__init__(model, device, **kwargs)
         self.optimize_after_n_clicks = optimize_after_n_clicks
@@ -51,6 +52,7 @@ class BRSBasePredictor(BasePredictor):
 
 
 class FeatureBRSPredictor(BRSBasePredictor):
+
     def __init__(self, model, device, opt_functor, insertion_mode='after_deeplab', **kwargs):
         super().__init__(model, device, opt_functor=opt_functor, **kwargs)
         self.insertion_mode = insertion_mode
@@ -155,6 +157,7 @@ class FeatureBRSPredictor(BRSBasePredictor):
 
 
 class HRNetFeatureBRSPredictor(BRSBasePredictor):
+
     def __init__(self, model, device, opt_functor, insertion_mode='A', **kwargs):
         super().__init__(model, device, opt_functor=opt_functor, **kwargs)
         self.insertion_mode = insertion_mode
@@ -255,6 +258,7 @@ class HRNetFeatureBRSPredictor(BRSBasePredictor):
 
 
 class InputBRSPredictor(BRSBasePredictor):
+
     def __init__(self, model, device, opt_functor, optimize_target='rgb', **kwargs):
         super().__init__(model, device, opt_functor=opt_functor, **kwargs)
         self.optimize_target = optimize_target

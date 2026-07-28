@@ -1,5 +1,5 @@
 import torch
-from torch import nn as nn
+from torch import nn
 import numpy as np
 # import ...model.initializer as initializer
 from ..model import initializer
@@ -20,6 +20,7 @@ def select_activation_function(activation):
 
 
 class BilinearConvTranspose2d(nn.ConvTranspose2d):
+
     def __init__(self, in_channels, out_channels, scale, groups=1):
         kernel_size = 2 * scale - scale % 2
         self.scale = scale
@@ -36,6 +37,7 @@ class BilinearConvTranspose2d(nn.ConvTranspose2d):
 
 
 class DistMaps(nn.Module):
+
     def __init__(self, norm_radius, spatial_scale=1.0, cpu_mode=False, use_disks=False):
         super(DistMaps, self).__init__()
         self.spatial_scale = spatial_scale
@@ -43,7 +45,8 @@ class DistMaps(nn.Module):
         self.cpu_mode = cpu_mode
         self.use_disks = use_disks
         if self.cpu_mode:
-            from ..utils.cython import get_dist_maps
+            # The Cython extension is optional unless CPU distance maps are requested.
+            from ..utils.cython import get_dist_maps  # pylint: disable=import-outside-toplevel
             self._get_dist_maps = get_dist_maps
 
     def get_coord_features(self, points, batchsize, rows, cols):
@@ -103,6 +106,7 @@ class DistMaps(nn.Module):
 
 
 class ScaleLayer(nn.Module):
+
     def __init__(self, init_value=1.0, lr_mult=1):
         super().__init__()
         self.lr_mult = lr_mult
@@ -114,6 +118,7 @@ class ScaleLayer(nn.Module):
 
 
 class BatchImageNormalize:
+
     def __init__(self, mean, std, dtype=torch.float):
         self.mean = torch.as_tensor(mean, dtype=dtype)[None, :, None, None]
         self.std = torch.as_tensor(std, dtype=dtype)[None, :, None, None]

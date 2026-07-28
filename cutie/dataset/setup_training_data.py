@@ -60,7 +60,7 @@ def setup_main_training_datasets(cfg, max_skip):
     dataset = VOSMergeTrainDataset(dataset_configs,
                                    seq_length=cfg.main_training.seq_length,
                                    max_num_obj=cfg.main_training.num_objects,
-                                   size=cfg.main_training.crop_size[0], 
+                                   size=cfg.main_training.crop_size[0],
                                    merge_probability=cfg.main_training.merge_probability)
 
     batch_size = cfg.main_training.batch_size

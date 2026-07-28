@@ -8,6 +8,7 @@ from gui.resource_manager import ResourceManager
 
 
 class PropagationReader(Dataset):
+
     def __init__(self, res_man: ResourceManager, start_ti: int, direction: Literal['forward',
                                                                                    'backward']):
         self.res_man = res_man

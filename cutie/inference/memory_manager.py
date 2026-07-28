@@ -15,6 +15,7 @@ class MemoryManager:
     """
     Manages all three memory stores and the transition between working/long-term memory
     """
+
     def __init__(self, cfg: DictConfig, object_manager: ObjectManager):
         self.object_manager = object_manager
         self.sensory_dim = cfg.model.sensory_dim
@@ -278,7 +279,7 @@ class MemoryManager:
                           selection=selection,
                           as_permanent=as_permanent)
 
-        for bucket_id in self.work_mem.buckets.keys():
+        for bucket_id in self.work_mem.buckets:
             # long-term memory cleanup
             if self.use_long_term:
                 # Do memory compressed if needed

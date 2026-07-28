@@ -10,6 +10,7 @@ from ...model import ops
 
 
 class DeepLabV3Plus(nn.Module):
+
     def __init__(self,
                  backbone='resnet50',
                  norm_layer=nn.BatchNorm2d,
@@ -88,10 +89,11 @@ class DeepLabV3Plus(nn.Module):
             x = torch.cat((x, c1), dim=1)
             x = self.head(x)
 
-        return x,
+        return x
 
 
 class _SkipProject(nn.Module):
+
     def __init__(self, in_channels, out_channels, norm_layer=nn.BatchNorm2d):
         super(_SkipProject, self).__init__()
         _activation = ops.select_activation_function("relu")
@@ -105,6 +107,7 @@ class _SkipProject(nn.Module):
 
 
 class _DeepLabHead(nn.Module):
+
     def __init__(self, out_channels, in_channels, mid_channels=256, norm_layer=nn.BatchNorm2d):
         super(_DeepLabHead, self).__init__()
 
@@ -128,6 +131,7 @@ class _DeepLabHead(nn.Module):
 
 
 class _ASPP(nn.Module):
+
     def __init__(self,
                  in_channels,
                  atrous_rates,
@@ -167,6 +171,7 @@ class _ASPP(nn.Module):
 
 
 class _AsppPooling(nn.Module):
+
     def __init__(self, in_channels, out_channels, norm_layer):
         super(_AsppPooling, self).__init__()
 

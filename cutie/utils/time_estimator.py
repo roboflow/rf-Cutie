@@ -2,6 +2,7 @@ import time
 
 
 class TimeEstimator:
+
     def __init__(self, total_iter, step_size):
         self.avg_time_window = []  # window-based average
         self.exp_avg_time = None  # exponential moving average

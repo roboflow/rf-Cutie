@@ -76,6 +76,7 @@ def get_iou(gt_mask, pred_mask, ignore_label=-1):
 
 
 def compute_noc_metric(all_ious, iou_thrs, max_clicks=20):
+
     def _get_noc(iou_arr, iou_thr):
         vals = iou_arr >= iou_thr
         return np.argmax(vals) + 1 if np.any(vals) else max_clicks

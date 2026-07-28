@@ -31,6 +31,7 @@ def downsample_groups(g: torch.Tensor,
 
 
 class GConv2d(nn.Conv2d):
+
     def forward(self, g: torch.Tensor) -> torch.Tensor:
         batch_size, num_objects = g.shape[:2]
         g = super().forward(g.flatten(start_dim=0, end_dim=1))
@@ -38,6 +39,7 @@ class GConv2d(nn.Conv2d):
 
 
 class GroupResBlock(nn.Module):
+
     def __init__(self, in_dim: int, out_dim: int):
         super().__init__()
 
@@ -59,6 +61,7 @@ class GroupResBlock(nn.Module):
 
 
 class MainToGroupDistributor(nn.Module):
+
     def __init__(self,
                  x_transform: Optional[nn.Module] = None,
                  g_transform: Optional[nn.Module] = None,
@@ -100,6 +103,7 @@ class MainToGroupDistributor(nn.Module):
 
 
 class GroupFeatureFusionBlock(nn.Module):
+
     def __init__(self, x_in_dim: int, g_in_dim: int, out_dim: int):
         super().__init__()
 

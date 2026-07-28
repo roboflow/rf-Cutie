@@ -3,6 +3,7 @@ from threading import Lock
 
 
 class ID2RGBConverter:
+
     def __init__(self):
         self.all_id = []
         self.obj_to_id = {}

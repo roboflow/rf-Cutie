@@ -20,8 +20,7 @@ def search_options(options, name):
     for option in options:
         if path.exists(path.join(option, name)):
             return path.join(option, name)
-    else:
-        return None
+    return None
 
 
 def process_vid(vid):
@@ -122,12 +121,9 @@ if __name__ == '__main__':
     all_vid = sorted(all_vid)
     print('Total number of videos: ', len(all_vid))
 
-    pool = Pool(processes=args.num_proc)
-    for _ in tqdm(pool.imap_unordered(process_vid, all_vid), total=len(all_vid)):
-        pass
-
-    pool.close()
-    pool.join()
+    with Pool(processes=args.num_proc) as pool:
+        for _ in tqdm(pool.imap_unordered(process_vid, all_vid), total=len(all_vid)):
+            pass
 
     if 'D' in args.dataset:
         print('Making zip for DAVIS test-dev...')

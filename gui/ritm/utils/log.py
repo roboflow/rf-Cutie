@@ -41,7 +41,7 @@ class TqdmToLogger(io.StringIO):
 
     def write(self, buf):
         self.buf = buf.strip('\r\n\t ')
- 
+
     def flush(self):
         if len(self.buf) > 0 and time.time() - self.last_time > self.mininterval:
             self.logger.log(self.level, self.buf)
@@ -70,6 +70,7 @@ class TqdmToLogger(io.StringIO):
 
 
 class ScalarAccumulator(object):
+
     def __init__(self, period):
         self.sum = 0
         self.cnt = 0

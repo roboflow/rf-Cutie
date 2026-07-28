@@ -1,6 +1,7 @@
 from functools import wraps
 from copy import deepcopy
 import inspect
+import importlib
 import torch.nn as nn
 
 
@@ -103,7 +104,6 @@ def get_class_from_str(class_str):
     # mod = model
 
     if components[0] == 'isegm':
-        import importlib
         mod = importlib.import_module(f'gui.ritm.{components[1]}')
         components = components[1:]
     else:

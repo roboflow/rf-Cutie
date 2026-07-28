@@ -11,6 +11,7 @@ import random
 import numpy as np
 import torch
 import torch.distributed as distributed
+# pylint: disable=too-many-nested-blocks
 
 from cutie.model.trainer import Trainer
 from cutie.dataset.setup_training_data import setup_pre_training_datasets, setup_main_training_datasets
@@ -36,6 +37,7 @@ def info_if_rank_zero(msg):
 
 @hydra.main(version_base='1.3.2', config_path='config', config_name='train_config.yaml')
 def train(cfg: DictConfig):
+    """Run distributed training across the enabled configured stages."""
     # initial setup
     distributed_setup()
     num_gpus = world_size
@@ -167,4 +169,6 @@ def train(cfg: DictConfig):
 
 
 if __name__ == '__main__':
+    # Hydra injects this decorated entrypoint's configuration at runtime.
+    # pylint: disable-next=no-value-for-parameter
     train()

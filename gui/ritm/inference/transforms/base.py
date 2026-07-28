@@ -2,6 +2,7 @@ import torch
 
 
 class BaseTransform(object):
+
     def __init__(self):
         self.image_changed = False
 
@@ -22,6 +23,7 @@ class BaseTransform(object):
 
 
 class SigmoidForPred(BaseTransform):
+
     def transform(self, image_nd, clicks_lists):
         return image_nd, clicks_lists
 

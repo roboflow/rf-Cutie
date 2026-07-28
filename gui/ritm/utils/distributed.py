@@ -42,7 +42,7 @@ def reduce_loss_dict(loss_dict):
         if dist.get_rank() == 0:
             losses /= world_size
 
-        reduced_losses = {k: v for k, v in zip(keys, losses)}
+        reduced_losses = dict(zip(keys, losses))
 
     return reduced_losses
 
@@ -58,10 +58,14 @@ def get_sampler(dataset, shuffle, distributed):
 
 
 def get_dp_wrapper(distributed):
-    class DPWrapper(torch.nn.parallel.DistributedDataParallel if distributed else torch.nn.DataParallel):
+
+    class DPWrapper(
+            torch.nn.parallel.DistributedDataParallel if distributed else torch.nn.DataParallel):
+
         def __getattr__(self, name):
             try:
                 return super().__getattr__(name)
             except AttributeError:
                 return getattr(self.module, name)
+
     return DPWrapper

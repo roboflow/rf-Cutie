@@ -6,6 +6,7 @@ import os
 import logging
 import datetime
 from typing import Dict
+import git
 import numpy as np
 from PIL import Image
 
@@ -27,6 +28,7 @@ def fix_width_trunc(x):
 
 
 class TensorboardLogger:
+
     def __init__(self, run_dir, py_logger: logging.Logger, *, enabled_tb):
         self.run_dir = run_dir
         self.py_log = py_logger
@@ -37,7 +39,6 @@ class TensorboardLogger:
 
         # Get current git info for logging
         try:
-            import git
             repo = git.Repo(".")
             git_info = str(repo.active_branch) + ' ' + str(repo.head.commit.hexsha)
         except (ImportError, RuntimeError):

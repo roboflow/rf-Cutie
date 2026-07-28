@@ -7,6 +7,7 @@ from .base import BaseTransform
 
 
 class ZoomIn(BaseTransform):
+
     def __init__(self,
                  target_size=400,
                  skip_clicks=1,
@@ -73,11 +74,15 @@ class ZoomIn(BaseTransform):
 
         assert prob_map.shape[0] == 1
         rmin, rmax, cmin, cmax = self._object_roi
-        prob_map = torch.nn.functional.interpolate(prob_map, size=(rmax - rmin + 1, cmax - cmin + 1),
-                                                   mode='bilinear', align_corners=True)
+        prob_map = torch.nn.functional.interpolate(prob_map,
+                                                   size=(rmax - rmin + 1, cmax - cmin + 1),
+                                                   mode='bilinear',
+                                                   align_corners=True)
 
         if self._prev_probs is not None:
-            new_prob_map = torch.zeros(*self._prev_probs.shape, device=prob_map.device, dtype=prob_map.dtype)
+            new_prob_map = torch.zeros(*self._prev_probs.shape,
+                                       device=prob_map.device,
+                                       dtype=prob_map.dtype)
             new_prob_map[:, :, rmin:rmax + 1, cmin:cmax + 1] = prob_map
         else:
             new_prob_map = prob_map
@@ -92,8 +97,8 @@ class ZoomIn(BaseTransform):
 
         pred_mask = (self._prev_probs > self.prob_thresh)[0, 0]
         if pred_mask.sum() > 0:
-            possible_object_roi = get_object_roi(pred_mask, [],
-                                                 self.expansion_ratio, self.min_crop_size)
+            possible_object_roi = get_object_roi(pred_mask, [], self.expansion_ratio,
+                                                 self.min_crop_size)
             image_roi = (0, self._input_image_shape[2] - 1, 0, self._input_image_shape[3] - 1)
             if get_bbox_iou(possible_object_roi, image_roi) < 0.50:
                 return True
@@ -158,8 +163,10 @@ def get_roi_image_nd(image_nd, object_roi, target_size):
 
     with torch.no_grad():
         roi_image_nd = image_nd[:, :, rmin:rmax + 1, cmin:cmax + 1]
-        roi_image_nd = torch.nn.functional.interpolate(roi_image_nd, size=(new_height, new_width),
-                                                       mode='bilinear', align_corners=True)
+        roi_image_nd = torch.nn.functional.interpolate(roi_image_nd,
+                                                       size=(new_height, new_width),
+                                                       mode='bilinear',
+                                                       align_corners=True)
 
     return roi_image_nd
 

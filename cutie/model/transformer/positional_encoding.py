@@ -18,6 +18,7 @@ def get_emb(sin_inp: torch.Tensor) -> torch.Tensor:
 
 
 class PositionalEncoding(nn.Module):
+
     def __init__(self,
                  dim: int,
                  scale: float = math.pi * 2,
@@ -40,7 +41,7 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, tensor: torch.Tensor) -> torch.Tensor:
         """
-        :param tensor: A 4/5d tensor of size 
+        :param tensor: A 4/5d tensor of size
             channel_last=True: (batch_size, h, w, c) or (batch_size, k, h, w, c)
             channel_last=False: (batch_size, c, h, w) or (batch_size, k, c, h, w)
         :return: positional encoding tensor that has the same shape as the input if the input is 4d

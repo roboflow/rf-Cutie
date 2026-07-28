@@ -10,17 +10,18 @@ from cutie.model.channel_attn import CAResBlock
 
 
 class SelfAttention(nn.Module):
+
     def __init__(self,
                  dim: int,
                  nhead: int,
                  dropout: float = 0.0,
                  batch_first: bool = True,
-                 add_pe_to_qkv: List[bool] = [True, True, False]):
+                 add_pe_to_qkv: List[bool] | None = None):
         super().__init__()
         self.self_attn = nn.MultiheadAttention(dim, nhead, dropout=dropout, batch_first=batch_first)
         self.norm = nn.LayerNorm(dim)
         self.dropout = nn.Dropout(dropout)
-        self.add_pe_to_qkv = add_pe_to_qkv
+        self.add_pe_to_qkv = [True, True, False] if add_pe_to_qkv is None else add_pe_to_qkv
 
     def forward(self,
                 x: torch.Tensor,
@@ -43,12 +44,13 @@ class SelfAttention(nn.Module):
 
 # https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html#torch.nn.functional.scaled_dot_product_attention
 class CrossAttention(nn.Module):
+
     def __init__(self,
                  dim: int,
                  nhead: int,
                  dropout: float = 0.0,
                  batch_first: bool = True,
-                 add_pe_to_qkv: List[bool] = [True, True, False],
+                 add_pe_to_qkv: List[bool] | None = None,
                  residual: bool = True,
                  norm: bool = True):
         super().__init__()
@@ -61,7 +63,7 @@ class CrossAttention(nn.Module):
         else:
             self.norm = nn.Identity()
         self.dropout = nn.Dropout(dropout)
-        self.add_pe_to_qkv = add_pe_to_qkv
+        self.add_pe_to_qkv = [True, True, False] if add_pe_to_qkv is None else add_pe_to_qkv
         self.residual = residual
 
     def forward(self,
@@ -99,6 +101,7 @@ class CrossAttention(nn.Module):
 
 
 class FFN(nn.Module):
+
     def __init__(self, dim_in: int, dim_ff: int, activation=F.relu):
         super().__init__()
         self.linear1 = nn.Linear(dim_in, dim_ff)
@@ -119,6 +122,7 @@ class FFN(nn.Module):
 
 
 class PixelFFN(nn.Module):
+
     def __init__(self, dim: int):
         super().__init__()
         self.dim = dim
@@ -137,6 +141,7 @@ class PixelFFN(nn.Module):
 
 
 class OutputFFN(nn.Module):
+
     def __init__(self, dim_in: int, dim_out: int, activation=F.relu):
         super().__init__()
         self.linear1 = nn.Linear(dim_in, dim_out)

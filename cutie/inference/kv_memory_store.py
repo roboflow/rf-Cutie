@@ -245,9 +245,8 @@ class KeyValueMemoryStore:
         # return normalized usage
         if not self.save_usage:
             raise RuntimeError('I did not count usage!')
-        else:
-            usage = self.use_cnt[bucket_id] / self.life_cnt[bucket_id]
-            return usage
+        usage = self.use_cnt[bucket_id] / self.life_cnt[bucket_id]
+        return usage
 
     def get_all_sliced(
         self, bucket_id: int, start: int, end: int

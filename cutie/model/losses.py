@@ -30,6 +30,7 @@ def dice_loss(mask: torch.Tensor, soft_gt: torch.Tensor) -> torch.Tensor:
 
 
 class LossComputer:
+
     def __init__(self, cfg: DictConfig, stage_cfg: DictConfig):
         super().__init__()
         self.point_supervision = stage_cfg.point_supervision
@@ -46,9 +47,10 @@ class LossComputer:
 
         with torch.no_grad():
             # sample point_coords
-            point_coords = get_uncertain_point_coords_with_randomness(
-                logits, lambda x: calculate_uncertainty(x), self.num_points, self.oversample_ratio,
-                self.importance_sample_ratio)
+            point_coords = get_uncertain_point_coords_with_randomness(logits, calculate_uncertainty,
+                                                                      self.num_points,
+                                                                      self.oversample_ratio,
+                                                                      self.importance_sample_ratio)
             # get gt labels
             point_labels = point_sample(soft_gt, point_coords, align_corners=False)
         point_logits = point_sample(logits, point_coords, align_corners=False)

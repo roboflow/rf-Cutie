@@ -11,6 +11,7 @@ from cutie.utils.tensor_utils import aggregate
 
 
 class LinearPredictor(nn.Module):
+
     def __init__(self, x_dim: int, pix_dim: int):
         super().__init__()
         self.projection = GConv2d(x_dim, pix_dim + 1, kernel_size=1)
@@ -27,6 +28,7 @@ class LinearPredictor(nn.Module):
 
 
 class DirectPredictor(nn.Module):
+
     def __init__(self, x_dim: int):
         super().__init__()
         self.projection = GConv2d(x_dim, 1, kernel_size=1)
@@ -38,6 +40,7 @@ class DirectPredictor(nn.Module):
 
 
 class AuxComputer(nn.Module):
+
     def __init__(self, cfg: DictConfig):
         super().__init__()
 
@@ -52,7 +55,8 @@ class AuxComputer(nn.Module):
         else:
             self.sensory_aux = None
 
-    def _aggregate_with_selector(self, logits: torch.Tensor, selector: torch.Tensor) -> torch.Tensor:
+    def _aggregate_with_selector(self, logits: torch.Tensor,
+                                 selector: torch.Tensor) -> torch.Tensor:
         prob = torch.sigmoid(logits)
         if selector is not None:
             prob = prob * selector

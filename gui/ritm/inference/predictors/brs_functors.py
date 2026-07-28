@@ -6,7 +6,9 @@ from .brs_losses import BRSMaskLoss
 
 
 class BaseOptimizer:
-    def __init__(self, optimizer_params,
+
+    def __init__(self,
+                 optimizer_params,
                  prob_thresh=0.49,
                  reg_weight=1e-3,
                  min_iou_diff=0.01,
@@ -81,6 +83,7 @@ class BaseOptimizer:
 
 
 class InputOptimizer(BaseOptimizer):
+
     def unpack_opt_params(self, opt_params):
         opt_params = opt_params.view(self._opt_shape)
         if self.with_flip:
@@ -88,10 +91,11 @@ class InputOptimizer(BaseOptimizer):
             opt_params = torch.cat([opt_params, opt_params_flipped], dim=0)
         reg_loss = self.reg_weight * torch.sum(opt_params**2)
 
-        return (opt_params,), reg_loss
+        return (opt_params, ), reg_loss
 
 
 class ScaleBiasOptimizer(BaseOptimizer):
+
     def __init__(self, *args, scale_act=None, reg_bias_weight=10.0, **kwargs):
         super().__init__(*args, **kwargs)
         self.scale_act = scale_act
@@ -99,7 +103,8 @@ class ScaleBiasOptimizer(BaseOptimizer):
 
     def unpack_opt_params(self, opt_params):
         scale, bias = torch.chunk(opt_params, 2, dim=0)
-        reg_loss = self.reg_weight * (torch.sum(scale**2) + self.reg_bias_weight * torch.sum(bias**2))
+        reg_loss = self.reg_weight * (torch.sum(scale**2) +
+                                      self.reg_bias_weight * torch.sum(bias**2))
 
         if self.scale_act == 'tanh':
             scale = torch.tanh(scale)

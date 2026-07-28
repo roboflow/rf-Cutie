@@ -28,6 +28,7 @@ def aggregate_wbg(prob: torch.Tensor, keep_bg: bool = False, hard: bool = False)
 
 
 class Interaction:
+
     def __init__(self, image: torch.Tensor, prev_mask: torch.Tensor, true_size: Tuple[int, int],
                  controller: ClickController):
         self.image = image
@@ -44,6 +45,7 @@ class Interaction:
 
 
 class ClickInteraction(Interaction):
+
     def __init__(self, image: torch.Tensor, prev_mask: torch.Tensor, true_size: Tuple[int, int],
                  controller: ClickController, tar_obj: int):
         """

@@ -6,6 +6,7 @@ from cutie.model.group_modules import *
 
 
 class MaskUpsampleBlock(nn.Module):
+
     def __init__(self, in_dim: int, out_dim: int, scale_factor: int = 2):
         super().__init__()
         self.distributor = MainToGroupDistributor(method='add')
@@ -20,6 +21,7 @@ class MaskUpsampleBlock(nn.Module):
 
 
 class DecoderFeatureProcessor(nn.Module):
+
     def __init__(self, decoder_dims: List[int], out_dims: List[int]):
         super().__init__()
         self.transforms = nn.ModuleList([
@@ -69,6 +71,7 @@ class SensoryUpdater(nn.Module):
 
 
 class SensoryDeepUpdater(nn.Module):
+
     def __init__(self, f_dim: int, sensory_dim: int):
         super().__init__()
         self.transform = GConv2d(f_dim + sensory_dim, sensory_dim * 3, kernel_size=3, padding=1)

@@ -9,6 +9,7 @@ from cutie.utils.logger import TensorboardLogger
 
 
 class Integrator:
+
     def __init__(self, logger: TensorboardLogger, distributed: bool = True):
         self.values = {}
         self.counts = {}

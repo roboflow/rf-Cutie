@@ -4,6 +4,7 @@ import json
 
 
 class BURSTResultHandler:
+
     def __init__(self, dataset_json):
         self.dataset_json = copy.deepcopy(dataset_json)
 

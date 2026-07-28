@@ -4,6 +4,7 @@ from ...model import ops
 
 
 class ConvHead(nn.Module):
+
     def __init__(self,
                  out_channels,
                  in_channels=32,
@@ -29,6 +30,7 @@ class ConvHead(nn.Module):
 
 
 class SepConvHead(nn.Module):
+
     def __init__(self,
                  num_outputs,
                  in_channels,
@@ -66,6 +68,7 @@ class SepConvHead(nn.Module):
 
 
 class SeparableConv2d(nn.Module):
+
     def __init__(self,
                  in_channels,
                  out_channels,

@@ -80,7 +80,7 @@ def get_uncertain_point_coords_with_randomness(coarse_logits, uncertainty_func, 
             sampled points.
     """
     assert oversample_ratio >= 1
-    assert importance_sample_ratio <= 1 and importance_sample_ratio >= 0
+    assert 0 <= importance_sample_ratio <= 1
     num_boxes = coarse_logits.shape[0]
     num_sampled = int(num_points * oversample_ratio)
     point_coords = torch.rand(num_boxes, num_sampled, 2, device=coarse_logits.device)

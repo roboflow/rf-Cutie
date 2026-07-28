@@ -179,7 +179,7 @@ class ResourceManager:
         cap = cv2.VideoCapture(video)
         frame_index = 0
         print(f'Extracting frames from {video} into {self.image_dir}...')
-        with tqdm() as bar:
+        with tqdm() as progress:
             while (cap.isOpened()):
                 _, frame = cap.read()
                 if frame is None:
@@ -191,7 +191,7 @@ class ResourceManager:
                     frame = cv2.resize(frame, dsize=(new_w, new_h), interpolation=cv2.INTER_AREA)
                 cv2.imwrite(path.join(self.image_dir, f'{frame_index:07d}.jpg'), frame)
                 frame_index += 1
-                bar.update()
+                progress.update()
         print('Done!')
 
     def _copy_resize_frames(self, images: str):

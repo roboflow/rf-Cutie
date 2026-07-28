@@ -16,6 +16,7 @@ class BURSTVideoReader(Dataset):
     This class is used to read a video, one frame at a time
     Tailored for the BURST dataset
     """
+
     def __init__(
         self,
         image_root: str,
@@ -87,7 +88,7 @@ class BURSTVideoReader(Dataset):
                 data['valid_labels'] = valid_labels
 
         info['shape'] = shape
-        info['resize_needed'] = not (self.size < 0)
+        info['resize_needed'] = self.size >= 0
         info['time_index'] = self.frames.index(frame)
         info['path_to_image'] = im_path
         data['rgb'] = img

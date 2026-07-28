@@ -15,7 +15,6 @@ davis_palette = b'\x00\x00\x00\x80\x00\x00\x00\x80\x00\x80\x80\x00\x00\x00\x80\x
 
 youtube_palette = b'\x00\x00\x00\xec_g\xf9\x91W\xfa\xc8c\x99\xc7\x94b\xb3\xb2f\x99\xcc\xc5\x94\xc5\xabyg\xff\xff\xffes~\x0b\x0b\x0b\x0c\x0c\x0c\r\r\r\x0e\x0e\x0e\x0f\x0f\x0f'
 
-
 import pycocotools.mask as mask_utils
 
 parser = ArgumentParser()
@@ -39,7 +38,7 @@ def process_video(sequence):
     segmentations = sequence['segmentations']
     width, height = sequence['width'], sequence['height']
 
-    new_seq_name = dataset+'_-_'+seq_name
+    new_seq_name = dataset + '_-_' + seq_name
 
     # Decode masks from annotated images and save them to the visualize folder
     output_image_folder = path.join(output_path, 'JPEGImages', new_seq_name)

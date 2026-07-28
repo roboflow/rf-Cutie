@@ -8,6 +8,7 @@ from ..model.modifiers import LRMult
 
 
 class DeeplabModel(ISModel):
+
     @serialize
     def __init__(self,
                  backbone='resnet50',

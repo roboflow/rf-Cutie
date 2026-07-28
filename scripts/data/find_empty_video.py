@@ -5,7 +5,6 @@ from os import path
 from PIL import Image
 import numpy as np
 
-
 data_path = sys.argv[1]
 
 videos = os.listdir(data_path)

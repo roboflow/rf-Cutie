@@ -49,7 +49,10 @@ values should contain lists of cv2 images
 """
 
 
-def get_image_array(images, grid_shape, captions={}):
+def get_image_array(images, grid_shape, captions=None):
+    """Build a captioned image grid from category-keyed image sequences."""
+    if captions is None:
+        captions = {}
     h, w = grid_shape
     cate_counts = len(images)
     rows_counts = len(next(iter(images.values())))

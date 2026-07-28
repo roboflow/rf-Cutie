@@ -28,6 +28,7 @@ except ImportError:
 
 
 class ResultSaver:
+
     def __init__(self,
                  output_root,
                  video_name,

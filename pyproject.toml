@@ -5,14 +5,12 @@ build-backend = "hatchling.build"
 [tool.hatch.metadata]
 allow-direct-references = true
 
-[tool.yapf]
-based_on_style = "pep8"
-indent_width = 4
-column_limit = 100
-
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+
+[tool.ruff.format]
+quote-style = "single"
 
 [tool.ruff.lint]
 # Ruff-only baseline. `PL` enables Ruff's Pylint-origin rules; explicit codes

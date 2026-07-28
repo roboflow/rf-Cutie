@@ -26,12 +26,16 @@ def setup_pre_training_datasets(cfg):
     root = cfg.data.image_datasets.base
     datasets = cfg.data.pre_training.datasets
     dataset_configs = [cfg.data.image_datasets[d] for d in datasets]
-    dataset_tuples = [(path.join(root, d_cfg.directory), d_cfg.data_structure, d_cfg.multiplier)
-                      for d_cfg in dataset_configs]
-    dataset = SyntheticVideoDataset(dataset_tuples,
-                                    seq_length=cfg.pre_training.seq_length,
-                                    max_num_obj=cfg.pre_training.num_objects,
-                                    size=cfg.pre_training.crop_size[0])
+    dataset_tuples = [
+        (path.join(root, d_cfg.directory), d_cfg.data_structure, d_cfg.multiplier)
+        for d_cfg in dataset_configs
+    ]
+    dataset = SyntheticVideoDataset(
+        dataset_tuples,
+        seq_length=cfg.pre_training.seq_length,
+        max_num_obj=cfg.pre_training.num_objects,
+        size=cfg.pre_training.crop_size[0],
+    )
 
     batch_size = cfg.pre_training.batch_size
     num_workers = cfg.num_workers
@@ -57,11 +61,13 @@ def setup_main_training_datasets(cfg, max_skip):
         for name, d_cfg in zip(datasets, dataset_configs)
     }
 
-    dataset = VOSMergeTrainDataset(dataset_configs,
-                                   seq_length=cfg.main_training.seq_length,
-                                   max_num_obj=cfg.main_training.num_objects,
-                                   size=cfg.main_training.crop_size[0],
-                                   merge_probability=cfg.main_training.merge_probability)
+    dataset = VOSMergeTrainDataset(
+        dataset_configs,
+        seq_length=cfg.main_training.seq_length,
+        max_num_obj=cfg.main_training.num_objects,
+        size=cfg.main_training.crop_size[0],
+        merge_probability=cfg.main_training.merge_probability,
+    )
 
     batch_size = cfg.main_training.batch_size
     num_workers = cfg.num_workers
@@ -73,14 +79,16 @@ def setup_main_training_datasets(cfg, max_skip):
 
 
 def construct_loader(dataset, batch_size, num_workers, local_rank):
-    train_sampler = torch.utils.data.distributed.DistributedSampler(dataset,
-                                                                    rank=local_rank,
-                                                                    shuffle=True)
-    train_loader = DataLoader(dataset,
-                              batch_size,
-                              sampler=train_sampler,
-                              num_workers=num_workers,
-                              worker_init_fn=worker_init_fn,
-                              drop_last=True,
-                              persistent_workers=True)
+    train_sampler = torch.utils.data.distributed.DistributedSampler(
+        dataset, rank=local_rank, shuffle=True
+    )
+    train_loader = DataLoader(
+        dataset,
+        batch_size,
+        sampler=train_sampler,
+        num_workers=num_workers,
+        worker_init_fn=worker_init_fn,
+        drop_last=True,
+        persistent_workers=True,
+    )
     return train_sampler, train_loader

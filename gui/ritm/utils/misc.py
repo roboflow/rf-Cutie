@@ -29,10 +29,9 @@ def save_checkpoint(net, checkpoints_path, epoch=None, prefix='', verbose=True, 
         logger.info(f'Save checkpoint to {str(checkpoint_path)}')
 
     net = net.module if multi_gpu else net
-    torch.save({
-        'state_dict': net.state_dict(),
-        'config': getattr(net, '_config')
-    }, str(checkpoint_path))
+    torch.save(
+        {'state_dict': net.state_dict(), 'config': getattr(net, '_config')}, str(checkpoint_path)
+    )
 
 
 def get_bbox_from_mask(mask):

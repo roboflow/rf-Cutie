@@ -10,6 +10,7 @@ from omegaconf import DictConfig, open_dict
 from typing import Dict, Optional, Tuple, Literal, Union
 import cv2
 from PIL import Image
+
 if not hasattr(Image, 'Resampling'):  # Pillow<9.0
     Image.Resampling = Image
 import numpy as np
@@ -23,7 +24,6 @@ log = logging.getLogger()
 # https://bugs.python.org/issue28178
 # ah python ah why
 class LRU:
-
     def __init__(self, func, maxsize=128):
         self.cache = collections.OrderedDict()
         self.func = func
@@ -52,7 +52,6 @@ class SaveItem:
 
 
 class ResourceManager:
-
     def __init__(self, cfg: DictConfig):
         # determine inputs
         images = cfg['images']
@@ -118,7 +117,9 @@ class ResourceManager:
         self.names = [f[:-4] for f in self.names]  # remove extensions
         self.length = len(self.names)
 
-        assert self.length > 0, f'No images found! Check {self.workspace}/images. Remove folder if necessary.'
+        assert self.length > 0, (
+            f'No images found! Check {self.workspace}/images. Remove folder if necessary.'
+        )
 
         print(f'{self.length} images found.')
 
@@ -128,7 +129,7 @@ class ResourceManager:
         self.save_queue = Queue(maxsize=cfg['save_queue_size'])
         self.num_save_threads = cfg['num_save_threads']
         self.save_threads = [
-            Thread(target=self.save_thread, args=(self.save_queue, ))
+            Thread(target=self.save_thread, args=(self.save_queue,))
             for _ in range(self.num_save_threads)
         ]
         for t in self.save_threads:
@@ -157,12 +158,14 @@ class ResourceManager:
                 os.makedirs(path.join(self.visualization_dir, vis_mode), exist_ok=True)
                 if vis_mode == 'rgba':
                     data = cv2.cvtColor(args.data, cv2.COLOR_RGBA2BGRA).copy()
-                    cv2.imwrite(path.join(self.visualization_dir, vis_mode, args.name + '.png'),
-                                data)
+                    cv2.imwrite(
+                        path.join(self.visualization_dir, vis_mode, args.name + '.png'), data
+                    )
                 else:
                     data = cv2.cvtColor(args.data, cv2.COLOR_RGB2BGR)
-                    cv2.imwrite(path.join(self.visualization_dir, vis_mode, args.name + '.jpg'),
-                                data)
+                    cv2.imwrite(
+                        path.join(self.visualization_dir, vis_mode, args.name + '.jpg'), data
+                    )
             elif args.type == 'soft_mask':
                 # numpy array, save each channel with cv2
                 num_channels = args.data.shape[0]
@@ -180,14 +183,14 @@ class ResourceManager:
         frame_index = 0
         print(f'Extracting frames from {video} into {self.image_dir}...')
         with tqdm() as progress:
-            while (cap.isOpened()):
+            while cap.isOpened():
                 _, frame = cap.read()
                 if frame is None:
                     break
                 h, w = frame.shape[:2]
                 if self.max_size > 0 and min(h, w) > self.max_size:
-                    new_w = (w * self.max_size // min(w, h))
-                    new_h = (h * self.max_size // min(w, h))
+                    new_w = w * self.max_size // min(w, h)
+                    new_h = h * self.max_size // min(w, h)
                     frame = cv2.resize(frame, dsize=(new_w, new_h), interpolation=cv2.INTER_AREA)
                 cv2.imwrite(path.join(self.image_dir, f'{frame_index:07d}.jpg'), frame)
                 frame_index += 1
@@ -205,8 +208,8 @@ class ResourceManager:
                 frame = cv2.imread(path.join(images, image_name))
                 h, w = frame.shape[:2]
                 if self.max_size > 0 and min(h, w) > self.max_size:
-                    new_w = (w * self.max_size // min(w, h))
-                    new_h = (h * self.max_size // min(w, h))
+                    new_w = w * self.max_size // min(w, h)
+                    new_h = h * self.max_size // min(w, h)
                     frame = cv2.resize(frame, dsize=(new_w, new_h), interpolation=cv2.INTER_AREA)
                 cv2.imwrite(path.join(self.image_dir, image_name), frame)
         print('Done!')
@@ -214,7 +217,8 @@ class ResourceManager:
     def add_to_queue_with_warning(self, item: SaveItem):
         if self.save_queue.full():
             print(
-                'The save queue is full! You need more threads or faster IO. Program might pause.')
+                'The save queue is full! You need more threads or faster IO. Program might pause.'
+            )
         self.save_queue.put(item)
 
     def save_mask(self, ti: int, mask: np.ndarray):
@@ -290,16 +294,18 @@ class ResourceManager:
         # padding
         pad_h = (size[0] - new_h) // 2
         pad_w = (size[1] - new_w) // 2
-        image = np.pad(image,
-                       ((pad_h, size[0] - new_h - pad_h), (pad_w, size[1] - new_w - pad_w), (0, 0)),
-                       mode='constant',
-                       constant_values=0)
+        image = np.pad(
+            image,
+            ((pad_h, size[0] - new_h - pad_h), (pad_w, size[1] - new_w - pad_w), (0, 0)),
+            mode='constant',
+            constant_values=0,
+        )
 
         return image
 
     def invalidate(self, ti: int):
         # the image buffer is never invalidated
-        self.get_mask.invalidate((ti, ))
+        self.get_mask.invalidate((ti,))
 
     def __len__(self):
         return self.length

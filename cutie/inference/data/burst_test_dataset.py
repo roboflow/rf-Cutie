@@ -4,7 +4,6 @@ from cutie.inference.data.burst_video_reader import BURSTVideoReader
 
 
 class BURSTTestDataset:
-
     def __init__(self, image_dir: str, json_dir: str, *, size: int = -1, skip_frames: int = -1):
         self.image_dir = image_dir
         self.json_dir = json_dir

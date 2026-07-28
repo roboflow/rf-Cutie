@@ -8,8 +8,9 @@ from cutie.model.transformer.positional_encoding import PositionalEncoding
 
 
 # @torch.jit.script
-def _weighted_pooling(masks: torch.Tensor, value: torch.Tensor,
-                      logits: torch.Tensor) -> (torch.Tensor, torch.Tensor):
+def _weighted_pooling(
+    masks: torch.Tensor, value: torch.Tensor, logits: torch.Tensor
+) -> (torch.Tensor, torch.Tensor):
     # value: B*num_objects*H*W*value_dim
     # logits: B*num_objects*H*W*num_summaries
     # masks: B*num_objects*H*W*num_summaries: 1 if allowed
@@ -24,7 +25,6 @@ def _weighted_pooling(masks: torch.Tensor, value: torch.Tensor,
 
 
 class ObjectSummarizer(nn.Module):
-
     def __init__(self, model_cfg: DictConfig):
         super().__init__()
 
@@ -37,9 +37,9 @@ class ObjectSummarizer(nn.Module):
         self.pixel_pe_temperature = model_cfg.pixel_pe_temperature
 
         if self.add_pe:
-            self.pos_enc = PositionalEncoding(self.embed_dim,
-                                              scale=self.pixel_pe_scale,
-                                              temperature=self.pixel_pe_temperature)
+            self.pos_enc = PositionalEncoding(
+                self.embed_dim, scale=self.pixel_pe_scale, temperature=self.pixel_pe_temperature
+            )
 
         self.input_proj = nn.Linear(self.value_dim, self.embed_dim)
         self.feature_pred = nn.Sequential(
@@ -53,10 +53,9 @@ class ObjectSummarizer(nn.Module):
             nn.Linear(self.embed_dim, self.num_summaries),
         )
 
-    def forward(self,
-                masks: torch.Tensor,
-                value: torch.Tensor,
-                need_weights: bool = False) -> (torch.Tensor, Optional[torch.Tensor]):
+    def forward(
+        self, masks: torch.Tensor, value: torch.Tensor, need_weights: bool = False
+    ) -> (torch.Tensor, Optional[torch.Tensor]):
         # masks: B*num_objects*(H0)*(W0)
         # value: B*num_objects*value_dim*H*W
         # -> B*num_objects*H*W*value_dim
@@ -64,11 +63,13 @@ class ObjectSummarizer(nn.Module):
         masks = F.interpolate(masks, size=(h, w), mode='area')
         masks = masks.unsqueeze(-1)
         inv_masks = 1 - masks
-        repeated_masks = torch.cat([
-            masks.expand(-1, -1, -1, -1, self.num_summaries // 2),
-            inv_masks.expand(-1, -1, -1, -1, self.num_summaries // 2),
-        ],
-                                   dim=-1)
+        repeated_masks = torch.cat(
+            [
+                masks.expand(-1, -1, -1, -1, self.num_summaries // 2),
+                inv_masks.expand(-1, -1, -1, -1, self.num_summaries // 2),
+            ],
+            dim=-1,
+        )
 
         value = value.permute(0, 1, 3, 4, 2)
         value = self.input_proj(value)

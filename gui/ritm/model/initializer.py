@@ -4,7 +4,6 @@ import numpy as np
 
 
 class Initializer(object):
-
     def __init__(self, local_init=True, gamma=None):
         self.local_init = local_init
         self.gamma = gamma
@@ -13,9 +12,22 @@ class Initializer(object):
         if getattr(m, '__initialized', False):
             return
 
-        if isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.InstanceNorm1d,
-                          nn.InstanceNorm2d, nn.InstanceNorm3d, nn.GroupNorm,
-                          nn.SyncBatchNorm)) or 'BatchNorm' in m.__class__.__name__:
+        if (
+            isinstance(
+                m,
+                (
+                    nn.BatchNorm1d,
+                    nn.BatchNorm2d,
+                    nn.BatchNorm3d,
+                    nn.InstanceNorm1d,
+                    nn.InstanceNorm2d,
+                    nn.InstanceNorm3d,
+                    nn.GroupNorm,
+                    nn.SyncBatchNorm,
+                ),
+            )
+            or 'BatchNorm' in m.__class__.__name__
+        ):
             if m.weight is not None:
                 self._init_gamma(m.weight.data)
             if m.bias is not None:
@@ -46,7 +58,6 @@ class Initializer(object):
 
 
 class Bilinear(Initializer):
-
     def __init__(self, scale, groups, in_channels, **kwargs):
         super().__init__(**kwargs)
         self.scale = scale
@@ -79,7 +90,6 @@ class Bilinear(Initializer):
 
 
 class XavierGluon(Initializer):
-
     def __init__(self, rnd_type='uniform', factor_type='avg', magnitude=3, **kwargs):
         super().__init__(**kwargs)
 

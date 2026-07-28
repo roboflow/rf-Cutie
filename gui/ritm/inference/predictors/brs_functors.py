@@ -6,16 +6,17 @@ from .brs_losses import BRSMaskLoss
 
 
 class BaseOptimizer:
-
-    def __init__(self,
-                 optimizer_params,
-                 prob_thresh=0.49,
-                 reg_weight=1e-3,
-                 min_iou_diff=0.01,
-                 brs_loss=BRSMaskLoss(),
-                 with_flip=False,
-                 flip_average=False,
-                 **kwargs):
+    def __init__(
+        self,
+        optimizer_params,
+        prob_thresh=0.49,
+        reg_weight=1e-3,
+        min_iou_diff=0.01,
+        brs_loss=BRSMaskLoss(),
+        with_flip=False,
+        flip_average=False,
+        **kwargs,
+    ):
         self.brs_loss = brs_loss
         self.optimizer_params = optimizer_params
         self.prob_thresh = prob_thresh
@@ -53,7 +54,7 @@ class BaseOptimizer:
             if self.with_flip and self.flip_average:
                 result, result_flipped = torch.chunk(result, 2, dim=0)
                 result = 0.5 * (result + torch.flip(result_flipped, dims=[3]))
-                pos_mask, neg_mask = pos_mask[:result.shape[0]], neg_mask[:result.shape[0]]
+                pos_mask, neg_mask = pos_mask[: result.shape[0]], neg_mask[: result.shape[0]]
 
             loss, f_max_pos, f_max_neg = self.brs_loss(result, pos_mask, neg_mask)
             loss = loss + reg_loss
@@ -83,7 +84,6 @@ class BaseOptimizer:
 
 
 class InputOptimizer(BaseOptimizer):
-
     def unpack_opt_params(self, opt_params):
         opt_params = opt_params.view(self._opt_shape)
         if self.with_flip:
@@ -91,11 +91,10 @@ class InputOptimizer(BaseOptimizer):
             opt_params = torch.cat([opt_params, opt_params_flipped], dim=0)
         reg_loss = self.reg_weight * torch.sum(opt_params**2)
 
-        return (opt_params, ), reg_loss
+        return (opt_params,), reg_loss
 
 
 class ScaleBiasOptimizer(BaseOptimizer):
-
     def __init__(self, *args, scale_act=None, reg_bias_weight=10.0, **kwargs):
         super().__init__(*args, **kwargs)
         self.scale_act = scale_act
@@ -103,8 +102,9 @@ class ScaleBiasOptimizer(BaseOptimizer):
 
     def unpack_opt_params(self, opt_params):
         scale, bias = torch.chunk(opt_params, 2, dim=0)
-        reg_loss = self.reg_weight * (torch.sum(scale**2) +
-                                      self.reg_bias_weight * torch.sum(bias**2))
+        reg_loss = self.reg_weight * (
+            torch.sum(scale**2) + self.reg_bias_weight * torch.sum(bias**2)
+        )
 
         if self.scale_act == 'tanh':
             scale = torch.tanh(scale)

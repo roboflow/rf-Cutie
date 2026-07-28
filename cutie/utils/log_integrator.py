@@ -3,13 +3,13 @@ Integrate numerical values for some iterations
 Typically used for loss computation / logging to tensorboard
 Call finalize and create a new Integrator when you want to display/log
 """
+
 from typing import Dict, Callable, Tuple
 import torch
 from cutie.utils.logger import TensorboardLogger
 
 
 class Integrator:
-
     def __init__(self, logger: TensorboardLogger, distributed: bool = True):
         self.values = {}
         self.counts = {}
@@ -63,7 +63,6 @@ class Integrator:
 
         outputs = {}
         for k, v in self.values.items():
-
             if k[:4] == 'hide':
                 continue
 

@@ -62,15 +62,22 @@ def get_image_array(images, grid_shape, captions=None):
     output_image = np.zeros([w * cate_counts, h * (rows_counts + 1), 3], dtype=np.uint8)
     col_cnt = 0
     for k, v in images.items():
-
         # Default as key value itself
         caption = captions.get(k, k)
 
         # Handles new line character
         dy = 40
         for i, line in enumerate(caption.split('\n')):
-            cv2.putText(output_image, line, (10, col_cnt * w + 100 + i * dy), font, 0.8,
-                        (255, 255, 255), 2, cv2.LINE_AA)
+            cv2.putText(
+                output_image,
+                line,
+                (10, col_cnt * w + 100 + i * dy),
+                font,
+                0.8,
+                (255, 255, 255),
+                2,
+                cv2.LINE_AA,
+            )
 
         # Put images
         for row_cnt, img in enumerate(v):
@@ -80,8 +87,9 @@ def get_image_array(images, grid_shape, captions=None):
 
             img = (img * 255).astype('uint8')
 
-            output_image[(col_cnt + 0) * w:(col_cnt + 1) * w,
-                         (row_cnt + 1) * h:(row_cnt + 2) * h, :] = img
+            output_image[
+                (col_cnt + 0) * w : (col_cnt + 1) * w, (row_cnt + 1) * h : (row_cnt + 2) * h, :
+            ] = img
 
         col_cnt += 1
 
@@ -155,12 +163,15 @@ def vis(images, size, num_objects):
             for oi in range(max_num_objects):
                 if ti == 0 or oi >= num_objects[bi]:
                     req_images[f'Mask_{oi}'].append(
-                        mask_transform(images['first_frame_gt'][bi][0, oi], size))
+                        mask_transform(images['first_frame_gt'][bi][0, oi], size)
+                    )
                     req_images[f'S-Aux_{oi}'].append(
-                        mask_transform(images['first_frame_gt'][bi][0, oi], size))
+                        mask_transform(images['first_frame_gt'][bi][0, oi], size)
+                    )
                     for l in range(num_levels):
                         req_images[f'Q-Aux-L{l}_{oi}'].append(
-                            mask_transform(images['first_frame_gt'][bi][0, oi], size))
+                            mask_transform(images['first_frame_gt'][bi][0, oi], size)
+                        )
                 else:
                     mask = mask_transform(images[f'masks_{ti}'][bi][oi], size)
                     req_images[f'Mask_{oi}'].append(mask)
@@ -172,7 +183,8 @@ def vis(images, size, num_objects):
                         req_images[f'Q-Aux-L{l}_{oi}'].append(mask)
 
                 req_images[f'GT_{oi}_{GT_suffix}'].append(
-                    mask_transform(images['cls_gt'][bi, ti, 0] == (oi + 1), size))
+                    mask_transform(images['cls_gt'][bi, ti, 0] == (oi + 1), size)
+                )
 
     return get_image_array(req_images, size, key_captions)
 
@@ -206,15 +218,19 @@ def vis_debug(images, size, num_objects):
             for oi in range(max_num_objects):
                 if ti == 0 or oi >= num_objects[bi]:
                     req_images[f'Mask_{oi}'].append(
-                        mask_transform(images['first_frame_gt'][bi][0, oi], size))
+                        mask_transform(images['first_frame_gt'][bi][0, oi], size)
+                    )
                     req_images[f'S-Aux_{oi}'].append(
-                        mask_transform(images['first_frame_gt'][bi][0, oi], size))
+                        mask_transform(images['first_frame_gt'][bi][0, oi], size)
+                    )
                     for l in range(num_levels):
                         req_images[f'Q-Aux-L{l}_{oi}'].append(
-                            mask_transform(images['first_frame_gt'][bi][0, oi], size))
+                            mask_transform(images['first_frame_gt'][bi][0, oi], size)
+                        )
                     for q in range(num_queries):
                         req_images[f'Attn-Mask-Q{q}_{oi}'].append(
-                            mask_transform(images['first_frame_gt'][bi][0, oi], size))
+                            mask_transform(images['first_frame_gt'][bi][0, oi], size)
+                        )
                 else:
                     mask = mask_transform(images[f'masks_{ti}'][bi][oi], size)
                     req_images[f'Mask_{oi}'].append(mask)
@@ -228,6 +244,7 @@ def vis_debug(images, size, num_objects):
                         req_images[f'Attn-Mask-Q{q}_{oi}'].append(mask)
 
                 req_images[f'GT_{oi}_{GT_suffix}'].append(
-                    mask_transform(images['cls_gt'][bi, ti, 0] == (oi + 1), size))
+                    mask_transform(images['cls_gt'][bi, ti, 0] == (oi + 1), size)
+                )
 
     return get_image_array(req_images, size, key_captions)

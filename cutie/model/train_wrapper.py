@@ -11,7 +11,6 @@ log = logging.getLogger()
 
 
 class CutieTrainWrapper(CUTIE):
-
     def __init__(self, cfg: DictConfig, stage_cfg: DictConfig):
         super().__init__(cfg, single_object=(stage_cfg.num_objects == 1))
 
@@ -56,14 +55,16 @@ class CutieTrainWrapper(CUTIE):
 
             # zero-init sensory
             sensory = torch.zeros((b, num_objects, self.sensory_dim, h, w), device=frames.device)
-            msk_val, sensory, obj_val, _ = self.encode_mask(frames[:, 0], pix_feat[:, 0], sensory,
-                                                            first_frame_gt[:, 0])
+            msk_val, sensory, obj_val, _ = self.encode_mask(
+                frames[:, 0], pix_feat[:, 0], sensory, first_frame_gt[:, 0]
+            )
             masks = first_frame_gt[:, 0]
 
             # add the time dimension
             msk_values = msk_val.unsqueeze(3)  # B*num_objects*C*T*H*W
-            obj_values = obj_val.unsqueeze(
-                2) if obj_val is not None else None  # B*num_objects*T*Q*C
+            obj_values = (
+                obj_val.unsqueeze(2) if obj_val is not None else None
+            )  # B*num_objects*T*Q*C
 
             for ti in range(1, seq_length):
                 if ti <= self.num_ref_frames:
@@ -74,37 +75,47 @@ class CutieTrainWrapper(CUTIE):
                     # pick num_ref_frames random frames
                     # this is not very efficient but I think we would
                     # need broadcasting in gather which we don't have
-                    ridx = [torch.randperm(ti)[:self.num_ref_frames] for _ in range(b)]
+                    ridx = [torch.randperm(ti)[: self.num_ref_frames] for _ in range(b)]
                     ref_msk_values = torch.stack(
-                        [msk_values[bi, :, :, ridx[bi]] for bi in range(b)], 0)
+                        [msk_values[bi, :, :, ridx[bi]] for bi in range(b)], 0
+                    )
                     ref_keys = torch.stack([keys[bi, :, ridx[bi]] for bi in range(b)], 0)
-                    ref_shrinkages = torch.stack([shrinkages[bi, :, ridx[bi]] for bi in range(b)],
-                                                 0)
+                    ref_shrinkages = torch.stack(
+                        [shrinkages[bi, :, ridx[bi]] for bi in range(b)], 0
+                    )
 
                 # Segment frame ti
-                readout, aux_input = self.read_memory(keys[:, :, ti], selections[:, :,
-                                                                                 ti], ref_keys,
-                                                      ref_shrinkages, ref_msk_values, obj_values,
-                                                      pix_feat[:, ti], sensory, masks, selector)
+                readout, aux_input = self.read_memory(
+                    keys[:, :, ti],
+                    selections[:, :, ti],
+                    ref_keys,
+                    ref_shrinkages,
+                    ref_msk_values,
+                    obj_values,
+                    pix_feat[:, ti],
+                    sensory,
+                    masks,
+                    selector,
+                )
                 aux_output = self.compute_aux(pix_feat[:, ti], aux_input, selector)
-                sensory, logits, masks = self.segment(get_ms_feat_ti(ti),
-                                                      readout,
-                                                      sensory,
-                                                      selector=selector)
+                sensory, logits, masks = self.segment(
+                    get_ms_feat_ti(ti), readout, sensory, selector=selector
+                )
                 # remove background
                 masks = masks[:, 1:]
 
                 # No need to encode the last frame
                 if ti < (self.seq_length - 1):
                     deep_update = np.random.rand() < self.deep_update_prob
-                    msk_val, sensory, obj_val, _ = self.encode_mask(frames[:, ti],
-                                                                    pix_feat[:, ti],
-                                                                    sensory,
-                                                                    masks,
-                                                                    deep_update=deep_update)
+                    msk_val, sensory, obj_val, _ = self.encode_mask(
+                        frames[:, ti], pix_feat[:, ti], sensory, masks, deep_update=deep_update
+                    )
                     msk_values = torch.cat([msk_values, msk_val.unsqueeze(3)], 3)
-                    obj_values = torch.cat([obj_values, obj_val.unsqueeze(2)],
-                                           2) if obj_val is not None else None
+                    obj_values = (
+                        torch.cat([obj_values, obj_val.unsqueeze(2)], 2)
+                        if obj_val is not None
+                        else None
+                    )
 
                 out[f'masks_{ti}'] = masks
                 out[f'logits_{ti}'] = logits

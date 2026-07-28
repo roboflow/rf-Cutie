@@ -2,7 +2,6 @@ from .zoom_in import ZoomIn, get_roi_image_nd
 
 
 class LimitLongestSide(ZoomIn):
-
     def __init__(self, max_size=800):
         super().__init__(target_size=max_size, skip_clicks=0)
 

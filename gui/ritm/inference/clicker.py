@@ -4,7 +4,6 @@ import cv2
 
 
 class Clicker(object):
-
     def __init__(self, gt_mask=None, init_clicks=None, ignore_label=-1, click_indx_offset=0):
         self.click_indx_offset = click_indx_offset
         if gt_mask is not None:
@@ -28,10 +27,12 @@ class Clicker(object):
         return self.clicks_list[:clicks_limit]
 
     def _get_next_click(self, pred_mask, padding=True):
-        fn_mask = np.logical_and(np.logical_and(self.gt_mask, np.logical_not(pred_mask)),
-                                 self.not_ignore_mask)
-        fp_mask = np.logical_and(np.logical_and(np.logical_not(self.gt_mask), pred_mask),
-                                 self.not_ignore_mask)
+        fn_mask = np.logical_and(
+            np.logical_and(self.gt_mask, np.logical_not(pred_mask)), self.not_ignore_mask
+        )
+        fp_mask = np.logical_and(
+            np.logical_and(np.logical_not(self.gt_mask), pred_mask), self.not_ignore_mask
+        )
 
         if padding:
             fn_mask = np.pad(fn_mask, ((1, 1), (1, 1)), 'constant')
@@ -105,7 +106,6 @@ class Clicker(object):
 
 
 class Click:
-
     def __init__(self, is_positive, coords, indx=None):
         self.is_positive = is_positive
         self.coords = coords

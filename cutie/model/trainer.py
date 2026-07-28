@@ -20,7 +20,6 @@ from cutie.utils.time_estimator import TimeEstimator
 
 
 class Trainer:
-
     def __init__(self, cfg: DictConfig, stage_cfg: DictConfig, log: TensorboardLogger, run_path):
         self.exp_id = cfg['exp_id']
         self.stage = stage_cfg['name']
@@ -30,22 +29,29 @@ class Trainer:
         self.local_rank = local_rank
 
         # setting up the model
-        self.cutie = nn.parallel.DistributedDataParallel(CutieTrainWrapper(cfg, stage_cfg).cuda(),
-                                                         device_ids=[local_rank],
-                                                         output_device=local_rank,
-                                                         broadcast_buffers=False)
+        self.cutie = nn.parallel.DistributedDataParallel(
+            CutieTrainWrapper(cfg, stage_cfg).cuda(),
+            device_ids=[local_rank],
+            output_device=local_rank,
+            broadcast_buffers=False,
+        )
         self.size = stage_cfg['crop_size']
 
         # setting up logging
         self.log = log
         self.run_path = run_path
-        self.log.log_string('model_size',
-                            str(sum(param.nelement() for param in self.cutie.parameters())))
+        self.log.log_string(
+            'model_size', str(sum(param.nelement() for param in self.cutie.parameters()))
+        )
         self.log.log_string(
             'number_of_parameters_that_require_gradient',
             str(
-                sum(param.nelement()
-                    for param in filter(lambda p: p.requires_grad, self.cutie.parameters()))))
+                sum(
+                    param.nelement()
+                    for param in filter(lambda p: p.requires_grad, self.cutie.parameters())
+                )
+            ),
+        )
         self.log.log_string('torch version', torch.__version__)
         self.log.log_string('PIL version', PIL.__version__)
         self.train_integrator = Integrator(self.log, distributed=True)
@@ -53,11 +59,13 @@ class Trainer:
         # setting up optimizer and loss
         self.train()
         parameter_groups = get_parameter_groups(self.cutie, stage_cfg, print_log=(local_rank == 0))
-        self.optimizer = optim.AdamW(parameter_groups,
-                                     lr=stage_cfg['learning_rate'],
-                                     weight_decay=stage_cfg['weight_decay'],
-                                     eps=1e-6 if self.use_amp else 1e-8,
-                                     foreach=True)
+        self.optimizer = optim.AdamW(
+            parameter_groups,
+            lr=stage_cfg['learning_rate'],
+            weight_decay=stage_cfg['weight_decay'],
+            eps=1e-6 if self.use_amp else 1e-8,
+            foreach=True,
+        )
         self.loss_computer = LossComputer(cfg, stage_cfg)
         if self.use_amp:
             self.scaler = torch.cuda.amp.GradScaler(init_scale=8192)
@@ -68,13 +76,13 @@ class Trainer:
             self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda _: 1)
         elif stage_cfg['lr_schedule'] == 'poly':
             total_num_iter = stage_cfg['iterations']
-            self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer,
-                                                         lr_lambda=lambda x:
-                                                         (1 - (x / total_num_iter))**0.9)
+            self.scheduler = optim.lr_scheduler.LambdaLR(
+                self.optimizer, lr_lambda=lambda x: (1 - (x / total_num_iter)) ** 0.9
+            )
         elif stage_cfg['lr_schedule'] == 'step':
-            self.scheduler = optim.lr_scheduler.MultiStepLR(self.optimizer,
-                                                            stage_cfg['lr_schedule_steps'],
-                                                            stage_cfg['lr_schedule_gamma'])
+            self.scheduler = optim.lr_scheduler.MultiStepLR(
+                self.optimizer, stage_cfg['lr_schedule_steps'], stage_cfg['lr_schedule_gamma']
+            )
         else:
             raise NotImplementedError
 
@@ -111,8 +119,9 @@ class Trainer:
             if self._is_train:
                 if self.local_rank == 0 and it % self.log_image_interval == 0 and it != 0:
                     images = {**data, **out}
-                    self.log.log_image(self.stage, 'vis', vis(images, self.size,
-                                                              num_filled_objects), it)
+                    self.log.log_image(
+                        self.stage, 'vis', vis(images, self.size, num_filled_objects), it
+                    )
                     # self.log.log_image(self.stage, 'vis-debug',
                     #                    vis_debug(images, self.size, num_filled_objects), 0)
 
@@ -186,7 +195,7 @@ class Trainer:
             'it': it,
             'weights': self.cutie.module.state_dict(),
             'optimizer': self.optimizer.state_dict(),
-            'scheduler': self.scheduler.state_dict()
+            'scheduler': self.scheduler.state_dict(),
         }
 
         os.makedirs(self.run_path, exist_ok=True)

@@ -12,7 +12,10 @@ import numpy as np
 import torch
 import torch.distributed as distributed
 from cutie.model.trainer import Trainer
-from cutie.dataset.setup_training_data import setup_pre_training_datasets, setup_main_training_datasets
+from cutie.dataset.setup_training_data import (
+    setup_pre_training_datasets,
+    setup_main_training_datasets,
+)
 from cutie.utils.logger import TensorboardLogger
 
 local_rank = int(os.environ['LOCAL_RANK'])
@@ -21,7 +24,7 @@ log = logging.getLogger()
 
 
 def distributed_setup():
-    distributed.init_process_group(backend="nccl")
+    distributed.init_process_group(backend='nccl')
     local_rank = distributed.get_rank()
     world_size = distributed.get_world_size()
     log.info(f'Initialized: local_rank={local_rank}, world_size={world_size}')

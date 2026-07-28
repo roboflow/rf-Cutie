@@ -91,12 +91,12 @@ class VideoReader(Dataset):
             raise NotImplementedError(f'Unknown mode {first_mask.mode} in {self.first_mask_frame}.')
 
         self.im_transform = transforms.ToTensor()
-        self.im_resize = transforms.Resize(size,
-                                           interpolation=InterpolationMode.BILINEAR,
-                                           antialias=True)
-        self.mask_resize = transforms.Resize(size,
-                                             interpolation=InterpolationMode.NEAREST,
-                                             antialias=True)
+        self.im_resize = transforms.Resize(
+            size, interpolation=InterpolationMode.BILINEAR, antialias=True
+        )
+        self.mask_resize = transforms.Resize(
+            size, interpolation=InterpolationMode.NEAREST, antialias=True
+        )
         self.size = size
 
     def __getitem__(self, idx):
@@ -122,8 +122,9 @@ class VideoReader(Dataset):
             input_shape = np.array(img).shape[:2]
         else:
             input_shape = output_shape
-        resize_needed = (input_shape != output_shape) or ((self.size > 0) and
-                                                          (min(input_shape) > self.size))
+        resize_needed = (input_shape != output_shape) or (
+            (self.size > 0) and (min(input_shape) > self.size)
+        )
         img = self.im_transform(img)
         if resize_needed:
             img = self.im_resize(img)

@@ -5,12 +5,8 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
 
-  - repo: https://github.com/google/yapf
-    rev: v0.43.0
-    hooks:
-      - id: yapf
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.0
     hooks:
       - id: ruff-check
+      - id: ruff-format

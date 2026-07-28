@@ -18,19 +18,20 @@ def get_emb(sin_inp: torch.Tensor) -> torch.Tensor:
 
 
 class PositionalEncoding(nn.Module):
-
-    def __init__(self,
-                 dim: int,
-                 scale: float = math.pi * 2,
-                 temperature: float = 10000,
-                 normalize: bool = True,
-                 channel_last: bool = True,
-                 transpose_output: bool = False):
+    def __init__(
+        self,
+        dim: int,
+        scale: float = math.pi * 2,
+        temperature: float = 10000,
+        normalize: bool = True,
+        channel_last: bool = True,
+        transpose_output: bool = False,
+    ):
         super().__init__()
         dim = int(np.ceil(dim / 4) * 2)
         self.dim = dim
-        inv_freq = 1.0 / (temperature**(torch.arange(0, dim, 2).float() / dim))
-        self.register_buffer("inv_freq", inv_freq)
+        inv_freq = 1.0 / (temperature ** (torch.arange(0, dim, 2).float() / dim))
+        self.register_buffer('inv_freq', inv_freq)
         self.normalize = normalize
         self.scale = scale
         self.eps = 1e-6
@@ -76,14 +77,14 @@ class PositionalEncoding(nn.Module):
             pos_y = pos_y / (pos_y[-1] + self.eps) * self.scale
             pos_x = pos_x / (pos_x[-1] + self.eps) * self.scale
 
-        sin_inp_y = torch.einsum("i,j->ij", pos_y, self.inv_freq)
-        sin_inp_x = torch.einsum("i,j->ij", pos_x, self.inv_freq)
+        sin_inp_y = torch.einsum('i,j->ij', pos_y, self.inv_freq)
+        sin_inp_x = torch.einsum('i,j->ij', pos_x, self.inv_freq)
         emb_y = get_emb(sin_inp_y).unsqueeze(1)
         emb_x = get_emb(sin_inp_x)
 
         emb = torch.zeros((h, w, self.dim * 2), device=tensor.device, dtype=tensor.dtype)
-        emb[:, :, :self.dim] = emb_x
-        emb[:, :, self.dim:] = emb_y
+        emb[:, :, : self.dim] = emb_x
+        emb[:, :, self.dim :] = emb_y
 
         if not self.channel_last and self.transpose_output:
             # cancelled out

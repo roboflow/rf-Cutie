@@ -8,21 +8,22 @@ import av
 
 
 def convert_frames_to_video(
-        image_folder: str,
-        output_path: str,
-        fps: int = 24,
-        bitrate: int = 1,  # in Mbps
-        progress_callback=None) -> None:
-    images = [img for img in sorted(os.listdir(image_folder)) if img.endswith(".jpg")]
+    image_folder: str,
+    output_path: str,
+    fps: int = 24,
+    bitrate: int = 1,  # in Mbps
+    progress_callback=None,
+) -> None:
+    images = [img for img in sorted(os.listdir(image_folder)) if img.endswith('.jpg')]
     frame = cv2.imread(os.path.join(image_folder, images[0]))
     height, width, layers = frame.shape
 
-    output = av.open(output_path, mode="w")
+    output = av.open(output_path, mode='w')
 
-    stream = output.add_stream("h264", rate=fps)
+    stream = output.add_stream('h264', rate=fps)
     stream.width = width
     stream.height = height
-    stream.pix_fmt = "yuv420p"
+    stream.pix_fmt = 'yuv420p'
     stream.bit_rate = bitrate * (10**7)
 
     for i, img_path in enumerate(images):
@@ -41,11 +42,10 @@ def convert_frames_to_video(
     output.close()
 
 
-def convert_mask_to_binary(mask_folder: str,
-                           output_path: str,
-                           target_objects: List[int],
-                           progress_callback=None) -> None:
-    masks = [img for img in sorted(os.listdir(mask_folder)) if img.endswith(".png")]
+def convert_mask_to_binary(
+    mask_folder: str, output_path: str, target_objects: List[int], progress_callback=None
+) -> None:
+    masks = [img for img in sorted(os.listdir(mask_folder)) if img.endswith('.png')]
 
     for i, mask_path in enumerate(masks):
         mask = Image.open(os.path.join(mask_folder, mask_path))

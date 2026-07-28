@@ -25,19 +25,19 @@ def pad_divide_by(in_img: torch.Tensor, d: int) -> (torch.Tensor, Iterable[int])
 def unpad(img: torch.Tensor, pad: Iterable[int]) -> torch.Tensor:
     if len(img.shape) == 4:
         if pad[2] + pad[3] > 0:
-            img = img[:, :, pad[2]:-pad[3], :]
+            img = img[:, :, pad[2] : -pad[3], :]
         if pad[0] + pad[1] > 0:
-            img = img[:, :, :, pad[0]:-pad[1]]
+            img = img[:, :, :, pad[0] : -pad[1]]
     elif len(img.shape) == 3:
         if pad[2] + pad[3] > 0:
-            img = img[:, pad[2]:-pad[3], :]
+            img = img[:, pad[2] : -pad[3], :]
         if pad[0] + pad[1] > 0:
-            img = img[:, :, pad[0]:-pad[1]]
+            img = img[:, :, pad[0] : -pad[1]]
     elif len(img.shape) == 5:
         if pad[2] + pad[3] > 0:
-            img = img[:, :, :, pad[2]:-pad[3], :]
+            img = img[:, :, :, pad[2] : -pad[3], :]
         if pad[0] + pad[1] > 0:
-            img = img[:, :, :, :, pad[0]:-pad[1]]
+            img = img[:, :, :, :, pad[0] : -pad[1]]
     else:
         raise NotImplementedError
     return img
@@ -47,8 +47,9 @@ def unpad(img: torch.Tensor, pad: Iterable[int]) -> torch.Tensor:
 def aggregate(prob: torch.Tensor, dim: int) -> torch.Tensor:
     with torch.cuda.amp.autocast(enabled=False):
         prob = prob.float()
-        new_prob = torch.cat([torch.prod(1 - prob, dim=dim, keepdim=True), prob],
-                             dim).clamp(1e-7, 1 - 1e-7)
+        new_prob = torch.cat([torch.prod(1 - prob, dim=dim, keepdim=True), prob], dim).clamp(
+            1e-7, 1 - 1e-7
+        )
         logits = torch.log((new_prob / (1 - new_prob)))
 
         return logits

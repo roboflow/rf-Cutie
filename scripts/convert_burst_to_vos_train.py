@@ -50,10 +50,12 @@ def process_video(sequence):
 
         output_mask = np.zeros((height, width), dtype=np.uint8)
         for object_id, object_mask in segmentation.items():
-            mask = mask_utils.decode({
-                'size': [height, width],
-                'counts': object_mask['rle'],
-            }).astype(bool)
+            mask = mask_utils.decode(
+                {
+                    'size': [height, width],
+                    'counts': object_mask['rle'],
+                }
+            ).astype(bool)
             output_mask[mask] = object_id
 
         output_mask = Image.fromarray(output_mask)

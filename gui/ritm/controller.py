@@ -1,4 +1,5 @@
 import torch
+
 try:
     from torch import mps
 except ImportError:
@@ -10,7 +11,6 @@ from ..ritm.inference.predictors import get_predictor
 
 
 class InteractiveController:
-
     def __init__(self, net, device, predictor_params, prob_thresh=0.5):
         self.net = net.to(device)
         self.prob_thresh = prob_thresh
@@ -33,10 +33,9 @@ class InteractiveController:
         self.reset_last_object()
 
     def add_click(self, x, y, is_positive, prev_mask):
-        self.states.append({
-            'clicker': self.clicker.get_state(),
-            'predictor': self.predictor.get_states()
-        })
+        self.states.append(
+            {'clicker': self.clicker.get_state(), 'predictor': self.predictor.get_states()}
+        )
 
         click = clicker.Click(is_positive=is_positive, coords=(y, x))
         self.clicker.add_click(click)

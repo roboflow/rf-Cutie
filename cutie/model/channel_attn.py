@@ -5,7 +5,6 @@ import torch.nn.functional as F
 
 
 class CAResBlock(nn.Module):
-
     def __init__(self, in_dim: int, out_dim: int, residual: bool = True):
         super().__init__()
         self.residual = residual

@@ -5,33 +5,33 @@ import torch.nn.functional as F
 from cutie.model.channel_attn import CAResBlock
 
 
-def interpolate_groups(g: torch.Tensor, ratio: float, mode: str,
-                       align_corners: bool) -> torch.Tensor:
+def interpolate_groups(
+    g: torch.Tensor, ratio: float, mode: str, align_corners: bool
+) -> torch.Tensor:
     batch_size, num_objects = g.shape[:2]
-    g = F.interpolate(g.flatten(start_dim=0, end_dim=1),
-                      scale_factor=ratio,
-                      mode=mode,
-                      align_corners=align_corners)
+    g = F.interpolate(
+        g.flatten(start_dim=0, end_dim=1),
+        scale_factor=ratio,
+        mode=mode,
+        align_corners=align_corners,
+    )
     g = g.view(batch_size, num_objects, *g.shape[1:])
     return g
 
 
-def upsample_groups(g: torch.Tensor,
-                    ratio: float = 2,
-                    mode: str = 'bilinear',
-                    align_corners: bool = False) -> torch.Tensor:
+def upsample_groups(
+    g: torch.Tensor, ratio: float = 2, mode: str = 'bilinear', align_corners: bool = False
+) -> torch.Tensor:
     return interpolate_groups(g, ratio, mode, align_corners)
 
 
-def downsample_groups(g: torch.Tensor,
-                      ratio: float = 1 / 2,
-                      mode: str = 'area',
-                      align_corners: bool = None) -> torch.Tensor:
+def downsample_groups(
+    g: torch.Tensor, ratio: float = 1 / 2, mode: str = 'area', align_corners: bool = None
+) -> torch.Tensor:
     return interpolate_groups(g, ratio, mode, align_corners)
 
 
 class GConv2d(nn.Conv2d):
-
     def forward(self, g: torch.Tensor) -> torch.Tensor:
         batch_size, num_objects = g.shape[:2]
         g = super().forward(g.flatten(start_dim=0, end_dim=1))
@@ -39,7 +39,6 @@ class GConv2d(nn.Conv2d):
 
 
 class GroupResBlock(nn.Module):
-
     def __init__(self, in_dim: int, out_dim: int):
         super().__init__()
 
@@ -61,12 +60,13 @@ class GroupResBlock(nn.Module):
 
 
 class MainToGroupDistributor(nn.Module):
-
-    def __init__(self,
-                 x_transform: Optional[nn.Module] = None,
-                 g_transform: Optional[nn.Module] = None,
-                 method: str = 'cat',
-                 reverse_order: bool = False):
+    def __init__(
+        self,
+        x_transform: Optional[nn.Module] = None,
+        g_transform: Optional[nn.Module] = None,
+        method: str = 'cat',
+        reverse_order: bool = False,
+    ):
         super().__init__()
 
         self.x_transform = x_transform
@@ -103,16 +103,15 @@ class MainToGroupDistributor(nn.Module):
 
 
 class GroupFeatureFusionBlock(nn.Module):
-
     def __init__(self, x_in_dim: int, g_in_dim: int, out_dim: int):
         super().__init__()
 
         x_transform = nn.Conv2d(x_in_dim, out_dim, kernel_size=1)
         g_transform = GConv2d(g_in_dim, out_dim, kernel_size=1)
 
-        self.distributor = MainToGroupDistributor(x_transform=x_transform,
-                                                  g_transform=g_transform,
-                                                  method='add')
+        self.distributor = MainToGroupDistributor(
+            x_transform=x_transform, g_transform=g_transform, method='add'
+        )
         self.block1 = CAResBlock(out_dim, out_dim)
         self.block2 = CAResBlock(out_dim, out_dim)
 

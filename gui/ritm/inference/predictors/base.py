@@ -5,15 +5,16 @@ from ...inference.transforms import AddHorizontalFlip, SigmoidForPred, LimitLong
 
 
 class BasePredictor(object):
-
-    def __init__(self,
-                 model,
-                 device,
-                 net_clicks_limit=None,
-                 with_flip=False,
-                 zoom_in=None,
-                 max_size=None,
-                 **kwargs):
+    def __init__(
+        self,
+        model,
+        device,
+        net_clicks_limit=None,
+        with_flip=False,
+        zoom_in=None,
+        max_size=None,
+        **kwargs,
+    ):
         self.with_flip = with_flip
         self.net_clicks_limit = net_clicks_limit
         self.original_image = None
@@ -51,8 +52,9 @@ class BasePredictor(object):
         clicks_list = clicker.get_clicks()
 
         if self.click_models is not None:
-            model_indx = min(clicker.click_indx_offset + len(clicks_list), len(
-                self.click_models)) - 1
+            model_indx = (
+                min(clicker.click_indx_offset + len(clicks_list), len(self.click_models)) - 1
+            )
             if model_indx != self.model_indx:
                 self.model_indx = model_indx
                 self.net = self.click_models[model_indx]
@@ -65,10 +67,9 @@ class BasePredictor(object):
         image_nd, clicks_lists, is_image_changed = self.apply_transforms(input_image, [clicks_list])
 
         pred_logits = self._get_prediction(image_nd, clicks_lists, is_image_changed)
-        prediction = F.interpolate(pred_logits,
-                                   mode='bilinear',
-                                   align_corners=True,
-                                   size=image_nd.size()[2:])
+        prediction = F.interpolate(
+            pred_logits, mode='bilinear', align_corners=True, size=image_nd.size()[2:]
+        )
 
         for t in reversed(self.transforms):
             prediction = t.inv_transform(prediction)
@@ -104,8 +105,7 @@ class BasePredictor(object):
         total_clicks = []
         num_pos_clicks = [sum(x.is_positive for x in clicks_list) for clicks_list in clicks_lists]
         num_neg_clicks = [
-            len(clicks_list) - num_pos
-            for clicks_list, num_pos in zip(clicks_lists, num_pos_clicks)
+            len(clicks_list) - num_pos for clicks_list, num_pos in zip(clicks_lists, num_pos_clicks)
         ]
         num_max_points = max(num_pos_clicks + num_neg_clicks)
         if self.net_clicks_limit is not None:
@@ -113,7 +113,7 @@ class BasePredictor(object):
         num_max_points = max(1, num_max_points)
 
         for clicks_list in clicks_lists:
-            clicks_list = clicks_list[:self.net_clicks_limit]
+            clicks_list = clicks_list[: self.net_clicks_limit]
             pos_clicks = [click.coords_and_indx for click in clicks_list if click.is_positive]
             pos_clicks = pos_clicks + (num_max_points - len(pos_clicks)) * [(-1, -1, -1)]
 
@@ -126,7 +126,7 @@ class BasePredictor(object):
     def get_states(self):
         return {
             'transform_states': self._get_transform_states(),
-            'prev_prediction': self.prev_prediction.clone()
+            'prev_prediction': self.prev_prediction.clone(),
         }
 
     def set_states(self, states):

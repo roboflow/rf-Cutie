@@ -7,16 +7,17 @@ from cutie.inference.data.video_reader import VideoReader
 
 
 class VOSTestDataset:
-
-    def __init__(self,
-                 image_dir: str,
-                 mask_dir: str,
-                 *,
-                 use_all_masks: bool,
-                 req_frames_json: Optional[str] = None,
-                 size: int = -1,
-                 size_dir: Optional[str] = None,
-                 subset: Optional[str] = None):
+    def __init__(
+        self,
+        image_dir: str,
+        mask_dir: str,
+        *,
+        use_all_masks: bool,
+        req_frames_json: Optional[str] = None,
+        size: int = -1,
+        size_dir: Optional[str] = None,
+        subset: Optional[str] = None,
+    ):
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.use_all_masks = use_all_masks

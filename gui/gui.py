@@ -4,11 +4,26 @@ from pathlib import Path
 import numpy as np
 from omegaconf import DictConfig
 
-from PySide6.QtWidgets import (QWidget, QComboBox, QCheckBox, QHBoxLayout, QLabel, QPushButton,
-                               QTextEdit, QSpinBox, QPlainTextEdit, QVBoxLayout, QSizePolicy,
-                               QButtonGroup, QSlider, QRadioButton, QApplication, QFileDialog)
+from PySide6.QtWidgets import (
+    QWidget,
+    QComboBox,
+    QCheckBox,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QSpinBox,
+    QPlainTextEdit,
+    QVBoxLayout,
+    QSizePolicy,
+    QButtonGroup,
+    QSlider,
+    QRadioButton,
+    QApplication,
+    QFileDialog,
+)
 
-from PySide6.QtGui import (QKeySequence, QShortcut, QTextCursor, QImage, QPixmap, QIcon)
+from PySide6.QtGui import QKeySequence, QShortcut, QTextCursor, QImage, QPixmap, QIcon
 from PySide6.QtCore import Qt, QTimer
 
 from cutie.utils.palette import davis_palette_np
@@ -16,7 +31,6 @@ from gui.gui_utils import *
 
 
 class GUI(QWidget):
-
     def __init__(self, controller, cfg: DictConfig) -> None:
         super().__init__()
 
@@ -99,23 +113,24 @@ class GUI(QWidget):
 
         # combobox
         self.combo = QComboBox(self)
-        self.combo.addItem("mask")
-        self.combo.addItem("davis")
-        self.combo.addItem("fade")
-        self.combo.addItem("light")
-        self.combo.addItem("popup")
-        self.combo.addItem("layer")
-        self.combo.addItem("rgba")
+        self.combo.addItem('mask')
+        self.combo.addItem('davis')
+        self.combo.addItem('fade')
+        self.combo.addItem('light')
+        self.combo.addItem('popup')
+        self.combo.addItem('layer')
+        self.combo.addItem('rgba')
         self.combo.setCurrentText('davis')
         self.combo.currentTextChanged.connect(controller.set_vis_mode)
 
         self.save_visualization_combo = QComboBox(self)
-        self.save_visualization_combo.addItem("None")
-        self.save_visualization_combo.addItem("Always")
-        self.save_visualization_combo.addItem("Propagation only (higher quality)")
+        self.save_visualization_combo.addItem('None')
+        self.save_visualization_combo.addItem('Always')
+        self.save_visualization_combo.addItem('Propagation only (higher quality)')
         self.combo.setCurrentText('None')
         self.save_visualization_combo.currentTextChanged.connect(
-            controller.on_set_save_visualization_mode)
+            controller.on_set_save_visualization_mode
+        )
 
         self.save_soft_mask_checkbox = QCheckBox(self)
         self.save_soft_mask_checkbox.toggled.connect(controller.on_save_soft_mask_toggle)
@@ -160,23 +175,25 @@ class GUI(QWidget):
         self.work_mem_gauge, self.work_mem_gauge_layout = create_gauge('Working memory size')
         self.long_mem_gauge, self.long_mem_gauge_layout = create_gauge('Long-term memory size')
         self.gpu_mem_gauge, self.gpu_mem_gauge_layout = create_gauge(
-            'GPU mem. (all proc, w/ caching)')
+            'GPU mem. (all proc, w/ caching)'
+        )
         self.torch_mem_gauge, self.torch_mem_gauge_layout = create_gauge(
-            'GPU mem. (torch, w/o caching)')
+            'GPU mem. (torch, w/o caching)'
+        )
 
         # Parameters setting
         self.work_mem_min, self.work_mem_min_layout = create_parameter_box(
-            1, 100, 'Min. working memory frames', callback=controller.on_work_min_change)
+            1, 100, 'Min. working memory frames', callback=controller.on_work_min_change
+        )
         self.work_mem_max, self.work_mem_max_layout = create_parameter_box(
-            2, 100, 'Max. working memory frames', callback=controller.on_work_max_change)
+            2, 100, 'Max. working memory frames', callback=controller.on_work_max_change
+        )
         self.long_mem_max, self.long_mem_max_layout = create_parameter_box(
-            1000,
-            100000,
-            'Max. long-term memory size',
-            step=1000,
-            callback=controller.update_config)
+            1000, 100000, 'Max. long-term memory size', step=1000, callback=controller.update_config
+        )
         self.mem_every_box, self.mem_every_box_layout = create_parameter_box(
-            1, 100, 'Memory frame every (r)', callback=controller.update_config)
+            1, 100, 'Memory frame every (r)', callback=controller.update_config
+        )
 
         # import mask/layer
         self.import_mask_button = QPushButton('Import mask')
@@ -317,37 +334,46 @@ class GUI(QWidget):
 
         # Objects shortcuts
         for i in range(1, controller.num_objects + 1):
-            QShortcut(QKeySequence(str(i)),
-                      self).activated.connect(functools.partial(controller.hit_number_key, i))
-            QShortcut(QKeySequence(f"Ctrl+{i}"),
-                      self).activated.connect(functools.partial(controller.hit_number_key, i))
+            QShortcut(QKeySequence(str(i)), self).activated.connect(
+                functools.partial(controller.hit_number_key, i)
+            )
+            QShortcut(QKeySequence(f'Ctrl+{i}'), self).activated.connect(
+                functools.partial(controller.hit_number_key, i)
+            )
 
         # next/prev frame shortcuts
         QShortcut(QKeySequence(Qt.Key.Key_Left), self).activated.connect(controller.on_prev_frame)
         QShortcut(QKeySequence(Qt.Key.Key_Right), self).activated.connect(controller.on_next_frame)
 
         # +/- 10 frames shortcuts
-        QShortcut(QKeySequence(Qt.Key.Key_Left | Qt.KeyboardModifier.ShiftModifier),
-                  self).activated.connect(functools.partial(controller.on_prev_frame, 10))
-        QShortcut(QKeySequence(Qt.Key.Key_Right | Qt.KeyboardModifier.ShiftModifier),
-                  self).activated.connect(functools.partial(controller.on_next_frame, 10))
+        QShortcut(
+            QKeySequence(Qt.Key.Key_Left | Qt.KeyboardModifier.ShiftModifier), self
+        ).activated.connect(functools.partial(controller.on_prev_frame, 10))
+        QShortcut(
+            QKeySequence(Qt.Key.Key_Right | Qt.KeyboardModifier.ShiftModifier), self
+        ).activated.connect(functools.partial(controller.on_next_frame, 10))
 
         # first/last frame shortcuts
-        QShortcut(QKeySequence(Qt.Key.Key_Left | Qt.KeyboardModifier.AltModifier),
-                  self).activated.connect(functools.partial(controller.on_prev_frame, 999999))
-        QShortcut(QKeySequence(Qt.Key.Key_Right | Qt.KeyboardModifier.AltModifier),
-                  self).activated.connect(functools.partial(controller.on_next_frame, 999999))
+        QShortcut(
+            QKeySequence(Qt.Key.Key_Left | Qt.KeyboardModifier.AltModifier), self
+        ).activated.connect(functools.partial(controller.on_prev_frame, 999999))
+        QShortcut(
+            QKeySequence(Qt.Key.Key_Right | Qt.KeyboardModifier.AltModifier), self
+        ).activated.connect(functools.partial(controller.on_next_frame, 999999))
 
         # commit to permanent memory shortcut
         QShortcut(QKeySequence(Qt.Key.Key_C), self).activated.connect(controller.on_commit)
 
         # propagate forward/backward/pause shortcuts
-        QShortcut(QKeySequence(Qt.Key.Key_F),
-                  self).activated.connect(controller.on_forward_propagation)
-        QShortcut(QKeySequence(Qt.Key.Key_Space),
-                  self).activated.connect(controller.on_forward_propagation)
-        QShortcut(QKeySequence(Qt.Key.Key_B),
-                  self).activated.connect(controller.on_backward_propagation)
+        QShortcut(QKeySequence(Qt.Key.Key_F), self).activated.connect(
+            controller.on_forward_propagation
+        )
+        QShortcut(QKeySequence(Qt.Key.Key_Space), self).activated.connect(
+            controller.on_forward_propagation
+        )
+        QShortcut(QKeySequence(Qt.Key.Key_B), self).activated.connect(
+            controller.on_backward_propagation
+        )
 
         # quit shortcut
         QShortcut(QKeySequence(Qt.Key.Key_Q), self).activated.connect(self.close)
@@ -367,16 +393,23 @@ class GUI(QWidget):
             alpha = image[:, :, 3].astype(np.float32) / 255
             green_bg = np.array([0, 255, 0])
             # soft blending
-            image = (image_rgb * alpha[:, :, np.newaxis] + green_bg[np.newaxis, np.newaxis, :] *
-                     (1 - alpha[:, :, np.newaxis])).astype(np.uint8)
+            image = (
+                image_rgb * alpha[:, :, np.newaxis]
+                + green_bg[np.newaxis, np.newaxis, :] * (1 - alpha[:, :, np.newaxis])
+            ).astype(np.uint8)
 
         bytesPerLine = 3 * width
 
         qImg = QImage(image.data, width, height, bytesPerLine, QImage.Format.Format_RGB888)
         self.main_canvas.setPixmap(
             QPixmap(
-                qImg.scaled(self.main_canvas.size(), Qt.AspectRatioMode.KeepAspectRatio,
-                            Qt.TransformationMode.FastTransformation)))
+                qImg.scaled(
+                    self.main_canvas.size(),
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.FastTransformation,
+                )
+            )
+        )
 
         self.main_canvas_size = self.main_canvas.size()
         self.image_size = qImg.size()
@@ -408,7 +441,7 @@ class GUI(QWidget):
     def is_pos_out_of_bound(self, x, y):
         x, y = self.pixel_pos_to_image_pos(x, y)
 
-        out_of_bound = ((x < 0) or (y < 0) or (x > self.w - 1) or (y > self.h - 1))
+        out_of_bound = (x < 0) or (y < 0) or (x > self.w - 1) or (y > self.h - 1)
 
         return out_of_bound
 
@@ -471,11 +504,9 @@ class GUI(QWidget):
 
     def open_file(self, prompt):
         options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(self,
-                                                   prompt,
-                                                   "",
-                                                   "Image files (*)",
-                                                   options=options)
+        file_name, _ = QFileDialog.getOpenFileName(
+            self, prompt, '', 'Image files (*)', options=options
+        )
         return file_name
 
     def set_object_color(self, object_id: int):

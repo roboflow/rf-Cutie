@@ -57,8 +57,9 @@ def init_experiment(args, model_name):
         cfg.CHECKPOINTS_PATH.mkdir(exist_ok=True)
         cfg.VIS_PATH.mkdir(exist_ok=True)
 
-        dst_script_path = exp_path / (model_path.stem +
-                                      datetime.strftime(datetime.today(), '_%Y-%m-%d-%H-%M-%S.py'))
+        dst_script_path = exp_path / (
+            model_path.stem + datetime.strftime(datetime.today(), '_%Y-%m-%d-%H-%M-%S.py')
+        )
         if args.temp_model_path:
             shutil.copy(args.temp_model_path, dst_script_path)
             os.remove(args.temp_model_path)

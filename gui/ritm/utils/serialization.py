@@ -30,7 +30,7 @@ def serialize(init):
             config['params'][name] = {
                 'type': param_type,
                 'value': value,
-                'specified': name in specified_params
+                'specified': name in specified_params,
             }
 
         setattr(self, '_config', config)
@@ -65,7 +65,7 @@ def load_model(config, **kwargs):
 def get_config_repr(config):
     config_str = f'Model: {config["class"]}\n'
     for pname, param in config['params'].items():
-        value = param["value"]
+        value = param['value']
         if param['type'] == 'class':
             value = value.split('.')[-1]
         param_str = f'{pname:<22} = {str(value):<12}'
@@ -92,8 +92,8 @@ def get_default_params(some_class):
 def get_classname(cls):
     module = cls.__module__
     name = cls.__qualname__
-    if module is not None and module != "__builtin__":
-        name = module + "." + name
+    if module is not None and module != '__builtin__':
+        name = module + '.' + name
     return name
 
 

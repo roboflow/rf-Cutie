@@ -78,8 +78,9 @@ class VOSMergeTrainDataset(Dataset):
                     continue
                 self.frames[dataset][vid] = frames
                 self.videos[dataset].append(vid)
-                self.video_frames.extend([(dataset, vid, i)
-                                          for i, _ in enumerate(frames)] * multiplier)
+                self.video_frames.extend(
+                    [(dataset, vid, i) for i, _ in enumerate(frames)] * multiplier
+                )
                 total_frames += len(frames)
 
             if local_rank == 0:
@@ -87,7 +88,7 @@ class VOSMergeTrainDataset(Dataset):
                     f'{dataset}: {len(self.videos[dataset])}/{len(vid_list)} videos will be used in {im_root}.'
                 )
                 log.info(
-                    f'{dataset}: {total_frames} frames found. Multiplied to {total_frames*multiplier} frames.'
+                    f'{dataset}: {total_frames} frames found. Multiplied to {total_frames * multiplier} frames.'
                 )
 
         if local_rank == 0:
@@ -95,41 +96,53 @@ class VOSMergeTrainDataset(Dataset):
 
         # The frame transforms are the same for each of the pairs,
         # but different for different pairs in the sequence
-        self.frame_image_transform = transforms.Compose([
-            transforms.ColorJitter(0.1, 0.05, 0.05, 0),
-        ])
+        self.frame_image_transform = transforms.Compose(
+            [
+                transforms.ColorJitter(0.1, 0.05, 0.05, 0),
+            ]
+        )
 
         # The sequence transforms are the same for all pairs in the sampled sequence
-        self.sequence_image_only_transform = transforms.Compose([
-            transforms.ColorJitter(0.1, 0.03, 0.03, 0),
-            transforms.RandomGrayscale(0.05),
-        ])
+        self.sequence_image_only_transform = transforms.Compose(
+            [
+                transforms.ColorJitter(0.1, 0.03, 0.03, 0),
+                transforms.RandomGrayscale(0.05),
+            ]
+        )
 
-        self.sequence_image_dual_transform = transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomAffine(degrees=25,
-                                    shear=20,
-                                    interpolation=InterpolationMode.BILINEAR,
-                                    fill=im_mean),
-            transforms.RandomResizedCrop((self.size, self.size),
-                                         scale=(0.36, 1.0),
-                                         interpolation=InterpolationMode.BILINEAR)
-        ])
+        self.sequence_image_dual_transform = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomAffine(
+                    degrees=25, shear=20, interpolation=InterpolationMode.BILINEAR, fill=im_mean
+                ),
+                transforms.RandomResizedCrop(
+                    (self.size, self.size),
+                    scale=(0.36, 1.0),
+                    interpolation=InterpolationMode.BILINEAR,
+                ),
+            ]
+        )
 
-        self.sequence_mask_dual_transform = transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomAffine(degrees=25,
-                                    shear=20,
-                                    interpolation=InterpolationMode.NEAREST,
-                                    fill=0),
-            transforms.RandomResizedCrop((self.size, self.size),
-                                         scale=(0.36, 1.0),
-                                         interpolation=InterpolationMode.NEAREST)
-        ])
+        self.sequence_mask_dual_transform = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomAffine(
+                    degrees=25, shear=20, interpolation=InterpolationMode.NEAREST, fill=0
+                ),
+                transforms.RandomResizedCrop(
+                    (self.size, self.size),
+                    scale=(0.36, 1.0),
+                    interpolation=InterpolationMode.NEAREST,
+                ),
+            ]
+        )
 
-        self.output_image_transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
+        self.output_image_transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+            ]
+        )
 
     def _get_sample(self, idx=None):
         """Sample one admissible augmented video sequence with bounded retries."""
@@ -169,17 +182,23 @@ class VOSMergeTrainDataset(Dataset):
                     # acceptable_set contains the indices that are within
                     # max_skip from any sampled frames
                     acceptable_set = set(
-                        range(max(0, sampled_frames[-1] - this_max_skip),
-                              min(length, sampled_frames[-1] + this_max_skip + 1))).difference(
-                                  set(sampled_frames))
-                    while (len(sampled_frames) < num_frames):
+                        range(
+                            max(0, sampled_frames[-1] - this_max_skip),
+                            min(length, sampled_frames[-1] + this_max_skip + 1),
+                        )
+                    ).difference(set(sampled_frames))
+                    while len(sampled_frames) < num_frames:
                         idx = np.random.choice(list(acceptable_set))
                         sampled_frames.append(idx)
                         new_set = set(
-                            range(max(0, sampled_frames[-1] - this_max_skip),
-                                  min(length, sampled_frames[-1] + this_max_skip + 1)))
+                            range(
+                                max(0, sampled_frames[-1] - this_max_skip),
+                                min(length, sampled_frames[-1] + this_max_skip + 1),
+                            )
+                        )
                         acceptable_set = acceptable_set.union(new_set).difference(
-                            set(sampled_frames))
+                            set(sampled_frames)
+                        )
 
                     sampled_frames = sorted(sampled_frames)
                     if np.random.rand() < 0.5:
@@ -288,7 +307,7 @@ class VOSMergeTrainDataset(Dataset):
             labels2 = np.unique(masks2[0])
             labels2 = labels2[labels2 != 0].tolist()
             for l2 in labels2:
-                obj_masks2 = (masks2 == l2)
+                obj_masks2 = masks2 == l2
                 blur_masks = obj_masks2.astype(np.float32).transpose(1, 2, 0)
                 blur_masks = cv2.GaussianBlur(blur_masks, [5, 5], 1.0).transpose(2, 0, 1)[:, None]
                 images = images * (1 - blur_masks) + images2 * blur_masks
@@ -316,9 +335,9 @@ class VOSMergeTrainDataset(Dataset):
         cls_gt = np.zeros((self.seq_length, self.size, self.size), dtype=np.int64)
         first_frame_gt = np.zeros((1, self.max_num_obj, self.size, self.size), dtype=np.int64)
         for i, l in enumerate(target_objects):
-            this_mask = (masks == l)
+            this_mask = masks == l
             cls_gt[this_mask] = i + 1
-            first_frame_gt[0, i] = (this_mask[0])
+            first_frame_gt[0, i] = this_mask[0]
         cls_gt = np.expand_dims(cls_gt, 1)
 
         # 1 if object exist, 0 otherwise

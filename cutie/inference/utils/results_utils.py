@@ -28,21 +28,22 @@ except ImportError:
 
 
 class ResultSaver:
-
-    def __init__(self,
-                 output_root,
-                 video_name,
-                 *,
-                 dataset,
-                 object_manager: ObjectManager,
-                 use_long_id,
-                 palette=None,
-                 save_mask=True,
-                 save_scores=False,
-                 score_output_root=None,
-                 visualize_output_root=None,
-                 visualize=False,
-                 init_json=None):
+    def __init__(
+        self,
+        output_root,
+        video_name,
+        *,
+        dataset,
+        object_manager: ObjectManager,
+        use_long_id,
+        palette=None,
+        save_mask=True,
+        save_scores=False,
+        score_output_root=None,
+        visualize_output_root=None,
+        visualize=False,
+        init_json=None,
+    ):
         self.output_root = output_root
         self.video_name = video_name
         self.dataset = dataset.lower()
@@ -75,21 +76,24 @@ class ResultSaver:
             self.json_style = 'burst'
 
         self.queue = Queue(maxsize=10)
-        self.thread = Thread(target=save_result, args=(self.queue, ))
+        self.thread = Thread(target=save_result, args=(self.queue,))
         self.thread.daemon = True
         self.thread.start()
 
-    def process(self,
-                prob: torch.Tensor,
-                frame_name: str,
-                resize_needed: bool = False,
-                shape: Optional[Tuple[int, int]] = None,
-                last_frame: bool = False,
-                path_to_image: str = None):
+    def process(
+        self,
+        prob: torch.Tensor,
+        frame_name: str,
+        resize_needed: bool = False,
+        shape: Optional[Tuple[int, int]] = None,
+        last_frame: bool = False,
+        path_to_image: str = None,
+    ):
 
         if resize_needed:
-            prob = F.interpolate(prob.unsqueeze(1), shape, mode='bilinear', align_corners=False)[:,
-                                                                                                 0]
+            prob = F.interpolate(prob.unsqueeze(1), shape, mode='bilinear', align_corners=False)[
+                :, 0
+            ]
         # Probability mask -> index mask
         mask = torch.argmax(prob, dim=0)
         if self.save_scores:
@@ -105,14 +109,16 @@ class ResultSaver:
                 new_mask[mask == tmp_id] = obj.id
             mask = new_mask
 
-        args = ResultArgs(saver=self,
-                          prob=prob,
-                          mask=mask.cpu(),
-                          frame_name=frame_name,
-                          path_to_image=path_to_image,
-                          tmp_id_to_obj=copy.deepcopy(self.object_manager.tmp_id_to_obj),
-                          obj_to_tmp_id=copy.deepcopy(self.object_manager.obj_to_tmp_id),
-                          last_frame=last_frame)
+        args = ResultArgs(
+            saver=self,
+            prob=prob,
+            mask=mask.cpu(),
+            frame_name=frame_name,
+            path_to_image=path_to_image,
+            tmp_id_to_obj=copy.deepcopy(self.object_manager.tmp_id_to_obj),
+            obj_to_tmp_id=copy.deepcopy(self.object_manager.obj_to_tmp_id),
+            last_frame=last_frame,
+        )
 
         self.queue.put(args)
 
@@ -165,7 +171,7 @@ def save_result(queue: Queue):
                         continue
 
                     segment = {}
-                    segment_mask = (mask == id)
+                    segment_mask = mask == id
                     if segment_mask.sum() > 0:
                         coco_mask = mask_util.encode(np.asfortranarray(segment_mask.numpy()))
                         segment['rle'] = coco_mask['counts'].decode('utf-8')
@@ -178,7 +184,7 @@ def save_result(queue: Queue):
                 rgb_mask = np.zeros((*out_mask.shape[-2:], 3), dtype=np.uint8)
                 for id in all_obj_ids:
                     _, image = saver.id2rgb_converter.convert(id)
-                    obj_mask = (out_mask == id)
+                    obj_mask = out_mask == id
                     rgb_mask[obj_mask] = image
                 out_img = Image.fromarray(rgb_mask)
             else:
@@ -203,10 +209,12 @@ def save_result(queue: Queue):
                 tmp_to_obj_mapping = {obj.id: tmp_id for obj, tmp_id in tmp_id_to_obj.items()}
                 hkl.dump(tmp_to_obj_mapping, path.join(this_out_path, f'backward.hkl'), mode='w')
 
-            hkl.dump(prob,
-                     path.join(this_out_path, f'{frame_name[:-4]}.hkl'),
-                     mode='w',
-                     compression='lzf')
+            hkl.dump(
+                prob,
+                path.join(this_out_path, f'{frame_name[:-4]}.hkl'),
+                mode='w',
+                compression='lzf',
+            )
 
         if saver.visualize:
             if path_to_image is not None:
@@ -219,7 +227,7 @@ def save_result(queue: Queue):
                 rgb_mask = np.zeros((*out_mask.shape, 3), dtype=np.uint8)
                 for id in all_obj_ids:
                     image = saver.colors[id]
-                    obj_mask = (out_mask == id)
+                    obj_mask = out_mask == id
                     rgb_mask[obj_mask] = image
 
             alpha = (out_mask == 0).astype(np.float32) * 0.5 + 0.5
@@ -238,8 +246,9 @@ def make_zip(dataset, run_dir, exp_id, mask_output_root):
     if dataset.startswith('y'):
         # YoutubeVOS
         log.info('Making zip for YouTubeVOS...')
-        shutil.make_archive(path.join(run_dir, f'{exp_id}_{dataset}'), 'zip', run_dir,
-                            'Annotations')
+        shutil.make_archive(
+            path.join(run_dir, f'{exp_id}_{dataset}'), 'zip', run_dir, 'Annotations'
+        )
     elif dataset == 'd17-test-dev':
         # DAVIS 2017 test-dev -- zip from within the Annotation folder
         log.info('Making zip for DAVIS test-dev...')
@@ -251,7 +260,8 @@ def make_zip(dataset, run_dir, exp_id, mask_output_root):
     elif dataset == 'lvos-test':
         # LVOS test -- same as YouTubeVOS
         log.info('Making zip for LVOS test...')
-        shutil.make_archive(path.join(run_dir, f'{exp_id}_{dataset}'), 'zip', run_dir,
-                            'Annotations')
+        shutil.make_archive(
+            path.join(run_dir, f'{exp_id}_{dataset}'), 'zip', run_dir, 'Annotations'
+        )
     else:
         log.info(f'Not making zip for {dataset}.')

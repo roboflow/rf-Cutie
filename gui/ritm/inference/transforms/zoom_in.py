@@ -7,14 +7,15 @@ from .base import BaseTransform
 
 
 class ZoomIn(BaseTransform):
-
-    def __init__(self,
-                 target_size=400,
-                 skip_clicks=1,
-                 expansion_ratio=1.4,
-                 min_crop_size=200,
-                 recompute_thresh_iou=0.5,
-                 prob_thresh=0.50):
+    def __init__(
+        self,
+        target_size=400,
+        skip_clicks=1,
+        expansion_ratio=1.4,
+        min_crop_size=200,
+        recompute_thresh_iou=0.5,
+        prob_thresh=0.50,
+    ):
         super().__init__()
         self.target_size = target_size
         self.min_crop_size = min_crop_size
@@ -42,8 +43,9 @@ class ZoomIn(BaseTransform):
         if self._prev_probs is not None:
             current_pred_mask = (self._prev_probs > self.prob_thresh)[0, 0]
             if current_pred_mask.sum() > 0:
-                current_object_roi = get_object_roi(current_pred_mask, clicks_list,
-                                                    self.expansion_ratio, self.min_crop_size)
+                current_object_roi = get_object_roi(
+                    current_pred_mask, clicks_list, self.expansion_ratio, self.min_crop_size
+                )
 
         if current_object_roi is None:
             if self.skip_clicks >= 0:
@@ -74,16 +76,15 @@ class ZoomIn(BaseTransform):
 
         assert prob_map.shape[0] == 1
         rmin, rmax, cmin, cmax = self._object_roi
-        prob_map = torch.nn.functional.interpolate(prob_map,
-                                                   size=(rmax - rmin + 1, cmax - cmin + 1),
-                                                   mode='bilinear',
-                                                   align_corners=True)
+        prob_map = torch.nn.functional.interpolate(
+            prob_map, size=(rmax - rmin + 1, cmax - cmin + 1), mode='bilinear', align_corners=True
+        )
 
         if self._prev_probs is not None:
-            new_prob_map = torch.zeros(*self._prev_probs.shape,
-                                       device=prob_map.device,
-                                       dtype=prob_map.dtype)
-            new_prob_map[:, :, rmin:rmax + 1, cmin:cmax + 1] = prob_map
+            new_prob_map = torch.zeros(
+                *self._prev_probs.shape, device=prob_map.device, dtype=prob_map.dtype
+            )
+            new_prob_map[:, :, rmin : rmax + 1, cmin : cmax + 1] = prob_map
         else:
             new_prob_map = prob_map
 
@@ -97,8 +98,9 @@ class ZoomIn(BaseTransform):
 
         pred_mask = (self._prev_probs > self.prob_thresh)[0, 0]
         if pred_mask.sum() > 0:
-            possible_object_roi = get_object_roi(pred_mask, [], self.expansion_ratio,
-                                                 self.min_crop_size)
+            possible_object_roi = get_object_roi(
+                pred_mask, [], self.expansion_ratio, self.min_crop_size
+            )
             image_roi = (0, self._input_image_shape[2] - 1, 0, self._input_image_shape[3] - 1)
             if get_bbox_iou(possible_object_roi, image_roi) < 0.50:
                 return True
@@ -106,10 +108,22 @@ class ZoomIn(BaseTransform):
 
     def get_state(self):
         roi_image = self._roi_image.cpu() if self._roi_image is not None else None
-        return self._input_image_shape, self._object_roi, self._prev_probs, roi_image, self.image_changed
+        return (
+            self._input_image_shape,
+            self._object_roi,
+            self._prev_probs,
+            roi_image,
+            self.image_changed,
+        )
 
     def set_state(self, state):
-        self._input_image_shape, self._object_roi, self._prev_probs, self._roi_image, self.image_changed = state
+        (
+            self._input_image_shape,
+            self._object_roi,
+            self._prev_probs,
+            self._roi_image,
+            self.image_changed,
+        ) = state
 
     def reset(self):
         self._input_image_shape = None
@@ -162,11 +176,10 @@ def get_roi_image_nd(image_nd, object_roi, target_size):
         new_width = int(round(width * scale))
 
     with torch.no_grad():
-        roi_image_nd = image_nd[:, :, rmin:rmax + 1, cmin:cmax + 1]
-        roi_image_nd = torch.nn.functional.interpolate(roi_image_nd,
-                                                       size=(new_height, new_width),
-                                                       mode='bilinear',
-                                                       align_corners=True)
+        roi_image_nd = image_nd[:, :, rmin : rmax + 1, cmin : cmax + 1]
+        roi_image_nd = torch.nn.functional.interpolate(
+            roi_image_nd, size=(new_height, new_width), mode='bilinear', align_corners=True
+        )
 
     return roi_image_nd
 

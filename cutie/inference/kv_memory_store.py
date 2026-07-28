@@ -52,13 +52,15 @@ class KeyValueMemoryStore:
             self.use_cnt = {}  # indexed by bucket id, does not contain the permanent memory part
             self.life_cnt = {}  # indexed by bucket id, does not contain the permanent memory part
 
-    def add(self,
-            key: torch.Tensor,
-            values: Dict[int, torch.Tensor],
-            shrinkage: torch.Tensor,
-            selection: torch.Tensor,
-            supposed_bucket_id: int = -1,
-            as_permanent: Literal['no', 'first', 'all'] = 'no') -> None:
+    def add(
+        self,
+        key: torch.Tensor,
+        values: Dict[int, torch.Tensor],
+        shrinkage: torch.Tensor,
+        selection: torch.Tensor,
+        supposed_bucket_id: int = -1,
+        as_permanent: Literal['no', 'first', 'all'] = 'no',
+    ) -> None:
         """
         key: (1/2)*C*N
         values: dict of values ((1/2)*C*N), object ids are used as keys
@@ -100,7 +102,8 @@ class KeyValueMemoryStore:
                 if obj in self.v:
                     _add_last_dim(self.v, obj, value, prepend=(as_permanent == 'all'))
                     bucket_used = [
-                        bucket_id for bucket_id, object_ids in self.buckets.items()
+                        bucket_id
+                        for bucket_id, object_ids in self.buckets.items()
                         if obj in object_ids
                     ]
                     assert len(bucket_used) == 1  # each object should only be in one bucket
@@ -154,7 +157,7 @@ class KeyValueMemoryStore:
         if not self.save_usage:
             return
 
-        usage = usage[:, self.perm_end_pt[bucket_id]:]
+        usage = usage[:, self.perm_end_pt[bucket_id] :]
         if usage.shape[-1] == 0:
             # if there is no temporary memory, we don't need to update
             return
@@ -194,11 +197,14 @@ class KeyValueMemoryStore:
         self.k[bucket_id] = torch.cat([k[:, :, :start], k[:, :, end:]], -1)
         self.s[bucket_id] = torch.cat([s[:, :, :start], s[:, :, end:]], -1)
         if self.save_selection:
-            self.e[bucket_id] = torch.cat([e[:, :, :start - p_size], e[:, :, end:]], -1)
+            self.e[bucket_id] = torch.cat([e[:, :, : start - p_size], e[:, :, end:]], -1)
         if self.save_usage:
-            self.use_cnt[bucket_id] = torch.cat([use_cnt[:, :start - p_size], use_cnt[:, end:]], -1)
-            self.life_cnt[bucket_id] = torch.cat([life_cnt[:, :start - p_size], life_cnt[:, end:]],
-                                                 -1)
+            self.use_cnt[bucket_id] = torch.cat(
+                [use_cnt[:, : start - p_size], use_cnt[:, end:]], -1
+            )
+            self.life_cnt[bucket_id] = torch.cat(
+                [life_cnt[:, : start - p_size], life_cnt[:, end:]], -1
+            )
         for obj_id in object_ids:
             v = self.v[obj_id]
             self.v[obj_id] = torch.cat([v[:, :, :start], v[:, :, end:]], -1)
@@ -224,22 +230,28 @@ class KeyValueMemoryStore:
             assert survived.shape[-1] == survivals[0].shape[-1]
 
         self.k[bucket_id] = torch.stack(
-            [self.k[bucket_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0)
+            [self.k[bucket_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0
+        )
         self.s[bucket_id] = torch.stack(
-            [self.s[bucket_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0)
+            [self.s[bucket_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0
+        )
 
         if self.save_selection:
             # Long-term memory does not store selection so this should not be needed
             self.e[bucket_id] = torch.stack(
-                [self.e[bucket_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0)
+                [self.e[bucket_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0
+            )
         for obj_id in object_ids:
             self.v[obj_id] = torch.stack(
-                [self.v[obj_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0)
+                [self.v[obj_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0
+            )
 
         self.use_cnt[bucket_id] = torch.stack(
-            [self.use_cnt[bucket_id][bi, survived] for bi, survived in enumerate(survivals)], 0)
+            [self.use_cnt[bucket_id][bi, survived] for bi, survived in enumerate(survivals)], 0
+        )
         self.life_cnt[bucket_id] = torch.stack(
-            [self.life_cnt[bucket_id][bi, survived] for bi, survived in enumerate(survivals)], 0)
+            [self.life_cnt[bucket_id][bi, survived] for bi, survived in enumerate(survivals)], 0
+        )
 
     def get_usage(self, bucket_id: int) -> torch.Tensor:
         # return normalized usage
@@ -264,15 +276,15 @@ class KeyValueMemoryStore:
             # negative 0 would not work as the end index!
             k = self.k[bucket_id][:, :, start:]
             sk = self.s[bucket_id][:, :, start:]
-            ek = self.e[bucket_id][:, :, start - p_size:] if self.save_selection else None
+            ek = self.e[bucket_id][:, :, start - p_size :] if self.save_selection else None
             value = {obj_id: self.v[obj_id][:, :, start:] for obj_id in self.buckets[bucket_id]}
-            usage = self.get_usage(bucket_id)[:, start - p_size:] if self.save_usage else None
+            usage = self.get_usage(bucket_id)[:, start - p_size :] if self.save_usage else None
         else:
             k = self.k[bucket_id][:, :, start:end]
             sk = self.s[bucket_id][:, :, start:end]
-            ek = self.e[bucket_id][:, :, start - p_size:end] if self.save_selection else None
+            ek = self.e[bucket_id][:, :, start - p_size : end] if self.save_selection else None
             value = {obj_id: self.v[obj_id][:, :, start:end] for obj_id in self.buckets[bucket_id]}
-            usage = self.get_usage(bucket_id)[:, start - p_size:end] if self.save_usage else None
+            usage = self.get_usage(bucket_id)[:, start - p_size : end] if self.save_usage else None
 
         return k, sk, ek, value, usage
 

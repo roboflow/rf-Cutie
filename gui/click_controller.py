@@ -4,7 +4,6 @@ from .ritm.inference import utils
 
 
 class ClickController:
-
     def __init__(self, checkpoint_path: str, device: str = 'cuda', max_size: int = 800):
         model = utils.load_is_model(checkpoint_path, device, cpu_dist_maps=True)
 
@@ -24,12 +23,8 @@ class ClickController:
                 'net_clicks_limit': 8,
                 'max_size': max_size,
             },
-            'brs_opt_func_params': {
-                'min_iou_diff': 1e-3
-            },
-            'lbfgs_params': {
-                'maxfun': 20
-            },
+            'brs_opt_func_params': {'min_iou_diff': 1e-3},
+            'lbfgs_params': {'maxfun': 20},
             'with_flip': True,
         }
 
@@ -40,8 +35,9 @@ class ClickController:
     def unanchor(self):
         self.anchored = False
 
-    def interact(self, image: torch.Tensor, x: int, y: int, is_positive: bool,
-                 prev_mask: torch.Tensor):
+    def interact(
+        self, image: torch.Tensor, x: int, y: int, is_positive: bool, prev_mask: torch.Tensor
+    ):
         if not self.anchored:
             image = image.to(self.device, non_blocking=True)
             self.controller.set_image(image)

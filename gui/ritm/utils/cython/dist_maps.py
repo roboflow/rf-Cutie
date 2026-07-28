@@ -1,5 +1,5 @@
 #!python
-#cython: language_level=3
+# cython: language_level=3
 
 import pyximport
 

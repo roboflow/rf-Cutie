@@ -4,10 +4,12 @@ import logging
 from typing import Literal
 
 import cv2
+
 # fix conflicts between qt5 and cv2
-os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
+os.environ.pop('QT_QPA_PLATFORM_PLUGIN_PATH')
 
 import torch
+
 try:
     from torch import mps
 except ImportError:
@@ -32,7 +34,7 @@ from gui.exporter import convert_frames_to_video, convert_mask_to_binary
 log = logging.getLogger()
 
 
-class MainController():
+class MainController:
     """Coordinate interactive segmentation state, UI actions, and persistence."""
 
     def __init__(self, cfg: DictConfig) -> None:
@@ -41,15 +43,15 @@ class MainController():
         self.initialized = False
 
         # setting up the workspace
-        if cfg["workspace"] is None:
-            if cfg["images"] is not None:
-                basename = path.basename(cfg["images"])
-            elif cfg["video"] is not None:
-                basename = path.basename(cfg["video"])[:-4]
+        if cfg['workspace'] is None:
+            if cfg['images'] is not None:
+                basename = path.basename(cfg['images'])
+            elif cfg['video'] is not None:
+                basename = path.basename(cfg['video'])[:-4]
             else:
                 raise NotImplementedError('Either images, video, or workspace has to be specified')
 
-            cfg["workspace"] = path.join(cfg['workspace_root'], basename)
+            cfg['workspace'] = path.join(cfg['workspace_root'], basename)
 
         # reading arguments
         self.cfg = cfg
@@ -82,8 +84,9 @@ class MainController():
         self.curr_image_np: np.ndarray = np.zeros((self.h, self.w, 3), dtype=np.uint8)
         self.curr_image_torch: torch.Tensor = None
         self.curr_mask: np.ndarray = np.zeros((self.h, self.w), dtype=np.uint8)
-        self.curr_prob: torch.Tensor = torch.zeros((self.num_objects + 1, self.h, self.w),
-                                                   dtype=torch.float).to(self.device)
+        self.curr_prob: torch.Tensor = torch.zeros(
+            (self.num_objects + 1, self.h, self.w), dtype=torch.float
+        ).to(self.device)
         self.curr_prob[0] = 1
 
         # visualization info
@@ -159,12 +162,13 @@ class MainController():
                 # right: negative click
                 self.convert_current_image_mask_torch()
                 image = self.curr_image_torch
-                if (last_interaction is None or last_interaction.tar_obj != self.curr_object):
+                if last_interaction is None or last_interaction.tar_obj != self.curr_object:
                     # create new interaction is needed
                     self.complete_interaction()
                     self.click_ctrl.unanchor()
-                    new_interaction = ClickInteraction(image, self.curr_prob, (self.h, self.w),
-                                                       self.click_ctrl, self.curr_object)
+                    new_interaction = ClickInteraction(
+                        image, self.curr_prob, (self.h, self.w), self.click_ctrl, self.curr_object
+                    )
                     if new_interaction is not None:
                         self.interaction = new_interaction
 
@@ -204,11 +208,17 @@ class MainController():
 
         if self.curr_prob is None and not no_mask:
             self.curr_prob = index_numpy_to_one_hot_torch(self.curr_mask, self.num_objects + 1).to(
-                self.device, non_blocking=True)
+                self.device, non_blocking=True
+            )
 
     def compose_current_im(self):
-        self.vis_image = get_visualization(self.vis_mode, self.curr_image_np, self.curr_mask,
-                                           self.overlay_layer, self.vis_target_objects)
+        self.vis_image = get_visualization(
+            self.vis_mode,
+            self.curr_image_np,
+            self.curr_mask,
+            self.overlay_layer,
+            self.vis_target_objects,
+        )
 
     def update_canvas(self):
         self.gui.set_canvas(self.vis_image)
@@ -217,13 +227,18 @@ class MainController():
         # fast path, uses gpu. Changes the image in-place to avoid copying
         # thus current_image_torch must be voided afterwards
         # do_no_save_soft_mask is an override to solve #41
-        self.vis_image = get_visualization_torch(self.vis_mode, self.curr_image_torch,
-                                                 self.curr_prob, self.overlay_layer_torch,
-                                                 self.vis_target_objects)
+        self.vis_image = get_visualization_torch(
+            self.vis_mode,
+            self.curr_image_torch,
+            self.curr_prob,
+            self.overlay_layer_torch,
+            self.vis_target_objects,
+        )
         self.curr_image_torch = None
         self.vis_image = np.ascontiguousarray(self.vis_image)
         save_visualization = self.save_visualization_mode in [
-            'Propagation only (higher quality)', 'Always'
+            'Propagation only (higher quality)',
+            'Always',
         ]
         if save_visualization and not invalid_soft_mask:
             self.res_man.save_visualization(self.curr_ti, self.vis_mode, self.vis_image)
@@ -302,9 +317,9 @@ class MainController():
 
             self.gui.text(f'Propagation started at t={self.curr_ti}.')
             self.processor.clear_sensory_memory()
-            self.curr_prob = self.processor.step(self.curr_image_torch,
-                                                 self.curr_prob[1:],
-                                                 idx_mask=False)
+            self.curr_prob = self.processor.step(
+                self.curr_image_torch, self.curr_prob[1:], idx_mask=False
+            )
             self.curr_mask = torch_prob_to_numpy_mask(self.curr_prob)
             # clear
             self.interacted_prob = None
@@ -361,10 +376,9 @@ class MainController():
         with autocast(self.device, enabled=(self.amp and self.device == 'cuda')):
             self.convert_current_image_mask_torch()
             self.gui.text(f'Permanent memory saved at {self.curr_ti}.')
-            self.curr_prob = self.processor.step(self.curr_image_torch,
-                                                 self.curr_prob[1:],
-                                                 idx_mask=False,
-                                                 force_permanent=True)
+            self.curr_prob = self.processor.step(
+                self.curr_image_torch, self.curr_prob[1:], idx_mask=False, force_permanent=True
+            )
             self.update_memory_gauges()
             self.update_gpu_gauges()
 
@@ -383,11 +397,13 @@ class MainController():
             output_path = path.join(save_folder, f'visualization_{self.vis_mode}.mp4')
             self.gui.text(f'Exporting visualization -- please wait')
             self.gui.process_events()
-            convert_frames_to_video(image_folder,
-                                    output_path,
-                                    fps=self.output_fps,
-                                    bitrate=self.output_bitrate,
-                                    progress_callback=self.gui.progressbar_update)
+            convert_frames_to_video(
+                image_folder,
+                output_path,
+                fps=self.output_fps,
+                bitrate=self.output_bitrate,
+                progress_callback=self.gui.progressbar_update,
+            )
             self.gui.text(f'Visualization exported to {output_path}')
             self.gui.progressbar_update(0)
         else:
@@ -401,10 +417,12 @@ class MainController():
             os.makedirs(save_folder, exist_ok=True)
             self.gui.text(f'Exporting binary masks -- please wait')
             self.gui.process_events()
-            convert_mask_to_binary(mask_folder,
-                                   save_folder,
-                                   self.vis_target_objects,
-                                   progress_callback=self.gui.progressbar_update)
+            convert_mask_to_binary(
+                mask_folder,
+                save_folder,
+                self.vis_target_objects,
+                progress_callback=self.gui.progressbar_update,
+            )
             self.gui.text(f'Binary masks exported to {save_folder}')
             self.gui.progressbar_update(0)
         else:
@@ -467,8 +485,8 @@ class MainController():
         if 'cuda' in self.device:
             info = torch.cuda.mem_get_info()
             global_free, global_total = info
-            global_free /= (2**30)
-            global_total /= (2**30)
+            global_free /= 2**30
+            global_total /= 2**30
             global_used = global_total - global_free
 
             self.gui.gpu_mem_gauge.setFormat(f'{global_used:.1f} GB / {global_total:.1f} GB')
@@ -519,15 +537,15 @@ class MainController():
     def on_work_min_change(self):
         if self.initialized:
             self.gui.work_mem_min.setValue(
-                min(self.gui.work_mem_min.value(),
-                    self.gui.work_mem_max.value() - 1))
+                min(self.gui.work_mem_min.value(), self.gui.work_mem_max.value() - 1)
+            )
             self.update_config()
 
     def on_work_max_change(self):
         if self.initialized:
             self.gui.work_mem_max.setValue(
-                max(self.gui.work_mem_max.value(),
-                    self.gui.work_mem_min.value() + 1))
+                max(self.gui.work_mem_max.value(), self.gui.work_mem_min.value() + 1)
+            )
             self.update_config()
 
     def update_config(self):
@@ -567,10 +585,11 @@ class MainController():
 
         mask = self.res_man.import_mask(file_name, size=(self.h, self.w))
 
-        shape_condition = ((len(mask.shape) == 2) and (mask.shape[-1] == self.w)
-                           and (mask.shape[-2] == self.h))
+        shape_condition = (
+            (len(mask.shape) == 2) and (mask.shape[-1] == self.w) and (mask.shape[-2] == self.h)
+        )
 
-        object_condition = (mask.max() <= self.num_objects)
+        object_condition = mask.max() <= self.num_objects
 
         if not shape_condition:
             self.gui.text(f'Expected ({self.h}, {self.w}). Got {mask.shape} instead.')

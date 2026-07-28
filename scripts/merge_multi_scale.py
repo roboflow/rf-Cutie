@@ -76,10 +76,10 @@ if __name__ == '__main__':
     """
     parser = ArgumentParser()
     parser.add_argument('--dataset', default='Y', help='D/Y, D for DAVIS; Y for YouTubeVOS')
-    parser.add_argument('--list', nargs="+")
-    parser.add_argument('--pattern',
-                        default=None,
-                        help='Glob pattern. Can be used in place of list.')
+    parser.add_argument('--list', nargs='+')
+    parser.add_argument(
+        '--pattern', default=None, help='Glob pattern. Can be used in place of list.'
+    )
     parser.add_argument('--output')
     parser.add_argument('--num_proc', default=4, type=int)
     args = parser.parse_args()
@@ -131,5 +131,6 @@ if __name__ == '__main__':
 
     if 'Y' in args.dataset:
         print('Making zip for YouTubeVOS...')
-        shutil.make_archive(path.join(args.output, path.basename(args.output)), 'zip', args.output,
-                            'Annotations')
+        shutil.make_archive(
+            path.join(args.output, path.basename(args.output)), 'zip', args.output, 'Annotations'
+        )

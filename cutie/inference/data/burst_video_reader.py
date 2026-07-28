@@ -41,18 +41,28 @@ class BURSTVideoReader(Dataset):
             self.frames = sorted(list(self.frames))
 
         if size < 0:
-            self.im_transform = transforms.Compose([
-                transforms.ToTensor(),
-            ])
+            self.im_transform = transforms.Compose(
+                [
+                    transforms.ToTensor(),
+                ]
+            )
             self.mask_transform = transforms.Compose([])
         else:
-            self.im_transform = transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Resize(size, interpolation=InterpolationMode.BILINEAR, antialias=True),
-            ])
-            self.mask_transform = transforms.Compose([
-                transforms.Resize(size, interpolation=InterpolationMode.NEAREST, antialias=True),
-            ])
+            self.im_transform = transforms.Compose(
+                [
+                    transforms.ToTensor(),
+                    transforms.Resize(
+                        size, interpolation=InterpolationMode.BILINEAR, antialias=True
+                    ),
+                ]
+            )
+            self.mask_transform = transforms.Compose(
+                [
+                    transforms.Resize(
+                        size, interpolation=InterpolationMode.NEAREST, antialias=True
+                    ),
+                ]
+            )
         self.size = size
         self.use_long_id = False
 
@@ -61,7 +71,7 @@ class BURSTVideoReader(Dataset):
         info = {}
         data = {}
         info['frame'] = frame
-        info['save'] = (frame[:-4] in self.annotated_frames)
+        info['save'] = frame[:-4] in self.annotated_frames
 
         im_path = path.join(self.image_dir, frame)
         img = Image.open(im_path).convert('RGB')

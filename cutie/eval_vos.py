@@ -39,7 +39,7 @@ def eval_vos(cfg: DictConfig):
 
     dataset_name = cfg.dataset
     data_cfg = get_dataset_cfg(cfg)
-    is_burst = ('burst' in dataset_name)
+    is_burst = 'burst' in dataset_name
 
     # setup dataset
     image_dir = data_cfg.image_directory
@@ -47,22 +47,23 @@ def eval_vos(cfg: DictConfig):
     size_dir = data_cfg.get('size_directory')
     if is_burst:
         # BURST style -- masks stored in a json file
-        meta_dataset = BURSTTestDataset(image_dir,
-                                        json_dir,
-                                        size=data_cfg.size,
-                                        skip_frames=data_cfg.skip_frames)
+        meta_dataset = BURSTTestDataset(
+            image_dir, json_dir, size=data_cfg.size, skip_frames=data_cfg.skip_frames
+        )
         burst_handler = BURSTResultHandler(meta_dataset.json)
     else:
         # DAVIS/YouTubeVOS/MOSE style -- masks stored as PNGs
         mask_dir = data_cfg.mask_directory
         subset = data_cfg.get('subset')
-        meta_dataset = VOSTestDataset(image_dir,
-                                      mask_dir,
-                                      use_all_masks=data_cfg.use_all_masks,
-                                      req_frames_json=json_dir,
-                                      size=data_cfg.size,
-                                      size_dir=size_dir,
-                                      subset=subset)
+        meta_dataset = VOSTestDataset(
+            image_dir,
+            mask_dir,
+            use_all_masks=data_cfg.use_all_masks,
+            req_frames_json=json_dir,
+            size=data_cfg.size,
+            size_dir=size_dir,
+            subset=subset,
+        )
     use_amp = cfg.amp
 
     # multi-scale configurations
@@ -87,7 +88,6 @@ def eval_vos(cfg: DictConfig):
     # Start eval
     pbar = tqdm(meta_loader, total=len(meta_dataset))
     for vid_reader in pbar:
-
         loader = DataLoader(vid_reader, batch_size=None, shuffle=False, num_workers=4)
         vid_name = vid_reader.vid_name
         pbar.set_description(vid_name)
@@ -95,17 +95,19 @@ def eval_vos(cfg: DictConfig):
 
         try:
             processor = InferenceCore(cutie, cfg=cfg)
-            saver = ResultSaver(mask_output_root,
-                                vid_name,
-                                dataset=dataset_name,
-                                object_manager=processor.object_manager,
-                                use_long_id=vid_reader.use_long_id,
-                                palette=vid_reader.get_palette(),
-                                save_scores=save_scores,
-                                score_output_root=score_output_root,
-                                visualize_output_root=visualize_output_root,
-                                visualize=cfg.visualize,
-                                init_json=vid_reader.sequence_json if is_burst else None)
+            saver = ResultSaver(
+                mask_output_root,
+                vid_name,
+                dataset=dataset_name,
+                object_manager=processor.object_manager,
+                use_long_id=vid_reader.use_long_id,
+                palette=vid_reader.get_palette(),
+                save_scores=save_scores,
+                score_output_root=score_output_root,
+                visualize_output_root=visualize_output_root,
+                visualize=cfg.visualize,
+                init_json=vid_reader.sequence_json if is_burst else None,
+            )
             first_mask_loaded = False
 
             for ti, data in enumerate(loader):
@@ -141,16 +143,18 @@ def eval_vos(cfg: DictConfig):
 
                     end.record()
                     torch.cuda.synchronize()
-                    total_process_time += (start.elapsed_time(end) / 1000)
+                    total_process_time += start.elapsed_time(end) / 1000
                     total_frames += 1
 
                     if save_all or info['save']:
-                        saver.process(prob,
-                                      frame_name,
-                                      resize_needed=resize_needed,
-                                      shape=shape,
-                                      last_frame=(ti == vid_length - 1),
-                                      path_to_image=path_to_image)
+                        saver.process(
+                            prob,
+                            frame_name,
+                            resize_needed=resize_needed,
+                            shape=shape,
+                            last_frame=(ti == vid_length - 1),
+                            path_to_image=path_to_image,
+                        )
 
             saver.end()
             if is_burst:

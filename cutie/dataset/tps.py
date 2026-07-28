@@ -17,8 +17,9 @@ def warp_dual_cv(img, mask, c_src, c_dst):
     theta = tps.tps_theta_from_points(c_src, c_dst, reduced=True)
     grid = tps.tps_grid(theta, c_dst, dshape)
     mapx, mapy = tps.tps_grid_to_remap(grid, img.shape)
-    return cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR), cv2.remap(mask, mapx, mapy,
-                                                                   cv2.INTER_NEAREST)
+    return cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR), cv2.remap(
+        mask, mapx, mapy, cv2.INTER_NEAREST
+    )
 
 
 def random_tps_warp(img, mask, scale, n_ctrl_pts=12):

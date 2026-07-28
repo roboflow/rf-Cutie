@@ -1,6 +1,7 @@
 """
 For computing auxiliary outputs for auxiliary losses
 """
+
 from typing import Dict
 from omegaconf import DictConfig
 import torch
@@ -11,7 +12,6 @@ from cutie.utils.tensor_utils import aggregate
 
 
 class LinearPredictor(nn.Module):
-
     def __init__(self, x_dim: int, pix_dim: int):
         super().__init__()
         self.projection = GConv2d(x_dim, pix_dim + 1, kernel_size=1)
@@ -28,7 +28,6 @@ class LinearPredictor(nn.Module):
 
 
 class DirectPredictor(nn.Module):
-
     def __init__(self, x_dim: int):
         super().__init__()
         self.projection = GConv2d(x_dim, 1, kernel_size=1)
@@ -40,7 +39,6 @@ class DirectPredictor(nn.Module):
 
 
 class AuxComputer(nn.Module):
-
     def __init__(self, cfg: DictConfig):
         super().__init__()
 
@@ -55,16 +53,18 @@ class AuxComputer(nn.Module):
         else:
             self.sensory_aux = None
 
-    def _aggregate_with_selector(self, logits: torch.Tensor,
-                                 selector: torch.Tensor) -> torch.Tensor:
+    def _aggregate_with_selector(
+        self, logits: torch.Tensor, selector: torch.Tensor
+    ) -> torch.Tensor:
         prob = torch.sigmoid(logits)
         if selector is not None:
             prob = prob * selector
         logits = aggregate(prob, dim=1)
         return logits
 
-    def forward(self, pix_feat: torch.Tensor, aux_input: Dict[str, torch.Tensor],
-                selector: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def forward(
+        self, pix_feat: torch.Tensor, aux_input: Dict[str, torch.Tensor], selector: torch.Tensor
+    ) -> Dict[str, torch.Tensor]:
         sensory = aux_input['sensory']
         q_logits = aux_input['q_logits']
 
@@ -79,6 +79,7 @@ class AuxComputer(nn.Module):
             # B*num_objects*num_levels*H*W
             aux_output['q_logits'] = self._aggregate_with_selector(
                 torch.stack(q_logits, dim=2),
-                selector.unsqueeze(2) if selector is not None else None)
+                selector.unsqueeze(2) if selector is not None else None,
+            )
 
         return aux_output

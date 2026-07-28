@@ -3,7 +3,6 @@ from .resnetv1b import resnet34_v1b, resnet50_v1s, resnet101_v1s, resnet152_v1s
 
 
 class ResNetBackbone(torch.nn.Module):
-
     def __init__(self, backbone='resnet50', pretrained_base=True, dilated=True, **kwargs):
         super(ResNetBackbone, self).__init__()
 
@@ -36,7 +35,8 @@ class ResNetBackbone(torch.nn.Module):
                 additional_features,
                 [0, 0, 0, 0, 0, x.size(1) - additional_features.size(1)],
                 mode='constant',
-                value=0)
+                value=0,
+            )
         x = self.maxpool(x)
         c1 = self.layer1(x)
         c2 = self.layer2(c1)

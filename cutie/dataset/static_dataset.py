@@ -48,60 +48,81 @@ class SyntheticVideoDataset(Dataset):
 
             elif method == 1:
                 self.im_list.extend(
-                    [path.join(root, im) for im in os.listdir(root) if '.jpg' in im] * multiplier)
+                    [path.join(root, im) for im in os.listdir(root) if '.jpg' in im] * multiplier
+                )
 
         if local_rank == 0:
             log.info(f'SyntheticVideoDataset: {len(self.im_list)} images found in total.')
 
         # The frame transforms are the same for each of the pairs,
         # but different for different pairs in the sequence
-        self.frame_image_transform = transforms.Compose([
-            transforms.ColorJitter(0.1, 0.05, 0.05, 0),
-        ])
+        self.frame_image_transform = transforms.Compose(
+            [
+                transforms.ColorJitter(0.1, 0.05, 0.05, 0),
+            ]
+        )
 
-        self.frame_image_dual_transform = transforms.Compose([
-            transforms.RandomAffine(degrees=20,
-                                    scale=(0.5, 2.0),
-                                    shear=10,
-                                    interpolation=InterpolationMode.BILINEAR,
-                                    fill=im_mean),
-            transforms.Resize(self.size, InterpolationMode.BILINEAR),
-            transforms.RandomCrop((self.size, self.size), pad_if_needed=True, fill=im_mean),
-        ])
+        self.frame_image_dual_transform = transforms.Compose(
+            [
+                transforms.RandomAffine(
+                    degrees=20,
+                    scale=(0.5, 2.0),
+                    shear=10,
+                    interpolation=InterpolationMode.BILINEAR,
+                    fill=im_mean,
+                ),
+                transforms.Resize(self.size, InterpolationMode.BILINEAR),
+                transforms.RandomCrop((self.size, self.size), pad_if_needed=True, fill=im_mean),
+            ]
+        )
 
-        self.frame_mask_dual_transform = transforms.Compose([
-            transforms.RandomAffine(degrees=20,
-                                    scale=(0.5, 2.0),
-                                    shear=10,
-                                    interpolation=InterpolationMode.NEAREST,
-                                    fill=0),
-            transforms.Resize(self.size, InterpolationMode.NEAREST),
-            transforms.RandomCrop((self.size, self.size), pad_if_needed=True, fill=0),
-        ])
+        self.frame_mask_dual_transform = transforms.Compose(
+            [
+                transforms.RandomAffine(
+                    degrees=20,
+                    scale=(0.5, 2.0),
+                    shear=10,
+                    interpolation=InterpolationMode.NEAREST,
+                    fill=0,
+                ),
+                transforms.Resize(self.size, InterpolationMode.NEAREST),
+                transforms.RandomCrop((self.size, self.size), pad_if_needed=True, fill=0),
+            ]
+        )
 
         # The sequence transforms are the same for all pairs in the sampled sequence
-        self.sequence_image_only_transform = transforms.Compose([
-            transforms.ColorJitter(0.1, 0.05, 0.05, 0.05),
-            transforms.RandomGrayscale(0.05),
-        ])
+        self.sequence_image_only_transform = transforms.Compose(
+            [
+                transforms.ColorJitter(0.1, 0.05, 0.05, 0.05),
+                transforms.RandomGrayscale(0.05),
+            ]
+        )
 
-        self.sequence_image_dual_transform = transforms.Compose([
-            transforms.RandomAffine(degrees=0, scale=(0.5, 2.0), fill=im_mean),
-            transforms.RandomHorizontalFlip(),
-        ])
+        self.sequence_image_dual_transform = transforms.Compose(
+            [
+                transforms.RandomAffine(degrees=0, scale=(0.5, 2.0), fill=im_mean),
+                transforms.RandomHorizontalFlip(),
+            ]
+        )
 
-        self.sequence_mask_dual_transform = transforms.Compose([
-            transforms.RandomAffine(degrees=0, scale=(0.5, 2.0), fill=0),
-            transforms.RandomHorizontalFlip(),
-        ])
+        self.sequence_mask_dual_transform = transforms.Compose(
+            [
+                transforms.RandomAffine(degrees=0, scale=(0.5, 2.0), fill=0),
+                transforms.RandomHorizontalFlip(),
+            ]
+        )
 
-        self.output_image_transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
+        self.output_image_transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+            ]
+        )
 
-        self.output_mask_transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
+        self.output_mask_transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+            ]
+        )
 
     def _get_sample(self, idx):
         im = Image.open(self.im_list[idx]).convert('RGB')
@@ -155,7 +176,7 @@ class SyntheticVideoDataset(Dataset):
                 merged_images = images
             else:
                 merged_images = merged_images * (1 - masks) + images * masks
-            merged_masks[masks[:, 0] > 0.5] = (i + 1)
+            merged_masks[masks[:, 0] > 0.5] = i + 1
 
         masks = merged_masks
 
@@ -168,9 +189,9 @@ class SyntheticVideoDataset(Dataset):
         cls_gt = np.zeros((self.seq_length, self.size, self.size), dtype=np.int64)
         first_frame_gt = np.zeros((1, self.max_num_obj, self.size, self.size), dtype=np.int64)
         for i, l in enumerate(target_objects):
-            this_mask = (masks == l)
+            this_mask = masks == l
             cls_gt[this_mask] = i + 1
-            first_frame_gt[0, i] = (this_mask[0])
+            first_frame_gt[0, i] = this_mask[0]
         cls_gt = np.expand_dims(cls_gt, 1)
 
         info = {}
@@ -186,7 +207,7 @@ class SyntheticVideoDataset(Dataset):
             'first_frame_gt': first_frame_gt,
             'cls_gt': cls_gt,
             'selector': selector,
-            'info': info
+            'info': info,
         }
 
         return data

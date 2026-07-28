@@ -4,11 +4,9 @@ import cv2
 import numpy as np
 
 
-def visualize_instances(imask,
-                        bg_color=255,
-                        boundaries_color=None,
-                        boundaries_width=1,
-                        boundaries_alpha=0.8):
+def visualize_instances(
+    imask, bg_color=255, boundaries_color=None, boundaries_width=1, boundaries_alpha=0.8
+):
     num_objects = imask.max() + 1
     palette = get_palette(num_objects)
     if bg_color is not None:
@@ -34,9 +32,9 @@ def get_palette(num_cls):
         i = 0
 
         while lab > 0:
-            palette[j * 3 + 0] |= (((lab >> 0) & 1) << (7 - i))
-            palette[j * 3 + 1] |= (((lab >> 1) & 1) << (7 - i))
-            palette[j * 3 + 2] |= (((lab >> 2) & 1) << (7 - i))
+            palette[j * 3 + 0] |= ((lab >> 0) & 1) << (7 - i)
+            palette[j * 3 + 1] |= ((lab >> 1) & 1) << (7 - i)
+            palette[j * 3 + 2] |= ((lab >> 2) & 1) << (7 - i)
             i = i + 1
             lab >>= 3
 
@@ -104,21 +102,24 @@ def get_boundaries(instances_masks, boundaries_width=1):
 
         obj_mask = instances_masks == obj_id
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        inner_mask = cv2.erode(obj_mask.astype(np.uint8), kernel,
-                               iterations=boundaries_width).astype(np.bool)
+        inner_mask = cv2.erode(
+            obj_mask.astype(np.uint8), kernel, iterations=boundaries_width
+        ).astype(np.bool)
 
         obj_boundary = np.logical_xor(obj_mask, np.logical_and(inner_mask, obj_mask))
         boundaries = np.logical_or(boundaries, obj_boundary)
     return boundaries
 
 
-def draw_with_blend_and_clicks(img,
-                               mask=None,
-                               alpha=0.6,
-                               clicks_list=None,
-                               pos_color=(0, 255, 0),
-                               neg_color=(255, 0, 0),
-                               radius=4):
+def draw_with_blend_and_clicks(
+    img,
+    mask=None,
+    alpha=0.6,
+    clicks_list=None,
+    pos_color=(0, 255, 0),
+    neg_color=(255, 0, 0),
+    radius=4,
+):
     result = img.copy()
 
     if mask is not None:
@@ -126,9 +127,11 @@ def draw_with_blend_and_clicks(img,
         rgb_mask = palette[mask.astype(np.uint8)]
 
         mask_region = (mask > 0).astype(np.uint8)
-        result = result * (1 - mask_region[:, :, np.newaxis]) + \
-            (1 - alpha) * mask_region[:, :, np.newaxis] * result + \
-            alpha * rgb_mask
+        result = (
+            result * (1 - mask_region[:, :, np.newaxis])
+            + (1 - alpha) * mask_region[:, :, np.newaxis] * result
+            + alpha * rgb_mask
+        )
         result = result.astype(np.uint8)
 
         # result = (result * (1 - alpha) + alpha * rgb_mask).astype(np.uint8)

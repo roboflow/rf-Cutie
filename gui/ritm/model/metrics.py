@@ -5,7 +5,6 @@ from ..utils import misc
 
 
 class TrainMetric(object):
-
     def __init__(self, pred_outputs, gt_outputs):
         self.pred_outputs = pred_outputs
         self.gt_outputs = gt_outputs
@@ -28,17 +27,18 @@ class TrainMetric(object):
 
 
 class AdaptiveIoU(TrainMetric):
-
-    def __init__(self,
-                 init_thresh=0.4,
-                 thresh_step=0.025,
-                 thresh_beta=0.99,
-                 iou_beta=0.9,
-                 ignore_label=-1,
-                 from_logits=True,
-                 pred_output='instances',
-                 gt_output='instances'):
-        super().__init__(pred_outputs=(pred_output, ), gt_outputs=(gt_output, ))
+    def __init__(
+        self,
+        init_thresh=0.4,
+        thresh_step=0.025,
+        thresh_beta=0.99,
+        iou_beta=0.9,
+        ignore_label=-1,
+        from_logits=True,
+        pred_output='instances',
+        gt_output='instances',
+    ):
+        super().__init__(pred_outputs=(pred_output,), gt_outputs=(gt_output,))
         self._ignore_label = ignore_label
         self._from_logits = from_logits
         self._iou_thresh = init_thresh
@@ -67,8 +67,9 @@ class AdaptiveIoU(TrainMetric):
                 max_iou = temp_iou
                 best_thresh = t
 
-        self._iou_thresh = self._thresh_beta * self._iou_thresh + (1 -
-                                                                   self._thresh_beta) * best_thresh
+        self._iou_thresh = (
+            self._thresh_beta * self._iou_thresh + (1 - self._thresh_beta) * best_thresh
+        )
         self._ema_iou = self._iou_beta * self._ema_iou + (1 - self._iou_beta) * max_iou
         self._epoch_iou_sum += max_iou
         self._epoch_batch_count += 1
@@ -85,9 +86,9 @@ class AdaptiveIoU(TrainMetric):
 
     def log_states(self, sw, tag_prefix, global_step):
         sw.add_scalar(tag=tag_prefix + '_ema_iou', value=self._ema_iou, global_step=global_step)
-        sw.add_scalar(tag=tag_prefix + '_iou_thresh',
-                      value=self._iou_thresh,
-                      global_step=global_step)
+        sw.add_scalar(
+            tag=tag_prefix + '_iou_thresh', value=self._iou_thresh, global_step=global_step
+        )
 
     @property
     def iou_thresh(self):
@@ -100,8 +101,9 @@ def _compute_iou(pred_mask, gt_mask, ignore_mask=None, keep_ignore=False):
 
     reduction_dims = misc.get_dims_with_exclusion(gt_mask.dim(), 0)
     union = torch.mean((pred_mask | gt_mask).float(), dim=reduction_dims).detach().cpu().numpy()
-    intersection = torch.mean((pred_mask & gt_mask).float(),
-                              dim=reduction_dims).detach().cpu().numpy()
+    intersection = (
+        torch.mean((pred_mask & gt_mask).float(), dim=reduction_dims).detach().cpu().numpy()
+    )
     nonzero = union > 0
 
     iou = intersection[nonzero] / union[nonzero]

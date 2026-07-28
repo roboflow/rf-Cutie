@@ -4,7 +4,6 @@ from ...model.losses import SigmoidBinaryCrossEntropyLoss
 
 
 class BRSMaskLoss(torch.nn.Module):
-
     def __init__(self, eps=1e-5):
         super().__init__()
         self._eps = eps
@@ -28,7 +27,6 @@ class BRSMaskLoss(torch.nn.Module):
 
 
 class OracleMaskLoss(torch.nn.Module):
-
     def __init__(self):
         super().__init__()
         self.gt_mask = None
@@ -44,11 +42,10 @@ class OracleMaskLoss(torch.nn.Module):
         gt_mask = self.gt_mask.to(result.device)
         if self.predictor.object_roi is not None:
             r1, r2, c1, c2 = self.predictor.object_roi[:4]
-            gt_mask = gt_mask[:, :, r1:r2 + 1, c1:c2 + 1]
-            gt_mask = torch.nn.functional.interpolate(gt_mask,
-                                                      result.size()[2:],
-                                                      mode='bilinear',
-                                                      align_corners=True)
+            gt_mask = gt_mask[:, :, r1 : r2 + 1, c1 : c2 + 1]
+            gt_mask = torch.nn.functional.interpolate(
+                gt_mask, result.size()[2:], mode='bilinear', align_corners=True
+            )
 
         if result.shape[0] == 2:
             gt_mask_flipped = torch.flip(gt_mask, dims=[3])

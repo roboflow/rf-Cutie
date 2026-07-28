@@ -55,18 +55,10 @@ def get_parameter_groups(model, stage_cfg, print_log=False):
         {
             'params': backbone_params,
             'lr': base_lr * backbone_lr_ratio,
-            'weight_decay': weight_decay
+            'weight_decay': weight_decay,
         },
-        {
-            'params': embed_params,
-            'lr': base_lr,
-            'weight_decay': embed_weight_decay
-        },
-        {
-            'params': other_params,
-            'lr': base_lr,
-            'weight_decay': weight_decay
-        },
+        {'params': embed_params, 'lr': base_lr, 'weight_decay': embed_weight_decay},
+        {'params': other_params, 'lr': base_lr, 'weight_decay': weight_decay},
     ]
 
     return parameter_groups

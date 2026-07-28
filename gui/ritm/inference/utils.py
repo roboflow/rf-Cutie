@@ -118,18 +118,22 @@ def find_checkpoint(weights_folder, checkpoint_name):
     return str(checkpoint_path)
 
 
-def get_results_table(noc_list,
-                      over_max_list,
-                      brs_type,
-                      dataset_name,
-                      mean_spc,
-                      elapsed_time,
-                      n_clicks=20,
-                      model_name=None):
-    table_header = (f'|{"BRS Type":^13}|{"Dataset":^11}|'
-                    f'{"NoC@80%":^9}|{"NoC@85%":^9}|{"NoC@90%":^9}|'
-                    f'{">="+str(n_clicks)+"@85%":^9}|{">="+str(n_clicks)+"@90%":^9}|'
-                    f'{"SPC,s":^7}|{"Time":^9}|')
+def get_results_table(
+    noc_list,
+    over_max_list,
+    brs_type,
+    dataset_name,
+    mean_spc,
+    elapsed_time,
+    n_clicks=20,
+    model_name=None,
+):
+    table_header = (
+        f'|{"BRS Type":^13}|{"Dataset":^11}|'
+        f'{"NoC@80%":^9}|{"NoC@85%":^9}|{"NoC@90%":^9}|'
+        f'{">=" + str(n_clicks) + "@85%":^9}|{">=" + str(n_clicks) + "@90%":^9}|'
+        f'{"SPC,s":^7}|{"Time":^9}|'
+    )
     row_width = len(table_header)
 
     header = f'Eval results for model: {model_name}\n' if model_name is not None else ''

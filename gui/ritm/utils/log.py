@@ -21,8 +21,9 @@ def add_logging(logs_path, prefix):
     stdout_log_path = logs_path / log_name
 
     fh = logging.FileHandler(str(stdout_log_path))
-    formatter = logging.Formatter(fmt='(%(levelname)s) %(asctime)s: %(message)s',
-                                  datefmt=LOGGER_DATEFMT)
+    formatter = logging.Formatter(
+        fmt='(%(levelname)s) %(asctime)s: %(message)s', datefmt=LOGGER_DATEFMT
+    )
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
@@ -70,7 +71,6 @@ class TqdmToLogger(io.StringIO):
 
 
 class ScalarAccumulator(object):
-
     def __init__(self, period):
         self.sum = 0
         self.cnt = 0

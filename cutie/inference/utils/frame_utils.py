@@ -5,9 +5,14 @@ from inference.object_info import ObjectInfo
 
 
 class FrameInfo:
-
-    def __init__(self, image: torch.Tensor, mask: torch.Tensor, segments_info: List[ObjectInfo],
-                 ti: int, info: Dict):
+    def __init__(
+        self,
+        image: torch.Tensor,
+        mask: torch.Tensor,
+        segments_info: List[ObjectInfo],
+        ti: int,
+        info: Dict,
+    ):
         self.image = image
         self.mask = mask
         self.segments_info = segments_info

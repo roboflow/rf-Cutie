@@ -16,7 +16,6 @@ log = logging.getLogger()
 
 
 class CUTIE(nn.Module):
-
     def __init__(self, cfg: DictConfig, *, single_object=False):
         super().__init__()
         self.cfg = cfg
@@ -44,8 +43,8 @@ class CUTIE(nn.Module):
             self.object_summarizer = ObjectSummarizer(model_cfg)
         self.aux_computer = AuxComputer(cfg)
 
-        self.register_buffer("pixel_mean", torch.Tensor(model_cfg.pixel_mean).view(-1, 1, 1), False)
-        self.register_buffer("pixel_std", torch.Tensor(model_cfg.pixel_std).view(-1, 1, 1), False)
+        self.register_buffer('pixel_mean', torch.Tensor(model_cfg.pixel_mean).view(-1, 1, 1), False)
+        self.register_buffer('pixel_std', torch.Tensor(model_cfg.pixel_std).view(-1, 1, 1), False)
 
     def _get_others(self, masks: torch.Tensor) -> torch.Tensor:
         # for each object, return the sum of masks of all other objects
@@ -65,46 +64,56 @@ class CUTIE(nn.Module):
         return ms_image_feat, self.pix_feat_proj(ms_image_feat[0])
 
     def encode_mask(
-            self,
-            image: torch.Tensor,
-            ms_features: List[torch.Tensor],
-            sensory: torch.Tensor,
-            masks: torch.Tensor,
-            *,
-            deep_update: bool = True,
-            chunk_size: int = -1,
-            need_weights: bool = False) -> (torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
+        self,
+        image: torch.Tensor,
+        ms_features: List[torch.Tensor],
+        sensory: torch.Tensor,
+        masks: torch.Tensor,
+        *,
+        deep_update: bool = True,
+        chunk_size: int = -1,
+        need_weights: bool = False,
+    ) -> (torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
         image = (image - self.pixel_mean) / self.pixel_std
         others = self._get_others(masks)
-        mask_value, new_sensory = self.mask_encoder(image,
-                                                    ms_features,
-                                                    sensory,
-                                                    masks,
-                                                    others,
-                                                    deep_update=deep_update,
-                                                    chunk_size=chunk_size)
+        mask_value, new_sensory = self.mask_encoder(
+            image,
+            ms_features,
+            sensory,
+            masks,
+            others,
+            deep_update=deep_update,
+            chunk_size=chunk_size,
+        )
         if self.object_transformer_enabled:
-            object_summaries, object_logits = self.object_summarizer(masks, mask_value,
-                                                                     need_weights)
+            object_summaries, object_logits = self.object_summarizer(
+                masks, mask_value, need_weights
+            )
         else:
             object_summaries, object_logits = None, None
         return mask_value, new_sensory, object_summaries, object_logits
 
-    def transform_key(self,
-                      final_pix_feat: torch.Tensor,
-                      *,
-                      need_sk: bool = True,
-                      need_ek: bool = True) -> (torch.Tensor, torch.Tensor, torch.Tensor):
+    def transform_key(
+        self, final_pix_feat: torch.Tensor, *, need_sk: bool = True, need_ek: bool = True
+    ) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         key, shrinkage, selection = self.key_proj(final_pix_feat, need_s=need_sk, need_e=need_ek)
         return key, shrinkage, selection
 
     # Used in training only.
     # This step is replaced by MemoryManager in test time
-    def read_memory(self, query_key: torch.Tensor, query_selection: torch.Tensor,
-                    memory_key: torch.Tensor, memory_shrinkage: torch.Tensor,
-                    msk_value: torch.Tensor, obj_memory: torch.Tensor, pix_feat: torch.Tensor,
-                    sensory: torch.Tensor, last_mask: torch.Tensor,
-                    selector: torch.Tensor) -> (torch.Tensor, Dict[str, torch.Tensor]):
+    def read_memory(
+        self,
+        query_key: torch.Tensor,
+        query_selection: torch.Tensor,
+        memory_key: torch.Tensor,
+        memory_shrinkage: torch.Tensor,
+        msk_value: torch.Tensor,
+        obj_memory: torch.Tensor,
+        pix_feat: torch.Tensor,
+        sensory: torch.Tensor,
+        last_mask: torch.Tensor,
+        selector: torch.Tensor,
+    ) -> (torch.Tensor, Dict[str, torch.Tensor]):
         """
         query_key       : B * CK * H * W
         query_selection : B * CK * H * W
@@ -118,15 +127,20 @@ class CUTIE(nn.Module):
 
         # read using visual attention
         with torch.cuda.amp.autocast(enabled=False):
-            affinity = get_affinity(memory_key.float(), memory_shrinkage.float(), query_key.float(),
-                                    query_selection.float())
+            affinity = get_affinity(
+                memory_key.float(),
+                memory_shrinkage.float(),
+                query_key.float(),
+                query_selection.float(),
+            )
 
             msk_value = msk_value.flatten(start_dim=1, end_dim=2).float()
 
             # B * (num_objects*CV) * H * W
             pixel_readout = readout(affinity, msk_value)
-            pixel_readout = pixel_readout.view(batch_size, num_objects, self.value_dim,
-                                               *pixel_readout.shape[-2:])
+            pixel_readout = pixel_readout.view(
+                batch_size, num_objects, self.value_dim, *pixel_readout.shape[-2:]
+            )
         pixel_readout = self.pixel_fusion(pix_feat, pixel_readout, sensory, last_mask)
 
         # read from query transformer
@@ -140,44 +154,41 @@ class CUTIE(nn.Module):
 
         return mem_readout, aux_output
 
-    def pixel_fusion(self,
-                     pix_feat: torch.Tensor,
-                     pixel: torch.Tensor,
-                     sensory: torch.Tensor,
-                     last_mask: torch.Tensor,
-                     *,
-                     chunk_size: int = -1) -> torch.Tensor:
+    def pixel_fusion(
+        self,
+        pix_feat: torch.Tensor,
+        pixel: torch.Tensor,
+        sensory: torch.Tensor,
+        last_mask: torch.Tensor,
+        *,
+        chunk_size: int = -1,
+    ) -> torch.Tensor:
         last_mask = F.interpolate(last_mask, size=sensory.shape[-2:], mode='area')
         last_others = self._get_others(last_mask)
-        fused = self.pixel_fuser(pix_feat,
-                                 pixel,
-                                 sensory,
-                                 last_mask,
-                                 last_others,
-                                 chunk_size=chunk_size)
+        fused = self.pixel_fuser(
+            pix_feat, pixel, sensory, last_mask, last_others, chunk_size=chunk_size
+        )
         return fused
 
-    def readout_query(self,
-                      pixel_readout,
-                      obj_memory,
-                      *,
-                      selector=None,
-                      need_weights=False) -> (torch.Tensor, Dict[str, torch.Tensor]):
+    def readout_query(
+        self, pixel_readout, obj_memory, *, selector=None, need_weights=False
+    ) -> (torch.Tensor, Dict[str, torch.Tensor]):
         if not self.object_transformer_enabled:
             return pixel_readout, None
-        return self.object_transformer(pixel_readout,
-                                       obj_memory,
-                                       selector=selector,
-                                       need_weights=need_weights)
+        return self.object_transformer(
+            pixel_readout, obj_memory, selector=selector, need_weights=need_weights
+        )
 
-    def segment(self,
-                ms_image_feat: List[torch.Tensor],
-                memory_readout: torch.Tensor,
-                sensory: torch.Tensor,
-                *,
-                selector: bool = None,
-                chunk_size: int = -1,
-                update_sensory: bool = True) -> (torch.Tensor, torch.Tensor, torch.Tensor):
+    def segment(
+        self,
+        ms_image_feat: List[torch.Tensor],
+        memory_readout: torch.Tensor,
+        sensory: torch.Tensor,
+        *,
+        selector: bool = None,
+        chunk_size: int = -1,
+        update_sensory: bool = True,
+    ) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         """
         multi_scale_features is from the key encoder for skip-connection
         memory_readout is from working/long-term memory
@@ -186,11 +197,13 @@ class CUTIE(nn.Module):
         selector is 1 if an object exists, and 0 otherwise. We use it to filter padded objects
             during training.
         """
-        sensory, logits = self.mask_decoder(ms_image_feat,
-                                            memory_readout,
-                                            sensory,
-                                            chunk_size=chunk_size,
-                                            update_sensory=update_sensory)
+        sensory, logits = self.mask_decoder(
+            ms_image_feat,
+            memory_readout,
+            sensory,
+            chunk_size=chunk_size,
+            update_sensory=update_sensory,
+        )
 
         prob = torch.sigmoid(logits)
         if selector is not None:
@@ -203,8 +216,9 @@ class CUTIE(nn.Module):
 
         return sensory, logits, prob
 
-    def compute_aux(self, pix_feat: torch.Tensor, aux_inputs: Dict[str, torch.Tensor],
-                    selector: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def compute_aux(
+        self, pix_feat: torch.Tensor, aux_inputs: Dict[str, torch.Tensor], selector: torch.Tensor
+    ) -> Dict[str, torch.Tensor]:
         return self.aux_computer(pix_feat, aux_inputs, selector)
 
     def forward(self, *args, **kwargs):
@@ -243,8 +257,10 @@ class CUTIE(nn.Module):
             """
             k = 'mask_encoder.conv1.weight'
             if src_dict[k].shape[1] == 5:
-                log.warning(f'Converting {k} from multiple objects to single object.'
-                            'This is not supposed to happen in standard training.')
+                log.warning(
+                    f'Converting {k} from multiple objects to single object.'
+                    'This is not supposed to happen in standard training.'
+                )
                 src_dict[k] = src_dict[k][:, :-1]
 
         for k in src_dict:

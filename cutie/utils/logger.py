@@ -24,11 +24,10 @@ def detach_to_cpu(x):
 
 
 def fix_width_trunc(x):
-    return ('{:.9s}'.format('{:0.9f}'.format(x)))
+    return '{:.9s}'.format('{:0.9f}'.format(x))
 
 
 class TensorboardLogger:
-
     def __init__(self, run_dir, py_logger: logging.Logger, *, enabled_tb):
         self.run_dir = run_dir
         self.py_log = py_logger
@@ -39,7 +38,7 @@ class TensorboardLogger:
 
         # Get current git info for logging
         try:
-            repo = git.Repo(".")
+            repo = git.Repo('.')
             git_info = str(repo.active_branch) + ' ' + str(repo.head.commit.hexsha)
         except (ImportError, RuntimeError):
             print('Failed to fetch git info. Defaulting to None')
@@ -70,7 +69,7 @@ class TensorboardLogger:
             if est.days > 0:
                 remaining_str = f'{est.days}d {est.seconds // 3600}h'
             else:
-                remaining_str = f'{est.seconds // 3600}h {(est.seconds%3600) // 60}m'
+                remaining_str = f'{est.seconds // 3600}h {(est.seconds % 3600) // 60}m'
             eta = datetime.datetime.now() + est
             eta_str = eta.strftime('%Y-%m-%d %H:%M:%S')
             time_msg = f'avg_time:{avg_time:.3f},remaining:{remaining_str},eta:{eta_str},\t'

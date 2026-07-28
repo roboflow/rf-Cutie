@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+
 # fix for Windows
 if 'QT_QPA_PLATFORM_PLUGIN_PATH' not in os.environ:
     os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = ''
@@ -24,19 +25,21 @@ def get_arguments():
     """
     parser.add_argument('--images', help='Folders containing input images.', default=None)
     parser.add_argument('--video', help='Video file readable by OpenCV.', default=None)
-    parser.add_argument('--workspace',
-                        help='directory for storing buffered images (if needed) and output masks',
-                        default=None)
+    parser.add_argument(
+        '--workspace',
+        help='directory for storing buffered images (if needed) and output masks',
+        default=None,
+    )
     parser.add_argument('--num_objects', type=int, default=1)
-    parser.add_argument('--workspace_init_only',
-                        action='store_true',
-                        help='initialize the workspace and exit')
+    parser.add_argument(
+        '--workspace_init_only', action='store_true', help='initialize the workspace and exit'
+    )
 
     args = parser.parse_args()
     return args
 
 
-if __name__ in "__main__":
+if __name__ in '__main__':
     # input arguments
     args = get_arguments()
 
@@ -52,8 +55,8 @@ if __name__ in "__main__":
     log = logging.getLogger()
 
     # getting hydra's config without using its decorator
-    initialize(version_base='1.3.2', config_path="../cutie/config", job_name="gui")
-    cfg = compose(config_name="gui_config")
+    initialize(version_base='1.3.2', config_path='../cutie/config', job_name='gui')
+    cfg = compose(config_name='gui_config')
 
     # general setup
     torch.set_grad_enabled(False)
@@ -75,7 +78,7 @@ if __name__ in "__main__":
 
     # start everything
     app = QApplication(sys.argv)
-    qdarktheme.setup_theme("auto")
+    qdarktheme.setup_theme('auto')
     ex = MainController(cfg)
     if 'workspace_init_only' in cfg and cfg['workspace_init_only']:
         sys.exit(0)

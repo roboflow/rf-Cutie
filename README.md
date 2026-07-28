@@ -28,8 +28,8 @@ Tested on Ubuntu only.
 
 **Prerequisite:**
 
-- Python 3.8+
-- PyTorch 1.12+ and corresponding torchvision
+- Python 3.10+
+- A PyTorch build for your hardware; image profiles also require matching torchvision
 
 **Clone our repository:**
 
@@ -37,14 +37,27 @@ Tested on Ubuntu only.
 git clone https://github.com/hkchengrex/Cutie.git
 ```
 
-**Install with pip:**
+**Install the model core with pip:**
 
 ```bash
 cd Cutie
 pip install -e .
 ```
 
-(If you encounter the File "setup.py" not found error, upgrade your pip with pip install --upgrade pip)
+Install feature-specific dependencies only when needed:
+
+| Profile | Command | Use case |
+| --- | --- | --- |
+| Inference | `pip install -e '.[inference]'` | Scripting examples and default model download. |
+| Evaluation | `pip install -e '.[evaluation]'` | `cutie/eval_vos.py`, BURST, and multi-scale score outputs. |
+| Training | `pip install -e '.[train]'` | Distributed training. |
+| GUI | `pip install -e '.[gui]'` | Interactive desktop tool from a source checkout. |
+| Video | `pip install -e '.[video]'` | `scripts/process_video.py`. |
+| Data | `pip install -e '.[data]'` | Dataset conversion and multi-scale utility scripts. |
+
+The core package contains only the model dependencies. Choose a PyTorch and
+torchvision build compatible with your CPU, CUDA, or MPS environment before
+installing a profile that requires image transforms.
 
 **Download the pretrained models:**
 

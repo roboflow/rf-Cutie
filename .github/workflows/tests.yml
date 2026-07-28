@@ -11,6 +11,8 @@ env:
   UV_TORCH_BACKEND: cpu
 
 jobs:
+  core-import:
+    uses: ./.github/workflows/_build-package.yml
   test:
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
@@ -28,8 +30,8 @@ jobs:
           version: '0.9.26'
           python-version: ${{ matrix.python-version }}
           activate-environment: true
-      - name: Install test dependency group
-        run: uv pip install --group tests --strict
+      - name: Install all extras and test dependency group
+        run: uv pip install --group tests --strict '.[inference,evaluation,train,gui,video,data]'
       - name: Run CPU unit tests with coverage
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'

@@ -8,7 +8,6 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 
-import pycocotools.mask as mask_util
 from threading import Thread
 from queue import Queue
 from dataclasses import dataclass
@@ -24,7 +23,12 @@ log = logging.getLogger()
 try:
     import hickle as hkl
 except ImportError:
-    log.warning('Failed to import hickle. Fine if not using multi-scale testing.')
+    hkl = None
+
+try:
+    import pycocotools.mask as mask_util
+except ImportError:
+    mask_util = None
 
 
 class ResultSaver:
@@ -44,6 +48,15 @@ class ResultSaver:
         visualize=False,
         init_json=None,
     ):
+        if save_scores and hkl is None:
+            raise ModuleNotFoundError(
+                'hickle is required to save scores; install cutie[evaluation].'
+            )
+        if 'burst' in dataset.lower() and mask_util is None:
+            raise ModuleNotFoundError(
+                'pycocotools is required for BURST results; install cutie[evaluation].'
+            )
+
         self.output_root = output_root
         self.video_name = video_name
         self.dataset = dataset.lower()
@@ -89,7 +102,6 @@ class ResultSaver:
         last_frame: bool = False,
         path_to_image: str = None,
     ):
-
         if resize_needed:
             prob = F.interpolate(prob.unsqueeze(1), shape, mode='bilinear', align_corners=False)[
                 :, 0

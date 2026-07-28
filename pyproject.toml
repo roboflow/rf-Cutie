@@ -89,6 +89,7 @@ dependencies = [
 [dependency-groups]
 tests = [
   'coverage==7.13.2',
+  'omegaconf==2.3.0',
   'pytest==9.1.1',
   'torch==2.9.0',
 ]

@@ -10,6 +10,44 @@ based_on_style = "pep8"
 indent_width = 4
 column_limit = 100
 
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+# Ruff-only baseline. `PL` enables Ruff's Pylint-origin rules; explicit codes
+# cover reviewed Pylint equivalents outside that family.
+select = [
+  "A001", "A002", "A003", "A004",
+  "ARG001", "ARG002", "ARG003", "ARG004", "ARG005",
+  "B006", "B018",
+  "E402", "E501", "E721", "E722",
+  "F",
+  "G001", "G002", "G004",
+  "I001",
+  "PL",
+  "RET505", "RET506", "RET508",
+  "SIM113", "SIM118",
+  "UP004", "UP008", "UP032", "UP034",
+]
+ignore = [
+  # Direct equivalents for disabled Pylint rules.
+  "A001", "A002", "A003", "A004",
+  "ARG001", "ARG002", "ARG003", "ARG004", "ARG005",
+  "B006", "B018",
+  "E402", "E501", "E721", "E722",
+  "F401", "F403", "F405", "F541", "F821", "F823", "F841",
+  "G001", "G002", "G004",
+  "I001",
+  "PLR0402", "PLR0912", "PLR0913", "PLR0914", "PLR0915", "PLR0917",
+  "PLR1714", "PLR1722",
+  "RET505", "RET506", "RET508",
+  "SIM113", "SIM118",
+  "UP004", "UP008", "UP032", "UP034",
+  # Ruff Pylint extensions not enabled by the existing Pylint baseline.
+  "PLR2004", "PLW1514", "PLW2901",
+]
+
 [project]
 name = "cutie"
 version = "1.0.0"

@@ -46,7 +46,7 @@ class DistMaps(nn.Module):
         self.use_disks = use_disks
         if self.cpu_mode:
             # The Cython extension is optional unless CPU distance maps are requested.
-            from ..utils.cython import get_dist_maps  # pylint: disable=import-outside-toplevel
+            from ..utils.cython import get_dist_maps  # noqa: PLC0415
             self._get_dist_maps = get_dist_maps
 
     def get_coord_features(self, points, batchsize, rows, cols):

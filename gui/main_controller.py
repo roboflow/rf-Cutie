@@ -32,7 +32,6 @@ from gui.exporter import convert_frames_to_video, convert_mask_to_binary
 log = logging.getLogger()
 
 
-# pylint: disable-next=too-many-public-methods
 class MainController():
     """Coordinate interactive segmentation state, UI actions, and persistence."""
 

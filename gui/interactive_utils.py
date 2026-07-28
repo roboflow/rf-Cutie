@@ -49,10 +49,10 @@ grayscale_weights = np.array([[0.3, 0.59, 0.11]]).astype(np.float32)
 grayscale_weights_torch = torch.from_numpy(grayscale_weights).to(device).unsqueeze(0)
 
 
-# pylint: disable-next=too-many-return-statements
-def get_visualization(mode: Literal['image', 'mask', 'fade', 'davis', 'light', 'popup', 'layer',
-                                    'rgba'], image: np.ndarray, mask: np.ndarray, layer: np.ndarray,
-                      target_objects: List[int]) -> np.ndarray:
+def get_visualization(  # noqa: PLR0911
+        mode: Literal['image', 'mask', 'fade', 'davis', 'light', 'popup', 'layer',
+                      'rgba'], image: np.ndarray, mask: np.ndarray, layer: np.ndarray,
+        target_objects: List[int]) -> np.ndarray:
     """Render an image, mask, or composited visualization for the selected mode."""
     if mode == 'image':
         return image
@@ -78,10 +78,10 @@ def get_visualization(mode: Literal['image', 'mask', 'fade', 'davis', 'light', '
         raise NotImplementedError
 
 
-# pylint: disable-next=too-many-return-statements
-def get_visualization_torch(mode: Literal['image', 'mask', 'fade', 'davis', 'light', 'popup',
-                                          'layer', 'rgba'], image: torch.Tensor, prob: torch.Tensor,
-                            layer: torch.Tensor, target_objects: List[int]) -> np.ndarray:
+def get_visualization_torch(  # noqa: PLR0911
+        mode: Literal['image', 'mask', 'fade', 'davis', 'light', 'popup', 'layer',
+                      'rgba'], image: torch.Tensor, prob: torch.Tensor, layer: torch.Tensor,
+        target_objects: List[int]) -> np.ndarray:
     """Render a tensor-backed visualization for the selected mode."""
     if mode == 'image':
         return image

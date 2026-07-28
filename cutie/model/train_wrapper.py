@@ -23,7 +23,7 @@ class CutieTrainWrapper(CUTIE):
         self.move_t_out_of_batch = Rearrange('(b t) c h w -> b t c h w', t=self.seq_length)
         self.move_t_from_batch_to_volume = Rearrange('(b t) c h w -> b c t h w', t=self.seq_length)
 
-    def forward(self, data: Dict):  # pylint: disable=arguments-differ
+    def forward(self, data: Dict):
         out = {}
         frames = data['rgb']
         first_frame_gt = data['first_frame_gt'].float()

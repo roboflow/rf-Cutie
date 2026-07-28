@@ -174,5 +174,4 @@ def eval_vos(cfg: DictConfig):
 
 if __name__ == '__main__':
     # Hydra injects this decorated entrypoint's configuration at runtime.
-    # pylint: disable-next=no-value-for-parameter
     eval_vos()

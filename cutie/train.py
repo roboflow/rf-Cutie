@@ -11,8 +11,6 @@ import random
 import numpy as np
 import torch
 import torch.distributed as distributed
-# pylint: disable=too-many-nested-blocks
-
 from cutie.model.trainer import Trainer
 from cutie.dataset.setup_training_data import setup_pre_training_datasets, setup_main_training_datasets
 from cutie.utils.logger import TensorboardLogger
@@ -170,5 +168,4 @@ def train(cfg: DictConfig):
 
 if __name__ == '__main__':
     # Hydra injects this decorated entrypoint's configuration at runtime.
-    # pylint: disable-next=no-value-for-parameter
     train()

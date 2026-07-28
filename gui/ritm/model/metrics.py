@@ -49,7 +49,7 @@ class AdaptiveIoU(TrainMetric):
         self._epoch_iou_sum = 0.0
         self._epoch_batch_count = 0
 
-    def update(self, pred, gt):  # pylint: disable=arguments-differ
+    def update(self, pred, gt):
         gt_mask = gt > 0.5
         if self._from_logits:
             pred = torch.sigmoid(pred)

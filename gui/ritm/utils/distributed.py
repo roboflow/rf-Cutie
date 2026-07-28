@@ -32,7 +32,7 @@ def reduce_loss_dict(loss_dict):
         keys = []
         losses = []
 
-        for k in loss_dict.keys():
+        for k in loss_dict:
             keys.append(k)
             losses.append(loss_dict[k])
 

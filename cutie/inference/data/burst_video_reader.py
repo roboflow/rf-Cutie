@@ -73,7 +73,7 @@ class BURSTVideoReader(Dataset):
             annotation_index = self.annotated_frames.index(frame[:-4])
             segmentations = self.sequence_json['segmentations'][annotation_index]
             if len(segmentations) > 0:
-                valid_labels = np.array([int(k) for k in segmentations.keys()])
+                valid_labels = np.array([int(k) for k in segmentations])
                 mask = np.zeros(shape, dtype=np.uint8)
                 for id, segment in segmentations.items():
                     object_mask = mask_utils.decode({'size': shape, 'counts': segment['rle']})

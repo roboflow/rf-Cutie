@@ -462,7 +462,7 @@ class HighResolutionNet(nn.Module):
             for k, v in pretrained_dict.items()
         }
 
-        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict.keys()}
+        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
 
         model_dict.update(pretrained_dict)
         self.load_state_dict(model_dict)

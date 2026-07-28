@@ -4,7 +4,6 @@ import logging
 from typing import Dict, List, Tuple
 
 import torch
-# pylint: disable=too-many-nested-blocks
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms
 from torchvision.transforms import InterpolationMode

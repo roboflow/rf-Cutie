@@ -206,7 +206,7 @@ def save_result(queue: Queue):
             prob = (prob.detach().numpy() * 255).astype(np.uint8)
 
             if last_frame:
-                tmp_to_obj_mapping = {obj.id: tmp_id for obj, tmp_id in tmp_id_to_obj.items()}
+                tmp_to_obj_mapping = {obj.id: tmp_id for tmp_id, obj in tmp_id_to_obj.items()}
                 hkl.dump(tmp_to_obj_mapping, path.join(this_out_path, f'backward.hkl'), mode='w')
 
             hkl.dump(

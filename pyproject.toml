@@ -12,6 +12,9 @@ target-version = "py38"
 [tool.ruff.format]
 quote-style = "single"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.ruff.lint]
 # Ruff-only baseline. `PL` enables Ruff's Pylint-origin rules; explicit codes
 # cover reviewed Pylint equivalents outside that family.
@@ -82,6 +85,16 @@ dependencies = [
   'requests',
   'pyqtdarktheme',
 ]
+
+[dependency-groups]
+tests = [
+  'coverage==7.13.2',
+  'pytest==9.1.1',
+  'torch==2.9.0',
+]
+
+[tool.uv.dependency-groups]
+tests = { requires-python = '>=3.10' }
 
 [tool.hatch.build.targets.wheel]
 packages = ["cutie"]

@@ -1,6 +1,5 @@
 import torch
 from functools import partial
-from easydict import EasyDict as edict
 from albumentations import *
 
 from ...data.datasets import *

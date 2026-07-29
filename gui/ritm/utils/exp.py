@@ -4,13 +4,49 @@ import shutil
 import pprint
 from pathlib import Path
 from datetime import datetime
+from typing import Any
 
 import yaml
 import torch
-from easydict import EasyDict as edict
 
 from .log import logger, add_logging
 from .distributed import synchronize, get_world_size
+
+
+class _ConfigDict(dict[str, Any]):
+    """Provide attribute access for RITM configurations."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__()
+        self.update(*args, **kwargs)
+
+    def __getattr__(self, name: str) -> Any:
+        try:
+            return self[name]
+        except KeyError as exc:
+            raise AttributeError(name) from exc
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        self[name] = value
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        super().__setitem__(key, _convert_config_value(value))
+
+    def update(self, *args: Any, **kwargs: Any) -> None:
+        """Update configuration values while preserving nested attribute access."""
+        for key, value in dict(*args, **kwargs).items():
+            self[key] = value
+
+
+def _convert_config_value(value: Any) -> Any:
+    """Recursively wrap nested mappings without restricting arbitrary values."""
+    if isinstance(value, dict) and not isinstance(value, _ConfigDict):
+        return _ConfigDict(value)
+    if isinstance(value, list):
+        return [_convert_config_value(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_convert_config_value(item) for item in value)
+    return value
 
 
 def init_experiment(args, model_name):
@@ -169,7 +205,7 @@ def load_config(model_path):
             break
         config_parent = config_parent.parent
 
-    return edict(cfg)
+    return _ConfigDict(cfg)
 
 
 def load_config_file(config_path, model_name=None, return_edict=False):
@@ -181,4 +217,4 @@ def load_config_file(config_path, model_name=None, return_edict=False):
             cfg.update(cfg['SUBCONFIGS'][model_name])
         del cfg['SUBCONFIGS']
 
-    return edict(cfg) if return_edict else cfg
+    return _ConfigDict(cfg) if return_edict else cfg

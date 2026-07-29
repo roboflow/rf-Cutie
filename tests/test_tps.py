@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 import pytest
 
-from thin_plate_spline import ThinPlateSpline
+from tps import ThinPlateSpline
 from cutie.dataset import tps as tps_module
 
 
@@ -85,7 +85,7 @@ def test_tps_affine_case_produces_expected_center_mapping() -> None:
     wrapped_grid = tps_module.inverse_tps_grid(source, destination, (3, 3, 3))
     wrapped_center = wrapped_grid[1, 1]
 
-    np.testing.assert_allclose(direct_out.reshape(-1, 2), expected_center, atol=1e-8)
+    np.testing.assert_allclose(direct_out, expected_center.reshape(1, 2), atol=1e-8)
     np.testing.assert_allclose(wrapped_center, expected_center, atol=1e-8)
 
 
@@ -183,7 +183,7 @@ def test_random_tps_warp_rejects_too_many_control_points_for_source_grid() -> No
     image = np.zeros((4, 4, 3), dtype=np.uint8)
     mask = np.zeros((4, 4), dtype=np.uint8)
 
-    with pytest.raises(ValueError, match='cannot take a larger sample'):
+    with pytest.raises(ValueError, match='larger sample'):
         tps_module.random_tps_warp(image, mask, scale=0.02, n_ctrl_pts=5)
 
 

@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image
 import cv2
 
-from thin_plate_spline import ThinPlateSpline
+from tps import ThinPlateSpline
 
 cv2.setNumThreads(0)
 
@@ -28,8 +28,8 @@ def inverse_tps_grid(c_src, c_dst, dshape):
 def warp_dual_cv(img, mask, c_src, c_dst):
     """Warp an image and mask with a shared TPS coordinate map."""
     grid = inverse_tps_grid(c_src, c_dst, img.shape)
-    mapx = (grid[:, :, 0] * img.shape[1]).astype(np.float32)
-    mapy = (grid[:, :, 1] * img.shape[0]).astype(np.float32)
+    mapx = (grid[:, :, 0] * (img.shape[1] - 1)).astype(np.float32)
+    mapy = (grid[:, :, 1] * (img.shape[0] - 1)).astype(np.float32)
     return cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR), cv2.remap(mask, mapx, mapy, cv2.INTER_NEAREST)
 
 

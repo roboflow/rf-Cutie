@@ -26,9 +26,7 @@ def index_numpy_to_one_hot_torch(mask: np.ndarray, num_classes: int):
     return F.one_hot(mask, num_classes=num_classes).permute(2, 0, 1).float()
 
 
-"""
-Some constants for visualization
-"""
+# Visualization constants.
 try:
     if torch.cuda.is_available():
         device = torch.device('cuda')

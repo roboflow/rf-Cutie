@@ -171,12 +171,8 @@ class VOSMergeTrainDataset(Dataset):
             for seed_trial in range(self.max_seed_trials):
                 seed_ok = True
                 info['frames'] = []  # To be filled with sampled frames
-                """
-                From the seed frame, we expand it to a sequence without exceeding max_skip
-                The first frame in the sequence should not be empty
-                empty_masks contains a list of empty masks (as str, without extension)
-                (from external pre-processing)
-                """
+                # Expand from the seed without exceeding max_skip. The first frame must be
+                # non-empty; empty_masks comes from external preprocessing without extensions.
                 for seq_trial in range(self.max_seq_trials):
                     sampled_frames = frames_idx.copy()
                     # acceptable_set contains the indices that are within
@@ -223,10 +219,7 @@ class VOSMergeTrainDataset(Dataset):
                     # reset seed frame and try again
                     frames_idx = [np.random.randint(length)]
                     continue
-                """
-                Read the frames in frames_idx one-by-one and augments them
-                We want to find a good crop such that the first frame is not empty
-                """
+                # Read the sampled frames and find a crop with a non-empty first frame.
                 images = []
                 masks = []
                 for i, f_idx in enumerate(frames_idx):
@@ -283,9 +276,7 @@ class VOSMergeTrainDataset(Dataset):
                     # reset seed frame and try again
                     frames_idx = [np.random.randint(length)]
                     continue
-                """
-                Everything should be good if the code reaches here -- proceed to output
-                """
+                # All sampling and cropping checks passed; assemble the output tensors.
                 images = torch.stack(images, 0)
                 masks = np.stack(masks, 0)
                 return info, images, masks

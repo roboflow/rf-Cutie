@@ -71,10 +71,7 @@ class ClickInteraction(Interaction):
         self.first_click = True
         self.out_prob = self.prev_mask.clone()
 
-    """
-    neg - Negative interaction or not
-    vis - a tuple (visualization map, pass through alpha). None if not needed.
-    """
+    # neg indicates a negative interaction; vis is an optional visualization/alpha tuple.
 
     def push_point(self, x: int, y: int, is_neg: bool) -> None:
         # Clicks

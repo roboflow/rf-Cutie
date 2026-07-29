@@ -249,12 +249,8 @@ class CUTIE(nn.Module):
                             log.info(f'Zero-initialized padding for {k}.')
                         src_dict[k] = torch.cat([src_dict[k], pads], 1)
         elif self.single_object:
-            """
-            If the model is multiple-object and we are training in single-object,
-            we strip the last channel of conv1.
-            This is not supposed to happen in standard training except when users are trying to
-            finetune a trained model with single object datasets.
-            """
+            # Support finetuning a multi-object model on single-object datasets by dropping conv1's
+            # final channel. Standard single-object training does not enter this compatibility path.
             k = 'mask_encoder.conv1.weight'
             if src_dict[k].shape[1] == 5:
                 log.warning(

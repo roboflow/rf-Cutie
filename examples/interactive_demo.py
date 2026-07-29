@@ -15,14 +15,8 @@ from argparse import ArgumentParser
 
 def get_arguments():
     parser = ArgumentParser()
-    """
-    Priority 1: If a "images" folder exists in the workspace, we will read from that directory
-    Priority 2: If --images is specified, we will copy/resize those images to the workspace
-    Priority 3: If --video is specified, we will extract the frames to the workspace (in an "images" folder) and read from there
-
-    In any case, if a "masks" folder exists in the workspace, we will use that to initialize the mask
-    That way, you can continue annotation from an interrupted run as long as the same workspace is used.
-    """
+    # Prefer workspace images, then --images, then --video. Existing workspace masks initialize
+    # the session so an interrupted annotation run can continue with the same workspace.
     parser.add_argument('--images', help='Folders containing input images.', default=None)
     parser.add_argument('--video', help='Video file readable by OpenCV.', default=None)
     parser.add_argument(

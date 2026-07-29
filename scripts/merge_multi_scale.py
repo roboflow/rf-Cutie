@@ -71,9 +71,7 @@ def process_vid(vid):
 
 
 if __name__ == '__main__':
-    """
-    Arguments loading
-    """
+    # Load command-line arguments.
     parser = ArgumentParser()
     parser.add_argument('--dataset', default='Y', help='D/Y, D for DAVIS; Y for YouTubeVOS')
     parser.add_argument('--list', nargs='+')

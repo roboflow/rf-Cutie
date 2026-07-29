@@ -136,9 +136,7 @@ class MemoryManager:
 
         query_key = query_key.flatten(start_dim=2)  # bs*C^k*HW
         selection = selection.flatten(start_dim=2)  # bs*C^k*HW
-        """
-        Compute affinity and perform readout
-        """
+        # Compute affinity and read out values from each memory bucket.
         all_readout_mem = {}
         buckets = self.work_mem.buckets
         for bucket_id, bucket in buckets.items():
@@ -156,9 +154,7 @@ class MemoryManager:
                 affinity, usage = do_softmax(
                     similarity, top_k=self.top_k, inplace=True, return_usage=True
                 )
-                """
-                Record memory usage for working and long-term memory
-                """
+                # Record memory usage for working and long-term memory.
                 # ignore the index return for long-term memory
                 work_usage = usage[:, long_mem_size:]
                 self.work_mem.update_bucket_usage(bucket_id, work_usage)
@@ -264,15 +260,7 @@ class MemoryManager:
         if obj_value is not None:
             for obj_id, obj in enumerate(objects):
                 if obj in self.obj_v:
-                    """streaming average
-                    each self.obj_v[obj] is (1/2)*num_summaries*(embed_dim+1)
-                    first embed_dim keeps track of the sum of embeddings
-                    the last dim keeps the total count
-                    averaging in done inside the object transformer
-
-                    incoming obj_value is (1/2)*num_objects*num_summaries*(embed_dim+1)
-                    self.obj_v[obj] = torch.cat([self.obj_v[obj], obj_value[:, obj_id]], dim=0)
-                    """
+                    # Keep embedding sums and counts for the object transformer's streaming average.
                     last_acc = self.obj_v[obj][:, :, -1]
                     new_acc = last_acc + obj_value[:, obj_id, :, -1]
 
@@ -362,9 +350,7 @@ class MemoryManager:
             prototype_selection.append(candidate_selection[bi, :, prototype_indices])
         prototype_key = torch.stack(prototype_key, dim=0)
         prototype_selection = torch.stack(prototype_selection, dim=0)
-        """
-        Potentiation step
-        """
+        # Potentiate selected prototypes before reading their values.
         similarity = get_similarity(
             candidate_key, candidate_shrinkage, prototype_key, prototype_selection
         )

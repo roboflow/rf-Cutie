@@ -42,11 +42,8 @@ key_captions = {
     'im': 'Image',
     'gt': 'GT',
 }
-"""
-Return an image array with captions
-keys in dictionary will be used as caption if not provided
-values should contain lists of cv2 images
-"""
+# Return an image array with captions. Dictionary keys supply default captions, and values contain
+# lists of OpenCV images.
 
 
 def get_image_array(images, grid_shape, captions=None):

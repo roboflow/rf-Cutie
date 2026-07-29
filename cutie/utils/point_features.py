@@ -34,7 +34,7 @@ def calculate_uncertainty(sem_seg_logits):
     return (top2_scores[:, 1] - top2_scores[:, 0]).unsqueeze(1)
 
 
-def point_sample(input, point_coords, **kwargs):
+def point_sample(input, point_coords, **kwargs):  # noqa: A001, A002
     """
     A wrapper around :function:`torch.nn.functional.grid_sample` to support 3D point_coords tensors.
     Unlike :function:`torch.nn.functional.grid_sample` it assumes `point_coords` to lie inside

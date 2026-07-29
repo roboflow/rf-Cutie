@@ -526,7 +526,7 @@ class MainController:
             self.gui.long_mem_gauge.setFormat(f'{curr_long_tokens} / {max_long_tokens}')
             self.gui.long_mem_gauge.setValue(round(curr_long_tokens / max_long_tokens * 100))
 
-        except AttributeError as e:
+        except AttributeError:
             self.gui.work_mem_gauge.setFormat('Unknown')
             self.gui.long_mem_gauge.setFormat('Unknown')
             self.gui.work_mem_gauge.setValue(0)

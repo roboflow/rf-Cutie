@@ -127,7 +127,7 @@ class FeatureBRSPredictor(BRSBasePredictor):
                 x = image_nd
                 additional_features = self.net.maps_transform(coord_features)
 
-            if self.insertion_mode == 'after_c4' or self.insertion_mode == 'after_aspp':
+            if self.insertion_mode in {'after_c4', 'after_aspp'}:
                 c1, _, c3, c4 = self.net.feature_extractor.backbone(x, additional_features)
                 c1 = self.net.feature_extractor.skip_project(c1)
 

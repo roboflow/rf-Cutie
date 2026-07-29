@@ -34,7 +34,7 @@ def download_models_if_needed() -> str:
                     t.update(len(data))
                     f.write(data)
             t.close()
-            if total_size != 0 and t.n != total_size:
+            if t.n not in (0, total_size):
                 raise RuntimeError('Error while downloading {}'.format(filename))
     return weight_dir
 

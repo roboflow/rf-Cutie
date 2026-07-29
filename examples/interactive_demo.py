@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from argparse import ArgumentParser
 
 # fix for Windows
 if 'QT_QPA_PLATFORM_PLUGIN_PATH' not in os.environ:
@@ -9,8 +10,6 @@ if 'QT_QPA_PLATFORM_PLUGIN_PATH' not in os.environ:
 import signal
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-from argparse import ArgumentParser
 
 
 def get_arguments():

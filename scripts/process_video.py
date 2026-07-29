@@ -46,7 +46,6 @@ def process_video(cfg: DictConfig):
     if video is None:
         print('No video defined. Please specify!')
         exit()
-    video_name = path.splitext(video)[0]
 
     print(f'Opening video {video}')
     cap = cv2.VideoCapture(video)
@@ -256,7 +255,11 @@ def get_arguments():
     )
     parser.add_argument(
         '--mem_cleanup_ratio',
-        help='How often to clear non permanent GPU memory; when ratio of GPU memory used is above given mem_cleanup_ratio [0;1] then cleanup is triggered; only used when device=cuda.',
+        help=(
+            'How often to clear non permanent GPU memory; when ratio of GPU memory '
+            'used is above given mem_cleanup_ratio [0;1] then cleanup is triggered; '
+            'only used when device=cuda.'
+        ),
         type=float,
         default='-1',
     )

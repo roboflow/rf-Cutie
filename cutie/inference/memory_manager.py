@@ -285,8 +285,6 @@ class MemoryManager:
             self.engaged = False
 
     def compress_features(self, bucket_id: int) -> None:
-        HW = self.HW
-
         # perform memory consolidation
         prototype_key, prototype_value, prototype_shrinkage = self.consolidation(
             *self.work_mem.get_all_sliced(bucket_id, 0, -self.min_work_tokens)

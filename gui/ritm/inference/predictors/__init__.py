@@ -81,7 +81,7 @@ def get_predictor(
             zoom_in=zoom_in,
             **predictor_params_,
         )
-    elif brs_mode == 'RGB-BRS' or brs_mode == 'DistMap-BRS':
+    elif brs_mode in {'RGB-BRS', 'DistMap-BRS'}:
         use_dmaps = brs_mode == 'DistMap-BRS'
 
         predictor_params_.update(

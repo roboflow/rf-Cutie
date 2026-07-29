@@ -53,8 +53,7 @@ def get_image_array(images, grid_shape, captions=None):
     font = cv2.FONT_HERSHEY_SIMPLEX
 
     output_image = np.zeros([w * cate_counts, h * (rows_counts + 1), 3], dtype=np.uint8)
-    col_cnt = 0
-    for k, v in images.items():
+    for col_cnt, (k, v) in enumerate(images.items()):
         # Default as key value itself
         caption = captions.get(k, k)
 
@@ -81,8 +80,6 @@ def get_image_array(images, grid_shape, captions=None):
             img = (img * 255).astype('uint8')
 
             output_image[(col_cnt + 0) * w : (col_cnt + 1) * w, (row_cnt + 1) * h : (row_cnt + 2) * h, :] = img
-
-        col_cnt += 1
 
     return output_image
 

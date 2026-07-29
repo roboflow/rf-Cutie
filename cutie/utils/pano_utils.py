@@ -8,7 +8,7 @@ class ID2RGBConverter:
         self.obj_to_id = {}
         self.lock = Lock()
 
-    def _id_to_rgb(self, id: int):
+    def _id_to_rgb(self, id: int):  # noqa: A001, A002
         rgb = np.zeros((3,), dtype=np.uint8)
         for i in range(3):
             rgb[i] = id % 256

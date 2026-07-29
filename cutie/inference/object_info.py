@@ -3,7 +3,7 @@ class ObjectInfo:
     Store meta information for an object
     """
 
-    def __init__(self, id: int):
+    def __init__(self, id: int):  # noqa: A001, A002
         self.id = id
         self.poke_count = 0  # count number of detections missed
 

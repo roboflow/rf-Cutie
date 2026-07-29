@@ -27,7 +27,7 @@ def index_numpy_to_one_hot_torch(mask: np.ndarray, num_classes: int):
 
 
 """
-Some constants fro visualization
+Some constants for visualization
 """
 try:
     if torch.cuda.is_available():

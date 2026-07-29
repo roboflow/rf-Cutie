@@ -19,7 +19,7 @@ def cat(tensors: List[torch.Tensor], dim: int = 0):
 
 def calculate_uncertainty(sem_seg_logits):
     """
-    For each location of the prediction `sem_seg_logits` we estimate uncerainty as the
+    For each location of the prediction `sem_seg_logits` we estimate uncertainty as the
         difference between top first and top second predicted logits.
     Args:
         mask_logits (Tensor): A tensor of shape (N, C, ...), where N is the minibatch size and

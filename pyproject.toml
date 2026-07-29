@@ -9,6 +9,10 @@ target-version = "py310"
 [tool.ruff.format]
 quote-style = "single"
 
+[tool.codespell]
+# MOSE is a dataset; the other spellings are serialized model/click attributes.
+ignore-words-list = ["MOSE", "concurent", "indx"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

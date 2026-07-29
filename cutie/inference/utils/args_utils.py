@@ -23,7 +23,7 @@ def get_dataset_cfg(cfg: DictConfig):
         if cfg[override] is not None:
             log.info(f'Overriding config {override} from {data_cfg[override]} to {cfg[override]}')
             data_cfg[override] = cfg[override]
-        # escalte all potential overrides to the top-level config
+        # Escalate all potential overrides to the top-level config.
         if override in data_cfg:
             cfg[override] = data_cfg[override]
 

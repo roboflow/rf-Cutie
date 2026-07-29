@@ -86,7 +86,7 @@ ignore = []
 
 [project]
 name = "rf-cutie"
-version = "1.0.0.rc2"
+version = "1.0.0"
 authors = [{ name = "Rex Cheng", email = "hkchengrex@gmail.com" }]
 description = ""
 readme = "README.md"

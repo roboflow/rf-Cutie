@@ -43,9 +43,7 @@ class SpatialOCR_Module(nn.Module):
         align_corners=True,
     ):
         super(SpatialOCR_Module, self).__init__()
-        self.object_context_block = ObjectAttentionBlock2D(
-            in_channels, key_channels, scale, norm_layer, align_corners
-        )
+        self.object_context_block = ObjectAttentionBlock2D(in_channels, key_channels, scale, norm_layer, align_corners)
         _in_channels = 2 * in_channels
 
         self.conv_bn_dropout = nn.Sequential(
@@ -76,9 +74,7 @@ class ObjectAttentionBlock2D(nn.Module):
         N X C X H X W
     """
 
-    def __init__(
-        self, in_channels, key_channels, scale=1, norm_layer=nn.BatchNorm2d, align_corners=True
-    ):
+    def __init__(self, in_channels, key_channels, scale=1, norm_layer=nn.BatchNorm2d, align_corners=True):
         super(ObjectAttentionBlock2D, self).__init__()
         self.scale = scale
         self.in_channels = in_channels
@@ -170,8 +166,6 @@ class ObjectAttentionBlock2D(nn.Module):
         context = context.view(batch_size, self.key_channels, *x.size()[2:])
         context = self.f_up(context)
         if self.scale > 1:
-            context = F.interpolate(
-                input=context, size=(h, w), mode='bilinear', align_corners=self.align_corners
-            )
+            context = F.interpolate(input=context, size=(h, w), mode='bilinear', align_corners=self.align_corners)
 
         return context

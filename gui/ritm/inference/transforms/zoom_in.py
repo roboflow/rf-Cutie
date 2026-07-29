@@ -81,9 +81,7 @@ class ZoomIn(BaseTransform):
         )
 
         if self._prev_probs is not None:
-            new_prob_map = torch.zeros(
-                *self._prev_probs.shape, device=prob_map.device, dtype=prob_map.dtype
-            )
+            new_prob_map = torch.zeros(*self._prev_probs.shape, device=prob_map.device, dtype=prob_map.dtype)
             new_prob_map[:, :, rmin : rmax + 1, cmin : cmax + 1] = prob_map
         else:
             new_prob_map = prob_map
@@ -98,9 +96,7 @@ class ZoomIn(BaseTransform):
 
         pred_mask = (self._prev_probs > self.prob_thresh)[0, 0]
         if pred_mask.sum() > 0:
-            possible_object_roi = get_object_roi(
-                pred_mask, [], self.expansion_ratio, self.min_crop_size
-            )
+            possible_object_roi = get_object_roi(pred_mask, [], self.expansion_ratio, self.min_crop_size)
             image_roi = (0, self._input_image_shape[2] - 1, 0, self._input_image_shape[3] - 1)
             if get_bbox_iou(possible_object_roi, image_roi) < 0.50:
                 return True

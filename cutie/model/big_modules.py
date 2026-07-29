@@ -78,9 +78,7 @@ class KeyProjection(nn.Module):
         nn.init.orthogonal_(self.key_proj.weight.data)
         nn.init.zeros_(self.key_proj.bias.data)
 
-    def forward(
-        self, x: torch.Tensor, *, need_s: bool, need_e: bool
-    ) -> (torch.Tensor, torch.Tensor, torch.Tensor):
+    def forward(self, x: torch.Tensor, *, need_s: bool, need_e: bool) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         x = self.pix_feat_proj(x)
         shrinkage = self.d_proj(x) ** 2 + 1 if (need_s) else None
         selection = torch.sigmoid(self.e_proj(x)) if (need_e) else None
@@ -101,13 +99,9 @@ class MaskEncoder(nn.Module):
 
         resnet_model_path = model_cfg.get('resnet_model_path')
         if model_cfg.mask_encoder.type == 'resnet18':
-            network = resnet.resnet18(
-                pretrained=True, extra_dim=extra_dim, model_dir=resnet_model_path
-            )
+            network = resnet.resnet18(pretrained=True, extra_dim=extra_dim, model_dir=resnet_model_path)
         elif model_cfg.mask_encoder.type == 'resnet50':
-            network = resnet.resnet50(
-                pretrained=True, extra_dim=extra_dim, model_dir=resnet_model_path
-            )
+            network = resnet.resnet50(pretrained=True, extra_dim=extra_dim, model_dir=resnet_model_path)
         else:
             raise NotImplementedError
         self.conv1 = network.conv1
@@ -182,9 +176,7 @@ class MaskEncoder(nn.Module):
                 if fast_path:
                     new_sensory = self.sensory_update(g_chunk, sensory)
                 else:
-                    new_sensory[:, i : i + chunk_size] = self.sensory_update(
-                        g_chunk, sensory[:, i : i + chunk_size]
-                    )
+                    new_sensory[:, i : i + chunk_size] = self.sensory_update(g_chunk, sensory[:, i : i + chunk_size])
         g = torch.cat(all_g, dim=1)
 
         return g, new_sensory
@@ -236,9 +228,7 @@ class PixelFeatureFuser(nn.Module):
         all_p16 = []
         for i in range(0, num_objects, chunk_size):
             sensory_readout = self.sensory_compress(
-                torch.cat(
-                    [sensory_memory[:, i : i + chunk_size], last_mask[:, i : i + chunk_size]], 2
-                )
+                torch.cat([sensory_memory[:, i : i + chunk_size], last_mask[:, i : i + chunk_size]], 2)
             )
             p16 = pixel_memory[:, i : i + chunk_size] + sensory_readout
             p16 = self.fuser(pix_feat, p16)
@@ -258,9 +248,7 @@ class MaskDecoder(nn.Module):
 
         assert embed_dim == up_dims[0]
 
-        self.sensory_update = SensoryUpdater(
-            [up_dims[0], up_dims[1], up_dims[2] + 1], sensory_dim, sensory_dim
-        )
+        self.sensory_update = SensoryUpdater([up_dims[0], up_dims[1], up_dims[2] + 1], sensory_dim, sensory_dim)
 
         self.decoder_feat_proc = DecoderFeatureProcessor(ms_image_dims[1:], up_dims[:-1])
         self.up_16_8 = MaskUpsampleBlock(up_dims[0], up_dims[1])
@@ -306,9 +294,7 @@ class MaskDecoder(nn.Module):
                 logits = self.pred(F.relu(p4.flatten(start_dim=0, end_dim=1).float()))
 
             if update_sensory:
-                p4 = torch.cat(
-                    [p4, logits.view(batch_size, actual_chunk_size, 1, *logits.shape[-2:])], 2
-                )
+                p4 = torch.cat([p4, logits.view(batch_size, actual_chunk_size, 1, *logits.shape[-2:])], 2)
                 if fast_path:
                     new_sensory = self.sensory_update([p16, p8, p4], sensory)
                 else:

@@ -56,9 +56,7 @@ class DistMaps(nn.Module):
             coords = []
             for i in range(batchsize):
                 norm_delimeter = 1.0 if self.use_disks else self.spatial_scale * self.norm_radius
-                coords.append(
-                    self._get_dist_maps(points[i].cpu().float().numpy(), rows, cols, norm_delimeter)
-                )
+                coords.append(self._get_dist_maps(points[i].cpu().float().numpy(), rows, cols, norm_delimeter))
             coords = torch.from_numpy(np.stack(coords, axis=0)).to(points.device).float()
         else:
             num_points = points.shape[1] // 2
@@ -66,19 +64,11 @@ class DistMaps(nn.Module):
             points, points_order = torch.split(points, [2, 1], dim=1)
 
             invalid_points = torch.max(points, dim=1, keepdim=False)[0] < 0
-            row_array = torch.arange(
-                start=0, end=rows, step=1, dtype=torch.float32, device=points.device
-            )
-            col_array = torch.arange(
-                start=0, end=cols, step=1, dtype=torch.float32, device=points.device
-            )
+            row_array = torch.arange(start=0, end=rows, step=1, dtype=torch.float32, device=points.device)
+            col_array = torch.arange(start=0, end=cols, step=1, dtype=torch.float32, device=points.device)
 
             coord_rows, coord_cols = torch.meshgrid(row_array, col_array)
-            coords = (
-                torch.stack((coord_rows, coord_cols), dim=0)
-                .unsqueeze(0)
-                .repeat(points.size(0), 1, 1, 1)
-            )
+            coords = torch.stack((coord_rows, coord_cols), dim=0).unsqueeze(0).repeat(points.size(0), 1, 1, 1)
 
             add_xy = (points * self.spatial_scale).view(points.size(0), points.size(1), 1, 1)
             coords.add_(-add_xy)

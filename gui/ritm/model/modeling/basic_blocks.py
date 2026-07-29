@@ -63,9 +63,7 @@ class SepConvHead(nn.Module):
             if dropout_ratio > 0 and dropout_indx == i:
                 sepconvhead.append(nn.Dropout(dropout_ratio))
 
-        sepconvhead.append(
-            nn.Conv2d(in_channels=mid_channels, out_channels=num_outputs, kernel_size=1, padding=0)
-        )
+        sepconvhead.append(nn.Conv2d(in_channels=mid_channels, out_channels=num_outputs, kernel_size=1, padding=0))
 
         self.layers = nn.Sequential(*sepconvhead)
 

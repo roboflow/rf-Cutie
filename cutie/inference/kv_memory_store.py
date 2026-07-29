@@ -101,11 +101,7 @@ class KeyValueMemoryStore:
                 assert len(value.shape) == 3
                 if obj in self.v:
                     _add_last_dim(self.v, obj, value, prepend=(as_permanent == 'all'))
-                    bucket_used = [
-                        bucket_id
-                        for bucket_id, object_ids in self.buckets.items()
-                        if obj in object_ids
-                    ]
+                    bucket_used = [bucket_id for bucket_id, object_ids in self.buckets.items() if obj in object_ids]
                     assert len(bucket_used) == 1  # each object should only be in one bucket
                     enabled_buckets.add(bucket_used[0])
                 else:
@@ -199,12 +195,8 @@ class KeyValueMemoryStore:
         if self.save_selection:
             self.e[bucket_id] = torch.cat([e[:, :, : start - p_size], e[:, :, end:]], -1)
         if self.save_usage:
-            self.use_cnt[bucket_id] = torch.cat(
-                [use_cnt[:, : start - p_size], use_cnt[:, end:]], -1
-            )
-            self.life_cnt[bucket_id] = torch.cat(
-                [life_cnt[:, : start - p_size], life_cnt[:, end:]], -1
-            )
+            self.use_cnt[bucket_id] = torch.cat([use_cnt[:, : start - p_size], use_cnt[:, end:]], -1)
+            self.life_cnt[bucket_id] = torch.cat([life_cnt[:, : start - p_size], life_cnt[:, end:]], -1)
         for obj_id in object_ids:
             v = self.v[obj_id]
             self.v[obj_id] = torch.cat([v[:, :, :start], v[:, :, end:]], -1)
@@ -242,9 +234,7 @@ class KeyValueMemoryStore:
                 [self.e[bucket_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0
             )
         for obj_id in object_ids:
-            self.v[obj_id] = torch.stack(
-                [self.v[obj_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0
-            )
+            self.v[obj_id] = torch.stack([self.v[obj_id][bi, :, survived] for bi, survived in enumerate(survivals)], 0)
 
         self.use_cnt[bucket_id] = torch.stack(
             [self.use_cnt[bucket_id][bi, survived] for bi, survived in enumerate(survivals)], 0

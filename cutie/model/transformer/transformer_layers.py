@@ -58,9 +58,7 @@ class CrossAttention(nn.Module):
         norm: bool = True,
     ):
         super().__init__()
-        self.cross_attn = nn.MultiheadAttention(
-            dim, nhead, dropout=dropout, batch_first=batch_first
-        )
+        self.cross_attn = nn.MultiheadAttention(dim, nhead, dropout=dropout, batch_first=batch_first)
         if norm:
             self.norm = nn.LayerNorm(dim)
         else:

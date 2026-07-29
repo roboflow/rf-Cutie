@@ -33,9 +33,7 @@ for seq in tqdm.tqdm(sequences):
     segmentations = []
     for image_path in annotated_image_paths:
         this_segment = {}
-        mask_path = os.path.join(
-            input_mask_path, dataset + '_-_' + seq_name, image_path[:-4] + '.png'
-        )
+        mask_path = os.path.join(input_mask_path, dataset + '_-_' + seq_name, image_path[:-4] + '.png')
 
         if os.path.exists(mask_path):
             mask = np.array(Image.open(mask_path))

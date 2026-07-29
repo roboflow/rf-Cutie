@@ -91,25 +91,19 @@ class FeatureBRSPredictor(BRSBasePredictor):
             scaled_backbone_features = scaled_backbone_features + bias
             if self.insertion_mode == 'after_c4':
                 x = self.net.feature_extractor.aspp(scaled_backbone_features)
-                x = F.interpolate(
-                    x, mode='bilinear', size=self._c1_features.size()[2:], align_corners=True
-                )
+                x = F.interpolate(x, mode='bilinear', size=self._c1_features.size()[2:], align_corners=True)
                 x = torch.cat((x, self._c1_features), dim=1)
                 scaled_backbone_features = self.net.feature_extractor.head(x)
             elif self.insertion_mode == 'after_aspp':
                 scaled_backbone_features = self.net.feature_extractor.head(scaled_backbone_features)
 
             pred_logits = self.net.head(scaled_backbone_features)
-            pred_logits = F.interpolate(
-                pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True
-            )
+            pred_logits = F.interpolate(pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True)
             return pred_logits
 
         self.opt_functor.init_click(get_prediction_logits, pos_mask, neg_mask, self.device)
         if num_clicks > self.optimize_after_n_clicks:
-            opt_result = fmin_l_bfgs_b(
-                func=self.opt_functor, x0=self.opt_data, **self.opt_functor.optimizer_params
-            )
+            opt_result = fmin_l_bfgs_b(func=self.opt_functor, x0=self.opt_data, **self.opt_functor.optimizer_params)
             self.opt_data = opt_result[0]
 
         with torch.no_grad():
@@ -201,16 +195,12 @@ class HRNetFeatureBRSPredictor(BRSBasePredictor):
             else:
                 raise NotImplementedError
 
-            pred_logits = F.interpolate(
-                pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True
-            )
+            pred_logits = F.interpolate(pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True)
             return pred_logits
 
         self.opt_functor.init_click(get_prediction_logits, pos_mask, neg_mask, self.device)
         if num_clicks > self.optimize_after_n_clicks:
-            opt_result = fmin_l_bfgs_b(
-                func=self.opt_functor, x0=self.opt_data, **self.opt_functor.optimizer_params
-            )
+            opt_result = fmin_l_bfgs_b(func=self.opt_functor, x0=self.opt_data, **self.opt_functor.optimizer_params)
             self.opt_data = opt_result[0]
 
         with torch.no_grad():
@@ -263,11 +253,7 @@ class InputBRSPredictor(BRSBasePredictor):
 
         if self.opt_data is None or is_image_changed:
             if self.optimize_target == 'dmaps':
-                opt_channels = (
-                    self.net.coord_feature_ch - 1
-                    if self.net.with_prev_mask
-                    else self.net.coord_feature_ch
-                )
+                opt_channels = self.net.coord_feature_ch - 1 if self.net.with_prev_mask else self.net.coord_feature_ch
             else:
                 opt_channels = 3
             bs = image_nd.shape[0] // 2 if self.with_flip else image_nd.shape[0]
@@ -299,15 +285,11 @@ class InputBRSPredictor(BRSBasePredictor):
                 coord_features = self.net.maps_transform(dmaps)
 
             pred_logits = self.net.backbone_forward(x, coord_features=coord_features)['instances']
-            pred_logits = F.interpolate(
-                pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True
-            )
+            pred_logits = F.interpolate(pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True)
 
             return pred_logits
 
-        self.opt_functor.init_click(
-            get_prediction_logits, pos_mask, neg_mask, self.device, shape=self.opt_data.shape
-        )
+        self.opt_functor.init_click(get_prediction_logits, pos_mask, neg_mask, self.device, shape=self.opt_data.shape)
         if num_clicks > self.optimize_after_n_clicks:
             opt_result = fmin_l_bfgs_b(
                 func=self.opt_functor,
@@ -315,9 +297,7 @@ class InputBRSPredictor(BRSBasePredictor):
                 **self.opt_functor.optimizer_params,
             )
 
-            self.opt_data = (
-                torch.from_numpy(opt_result[0]).view(self.opt_data.shape).to(self.device)
-            )
+            self.opt_data = torch.from_numpy(opt_result[0]).view(self.opt_data.shape).to(self.device)
 
         with torch.no_grad():
             if self.opt_functor.best_prediction is not None:

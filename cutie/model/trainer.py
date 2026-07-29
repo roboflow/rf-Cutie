@@ -40,17 +40,10 @@ class Trainer:
         # setting up logging
         self.log = log
         self.run_path = run_path
-        self.log.log_string(
-            'model_size', str(sum(param.nelement() for param in self.cutie.parameters()))
-        )
+        self.log.log_string('model_size', str(sum(param.nelement() for param in self.cutie.parameters())))
         self.log.log_string(
             'number_of_parameters_that_require_gradient',
-            str(
-                sum(
-                    param.nelement()
-                    for param in filter(lambda p: p.requires_grad, self.cutie.parameters())
-                )
-            ),
+            str(sum(param.nelement() for param in filter(lambda p: p.requires_grad, self.cutie.parameters()))),
         )
         self.log.log_string('torch version', torch.__version__)
         self.log.log_string('PIL version', PIL.__version__)
@@ -119,9 +112,7 @@ class Trainer:
             if self._is_train:
                 if self.local_rank == 0 and it % self.log_image_interval == 0 and it != 0:
                     images = {**data, **out}
-                    self.log.log_image(
-                        self.stage, 'vis', vis(images, self.size, num_filled_objects), it
-                    )
+                    self.log.log_image(self.stage, 'vis', vis(images, self.size, num_filled_objects), it)
                     # self.log.log_image(self.stage, 'vis-debug',
                     #                    vis_debug(images, self.size, num_filled_objects), 0)
 

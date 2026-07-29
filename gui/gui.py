@@ -128,9 +128,7 @@ class GUI(QWidget):
         self.save_visualization_combo.addItem('Always')
         self.save_visualization_combo.addItem('Propagation only (higher quality)')
         self.combo.setCurrentText('None')
-        self.save_visualization_combo.currentTextChanged.connect(
-            controller.on_set_save_visualization_mode
-        )
+        self.save_visualization_combo.currentTextChanged.connect(controller.on_set_save_visualization_mode)
 
         self.save_soft_mask_checkbox = QCheckBox(self)
         self.save_soft_mask_checkbox.toggled.connect(controller.on_save_soft_mask_toggle)
@@ -174,12 +172,8 @@ class GUI(QWidget):
         self.perm_mem_gauge, self.perm_mem_gauge_layout = create_gauge('Permanent memory size')
         self.work_mem_gauge, self.work_mem_gauge_layout = create_gauge('Working memory size')
         self.long_mem_gauge, self.long_mem_gauge_layout = create_gauge('Long-term memory size')
-        self.gpu_mem_gauge, self.gpu_mem_gauge_layout = create_gauge(
-            'GPU mem. (all proc, w/ caching)'
-        )
-        self.torch_mem_gauge, self.torch_mem_gauge_layout = create_gauge(
-            'GPU mem. (torch, w/o caching)'
-        )
+        self.gpu_mem_gauge, self.gpu_mem_gauge_layout = create_gauge('GPU mem. (all proc, w/ caching)')
+        self.torch_mem_gauge, self.torch_mem_gauge_layout = create_gauge('GPU mem. (torch, w/o caching)')
 
         # Parameters setting
         self.work_mem_min, self.work_mem_min_layout = create_parameter_box(
@@ -334,9 +328,7 @@ class GUI(QWidget):
 
         # Objects shortcuts
         for i in range(1, controller.num_objects + 1):
-            QShortcut(QKeySequence(str(i)), self).activated.connect(
-                functools.partial(controller.hit_number_key, i)
-            )
+            QShortcut(QKeySequence(str(i)), self).activated.connect(functools.partial(controller.hit_number_key, i))
             QShortcut(QKeySequence(f'Ctrl+{i}'), self).activated.connect(
                 functools.partial(controller.hit_number_key, i)
             )
@@ -346,34 +338,28 @@ class GUI(QWidget):
         QShortcut(QKeySequence(Qt.Key.Key_Right), self).activated.connect(controller.on_next_frame)
 
         # +/- 10 frames shortcuts
-        QShortcut(
-            QKeySequence(Qt.Key.Key_Left | Qt.KeyboardModifier.ShiftModifier), self
-        ).activated.connect(functools.partial(controller.on_prev_frame, 10))
-        QShortcut(
-            QKeySequence(Qt.Key.Key_Right | Qt.KeyboardModifier.ShiftModifier), self
-        ).activated.connect(functools.partial(controller.on_next_frame, 10))
+        QShortcut(QKeySequence(Qt.Key.Key_Left | Qt.KeyboardModifier.ShiftModifier), self).activated.connect(
+            functools.partial(controller.on_prev_frame, 10)
+        )
+        QShortcut(QKeySequence(Qt.Key.Key_Right | Qt.KeyboardModifier.ShiftModifier), self).activated.connect(
+            functools.partial(controller.on_next_frame, 10)
+        )
 
         # first/last frame shortcuts
-        QShortcut(
-            QKeySequence(Qt.Key.Key_Left | Qt.KeyboardModifier.AltModifier), self
-        ).activated.connect(functools.partial(controller.on_prev_frame, 999999))
-        QShortcut(
-            QKeySequence(Qt.Key.Key_Right | Qt.KeyboardModifier.AltModifier), self
-        ).activated.connect(functools.partial(controller.on_next_frame, 999999))
+        QShortcut(QKeySequence(Qt.Key.Key_Left | Qt.KeyboardModifier.AltModifier), self).activated.connect(
+            functools.partial(controller.on_prev_frame, 999999)
+        )
+        QShortcut(QKeySequence(Qt.Key.Key_Right | Qt.KeyboardModifier.AltModifier), self).activated.connect(
+            functools.partial(controller.on_next_frame, 999999)
+        )
 
         # commit to permanent memory shortcut
         QShortcut(QKeySequence(Qt.Key.Key_C), self).activated.connect(controller.on_commit)
 
         # propagate forward/backward/pause shortcuts
-        QShortcut(QKeySequence(Qt.Key.Key_F), self).activated.connect(
-            controller.on_forward_propagation
-        )
-        QShortcut(QKeySequence(Qt.Key.Key_Space), self).activated.connect(
-            controller.on_forward_propagation
-        )
-        QShortcut(QKeySequence(Qt.Key.Key_B), self).activated.connect(
-            controller.on_backward_propagation
-        )
+        QShortcut(QKeySequence(Qt.Key.Key_F), self).activated.connect(controller.on_forward_propagation)
+        QShortcut(QKeySequence(Qt.Key.Key_Space), self).activated.connect(controller.on_forward_propagation)
+        QShortcut(QKeySequence(Qt.Key.Key_B), self).activated.connect(controller.on_backward_propagation)
 
         # quit shortcut
         QShortcut(QKeySequence(Qt.Key.Key_Q), self).activated.connect(self.close)
@@ -504,9 +490,7 @@ class GUI(QWidget):
 
     def open_file(self, prompt):
         options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, prompt, '', 'Image files (*)', options=options
-        )
+        file_name, _ = QFileDialog.getOpenFileName(self, prompt, '', 'Image files (*)', options=options)
         return file_name
 
     def set_object_color(self, object_id: int):

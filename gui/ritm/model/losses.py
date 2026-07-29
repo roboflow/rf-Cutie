@@ -59,11 +59,7 @@ class NormalizedFocalLossSigmoid(nn.Module):
             beta = torch.clamp_max(beta, self._max_mult)
 
         with torch.no_grad():
-            ignore_area = (
-                torch.sum(label == self._ignore_label, dim=tuple(range(1, label.dim())))
-                .cpu()
-                .numpy()
-            )
+            ignore_area = torch.sum(label == self._ignore_label, dim=tuple(range(1, label.dim()))).cpu().numpy()
             sample_mult = torch.mean(mult, dim=tuple(range(1, mult.dim()))).cpu().numpy()
             if np.any(ignore_area == 0):
                 self._k_sum = 0.9 * self._k_sum + 0.1 * sample_mult[ignore_area == 0].mean()
@@ -72,11 +68,7 @@ class NormalizedFocalLossSigmoid(nn.Module):
                 beta_pmax = beta_pmax.mean().item()
                 self._m_max = 0.8 * self._m_max + 0.2 * beta_pmax
 
-        loss = (
-            -alpha
-            * beta
-            * torch.log(torch.min(pt + self._eps, torch.ones(1, dtype=torch.float).to(pt.device)))
-        )
+        loss = -alpha * beta * torch.log(torch.min(pt + self._eps, torch.ones(1, dtype=torch.float).to(pt.device)))
         loss = self._weight * (loss * sample_weight)
 
         if self._size_average:
@@ -84,9 +76,7 @@ class NormalizedFocalLossSigmoid(nn.Module):
                 sample_weight,
                 dim=misc.get_dims_with_exclusion(sample_weight.dim(), self._batch_axis),
             )
-            loss = torch.sum(
-                loss, dim=misc.get_dims_with_exclusion(loss.dim(), self._batch_axis)
-            ) / (bsum + self._eps)
+            loss = torch.sum(loss, dim=misc.get_dims_with_exclusion(loss.dim(), self._batch_axis)) / (bsum + self._eps)
         else:
             loss = torch.sum(loss, dim=misc.get_dims_with_exclusion(loss.dim(), self._batch_axis))
 
@@ -138,20 +128,12 @@ class FocalLoss(nn.Module):
 
         beta = (1 - pt) ** self._gamma
 
-        loss = (
-            -alpha
-            * beta
-            * torch.log(torch.min(pt + self._eps, torch.ones(1, dtype=torch.float).to(pt.device)))
-        )
+        loss = -alpha * beta * torch.log(torch.min(pt + self._eps, torch.ones(1, dtype=torch.float).to(pt.device)))
         loss = self._weight * (loss * sample_weight)
 
         if self._size_average:
-            tsum = torch.sum(
-                sample_weight, dim=misc.get_dims_with_exclusion(label.dim(), self._batch_axis)
-            )
-            loss = torch.sum(
-                loss, dim=misc.get_dims_with_exclusion(loss.dim(), self._batch_axis)
-            ) / (tsum + self._eps)
+            tsum = torch.sum(sample_weight, dim=misc.get_dims_with_exclusion(label.dim(), self._batch_axis))
+            loss = torch.sum(loss, dim=misc.get_dims_with_exclusion(loss.dim(), self._batch_axis)) / (tsum + self._eps)
         else:
             loss = torch.sum(loss, dim=misc.get_dims_with_exclusion(loss.dim(), self._batch_axis))
 

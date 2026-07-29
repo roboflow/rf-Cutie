@@ -8,9 +8,7 @@ from cutie.model.transformer.positional_encoding import PositionalEncoding
 
 
 # @torch.jit.script
-def _weighted_pooling(
-    masks: torch.Tensor, value: torch.Tensor, logits: torch.Tensor
-) -> (torch.Tensor, torch.Tensor):
+def _weighted_pooling(masks: torch.Tensor, value: torch.Tensor, logits: torch.Tensor) -> (torch.Tensor, torch.Tensor):
     # value: B*num_objects*H*W*value_dim
     # logits: B*num_objects*H*W*num_summaries
     # masks: B*num_objects*H*W*num_summaries: 1 if allowed

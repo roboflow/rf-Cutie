@@ -53,9 +53,7 @@ class AuxComputer(nn.Module):
         else:
             self.sensory_aux = None
 
-    def _aggregate_with_selector(
-        self, logits: torch.Tensor, selector: torch.Tensor
-    ) -> torch.Tensor:
+    def _aggregate_with_selector(self, logits: torch.Tensor, selector: torch.Tensor) -> torch.Tensor:
         prob = torch.sigmoid(logits)
         if selector is not None:
             prob = prob * selector

@@ -44,12 +44,8 @@ class DeepLabV3Plus(nn.Module):
             **kwargs,
         )
 
-        self.head = _DeepLabHead(
-            in_channels=ch + 32, mid_channels=ch, out_channels=ch, norm_layer=self.norm_layer
-        )
-        self.skip_project = _SkipProject(
-            self.skip_project_in_channels, 32, norm_layer=self.norm_layer
-        )
+        self.head = _DeepLabHead(in_channels=ch + 32, mid_channels=ch, out_channels=ch, norm_layer=self.norm_layer)
+        self.skip_project = _SkipProject(self.skip_project_in_channels, 32, norm_layer=self.norm_layer)
         self.aspp = _ASPP(
             in_channels=self.aspp_in_channels,
             atrous_rates=[12, 24, 36],
@@ -153,9 +149,7 @@ class _ASPP(nn.Module):
         super(_ASPP, self).__init__()
 
         b0 = nn.Sequential(
-            nn.Conv2d(
-                in_channels=in_channels, out_channels=out_channels, kernel_size=1, bias=False
-            ),
+            nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1, bias=False),
             norm_layer(out_channels),
             nn.ReLU(),
         )
@@ -169,9 +163,7 @@ class _ASPP(nn.Module):
         self.concurent = nn.ModuleList([b0, b1, b2, b3, b4])
 
         project = [
-            nn.Conv2d(
-                in_channels=5 * out_channels, out_channels=out_channels, kernel_size=1, bias=False
-            ),
+            nn.Conv2d(in_channels=5 * out_channels, out_channels=out_channels, kernel_size=1, bias=False),
             norm_layer(out_channels),
             nn.ReLU(),
         ]
@@ -191,9 +183,7 @@ class _AsppPooling(nn.Module):
 
         self.gap = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Conv2d(
-                in_channels=in_channels, out_channels=out_channels, kernel_size=1, bias=False
-            ),
+            nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1, bias=False),
             norm_layer(out_channels),
             nn.ReLU(),
         )

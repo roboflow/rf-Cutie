@@ -4,9 +4,7 @@ import cv2
 import numpy as np
 
 
-def visualize_instances(
-    imask, bg_color=255, boundaries_color=None, boundaries_width=1, boundaries_alpha=0.8
-):
+def visualize_instances(imask, bg_color=255, boundaries_color=None, boundaries_width=1, boundaries_alpha=0.8):
     num_objects = imask.max() + 1
     palette = get_palette(num_objects)
     if bg_color is not None:
@@ -102,9 +100,7 @@ def get_boundaries(instances_masks, boundaries_width=1):
 
         obj_mask = instances_masks == obj_id
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        inner_mask = cv2.erode(
-            obj_mask.astype(np.uint8), kernel, iterations=boundaries_width
-        ).astype(np.bool)
+        inner_mask = cv2.erode(obj_mask.astype(np.uint8), kernel, iterations=boundaries_width).astype(np.bool)
 
         obj_boundary = np.logical_xor(obj_mask, np.logical_and(inner_mask, obj_mask))
         boundaries = np.logical_or(boundaries, obj_boundary)

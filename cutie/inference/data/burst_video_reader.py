@@ -51,16 +51,12 @@ class BURSTVideoReader(Dataset):
             self.im_transform = transforms.Compose(
                 [
                     transforms.ToTensor(),
-                    transforms.Resize(
-                        size, interpolation=InterpolationMode.BILINEAR, antialias=True
-                    ),
+                    transforms.Resize(size, interpolation=InterpolationMode.BILINEAR, antialias=True),
                 ]
             )
             self.mask_transform = transforms.Compose(
                 [
-                    transforms.Resize(
-                        size, interpolation=InterpolationMode.NEAREST, antialias=True
-                    ),
+                    transforms.Resize(size, interpolation=InterpolationMode.NEAREST, antialias=True),
                 ]
             )
         self.size = size

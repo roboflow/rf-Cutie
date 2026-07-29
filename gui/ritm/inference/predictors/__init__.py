@@ -46,9 +46,7 @@ def get_predictor(
     if brs_mode == 'NoBRS':
         if predictor_params is not None:
             predictor_params_.update(predictor_params)
-        predictor = BasePredictor(
-            net, device, zoom_in=zoom_in, with_flip=with_flip, **predictor_params_
-        )
+        predictor = BasePredictor(net, device, zoom_in=zoom_in, with_flip=with_flip, **predictor_params_)
     elif brs_mode.startswith('f-BRS'):
         predictor_params_.update(
             {
@@ -73,9 +71,7 @@ def get_predictor(
 
         if isinstance(net, HRNetModel):
             FeaturePredictor = HRNetFeatureBRSPredictor
-            insertion_mode = {'after_c4': 'A', 'after_aspp': 'A', 'after_deeplab': 'C'}[
-                insertion_mode
-            ]
+            insertion_mode = {'after_c4': 'A', 'after_aspp': 'A', 'after_deeplab': 'C'}[insertion_mode]
         else:
             FeaturePredictor = FeatureBRSPredictor
 

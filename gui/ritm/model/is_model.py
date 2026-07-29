@@ -124,12 +124,8 @@ class ISModel(nn.Module):
 
     def get_coord_features(self, image, prev_mask, points):
         if self.clicks_groups is not None:
-            points_groups = split_points_by_order(
-                points, groups=(2,) + (1,) * (len(self.clicks_groups) - 2) + (-1,)
-            )
-            coord_features = [
-                dist_map(image, pg) for dist_map, pg in zip(self.dist_maps, points_groups)
-            ]
+            points_groups = split_points_by_order(points, groups=(2,) + (1,) * (len(self.clicks_groups) - 2) + (-1,))
+            coord_features = [dist_map(image, pg) for dist_map, pg in zip(self.dist_maps, points_groups)]
             coord_features = torch.cat(coord_features, dim=1)
         else:
             coord_features = self.dist_maps(image, points)
@@ -161,9 +157,7 @@ def split_points_by_order(tpoints: torch.Tensor, groups):
                 continue
 
             is_negative = int(pindx >= num_points)
-            if group_id >= num_groups or (
-                group_id == 0 and is_negative
-            ):  # disable negative first click
+            if group_id >= num_groups or (group_id == 0 and is_negative):  # disable negative first click
                 group_id = num_groups - 1
 
             new_point_indx = last_point_indx_group[bindx, group_id, is_negative]
@@ -171,8 +165,6 @@ def split_points_by_order(tpoints: torch.Tensor, groups):
 
             group_points[group_id][bindx, new_point_indx, :] = point
 
-    group_points = [
-        torch.tensor(x, dtype=tpoints.dtype, device=tpoints.device) for x in group_points
-    ]
+    group_points = [torch.tensor(x, dtype=tpoints.dtype, device=tpoints.device) for x in group_points]
 
     return group_points

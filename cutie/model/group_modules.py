@@ -5,9 +5,7 @@ import torch.nn.functional as F
 from cutie.model.channel_attn import CAResBlock
 
 
-def interpolate_groups(
-    g: torch.Tensor, ratio: float, mode: str, align_corners: bool
-) -> torch.Tensor:
+def interpolate_groups(g: torch.Tensor, ratio: float, mode: str, align_corners: bool) -> torch.Tensor:
     batch_size, num_objects = g.shape[:2]
     g = F.interpolate(
         g.flatten(start_dim=0, end_dim=1),
@@ -109,9 +107,7 @@ class GroupFeatureFusionBlock(nn.Module):
         x_transform = nn.Conv2d(x_in_dim, out_dim, kernel_size=1)
         g_transform = GConv2d(g_in_dim, out_dim, kernel_size=1)
 
-        self.distributor = MainToGroupDistributor(
-            x_transform=x_transform, g_transform=g_transform, method='add'
-        )
+        self.distributor = MainToGroupDistributor(x_transform=x_transform, g_transform=g_transform, method='add')
         self.block1 = CAResBlock(out_dim, out_dim)
         self.block2 = CAResBlock(out_dim, out_dim)
 

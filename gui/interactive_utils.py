@@ -136,9 +136,7 @@ def overlay_popup(image: np.ndarray, mask: np.ndarray, target_objects: List[int]
     return im_overlay.astype(image.dtype)
 
 
-def overlay_layer(
-    image: np.ndarray, mask: np.ndarray, layer: np.ndarray, target_objects: List[int]
-):
+def overlay_layer(image: np.ndarray, mask: np.ndarray, layer: np.ndarray, target_objects: List[int]):
     # insert a layer between foreground and background
     # The CPU version is less accurate because we are using the hard mask
     # The GPU version has softer edges as it uses soft probabilities
@@ -146,9 +144,7 @@ def overlay_layer(
     layer_alpha = layer[:, :, 3].astype(np.float32)[:, :, np.newaxis] / 255
     layer_rgb = layer[:, :, :3]
     background_alpha = (1 - obj_mask) * (1 - layer_alpha)
-    im_overlay = (
-        image * background_alpha + layer_rgb * (1 - obj_mask) * layer_alpha + image * obj_mask
-    ).clip(0, 255)
+    im_overlay = (image * background_alpha + layer_rgb * (1 - obj_mask) * layer_alpha + image * obj_mask).clip(0, 255)
     return im_overlay.astype(image.dtype)
 
 
@@ -159,9 +155,7 @@ def overlay_rgba(image: np.ndarray, mask: np.ndarray, target_objects: List[int])
     return im_overlay.astype(image.dtype)
 
 
-def overlay_davis_torch(
-    image: torch.Tensor, prob: torch.Tensor, alpha: float = 0.5, fade: bool = False
-):
+def overlay_davis_torch(image: torch.Tensor, prob: torch.Tensor, alpha: float = 0.5, fade: bool = False):
     """Overlay segmentation on top of RGB image. from davis official"""
     # Changes the image in-place to avoid copying
     # NOTE: Make sure you no longer use image after calling this function
@@ -201,9 +195,7 @@ def overlay_popup_torch(image: torch.Tensor, prob: torch.Tensor, target_objects:
     return im_overlay
 
 
-def overlay_layer_torch(
-    image: torch.Tensor, prob: torch.Tensor, layer: torch.Tensor, target_objects: List[int]
-):
+def overlay_layer_torch(image: torch.Tensor, prob: torch.Tensor, layer: torch.Tensor, target_objects: List[int]):
     # insert a layer between foreground and background
     # The CPU version is less accurate because we are using the hard mask
     # The GPU version has softer edges as it uses soft probabilities
@@ -218,9 +210,7 @@ def overlay_layer_torch(
     layer_rgb = layer[:, :, :3]
     # background_alpha = torch.maximum(obj_mask, layer_alpha)
     background_alpha = (1 - obj_mask) * (1 - layer_alpha)
-    im_overlay = (
-        image * background_alpha + layer_rgb * (1 - obj_mask) * layer_alpha + image * obj_mask
-    ).clip(0, 1)
+    im_overlay = (image * background_alpha + layer_rgb * (1 - obj_mask) * layer_alpha + image * obj_mask).clip(0, 1)
 
     im_overlay = (im_overlay * 255).byte().cpu().numpy()
     return im_overlay

@@ -16,9 +16,7 @@ def pick_random_points(h, w, n_samples):
 def inverse_tps_grid(c_src, c_dst, dshape):
     """Return normalized source coordinates for every destination image pixel."""
     height, width = dshape[:2]
-    destination_x, destination_y = np.meshgrid(
-        np.linspace(0.0, 1.0, width), np.linspace(0.0, 1.0, height)
-    )
+    destination_x, destination_y = np.meshgrid(np.linspace(0.0, 1.0, width), np.linspace(0.0, 1.0, height))
     destination_grid = np.stack((destination_x, destination_y), axis=-1)
 
     spline = ThinPlateSpline()
@@ -31,9 +29,7 @@ def warp_dual_cv(img, mask, c_src, c_dst):
     grid = inverse_tps_grid(c_src, c_dst, img.shape)
     mapx = (grid[:, :, 0] * img.shape[1]).astype(np.float32)
     mapy = (grid[:, :, 1] * img.shape[0]).astype(np.float32)
-    return cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR), cv2.remap(
-        mask, mapx, mapy, cv2.INTER_NEAREST
-    )
+    return cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR), cv2.remap(mask, mapx, mapy, cv2.INTER_NEAREST)
 
 
 def random_tps_warp(img, mask, scale, n_ctrl_pts=12):

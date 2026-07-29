@@ -55,16 +55,12 @@ class CutieTrainWrapper(CUTIE):
 
             # zero-init sensory
             sensory = torch.zeros((b, num_objects, self.sensory_dim, h, w), device=frames.device)
-            msk_val, sensory, obj_val, _ = self.encode_mask(
-                frames[:, 0], pix_feat[:, 0], sensory, first_frame_gt[:, 0]
-            )
+            msk_val, sensory, obj_val, _ = self.encode_mask(frames[:, 0], pix_feat[:, 0], sensory, first_frame_gt[:, 0])
             masks = first_frame_gt[:, 0]
 
             # add the time dimension
             msk_values = msk_val.unsqueeze(3)  # B*num_objects*C*T*H*W
-            obj_values = (
-                obj_val.unsqueeze(2) if obj_val is not None else None
-            )  # B*num_objects*T*Q*C
+            obj_values = obj_val.unsqueeze(2) if obj_val is not None else None  # B*num_objects*T*Q*C
 
             for ti in range(1, seq_length):
                 if ti <= self.num_ref_frames:
@@ -76,13 +72,9 @@ class CutieTrainWrapper(CUTIE):
                     # this is not very efficient but I think we would
                     # need broadcasting in gather which we don't have
                     ridx = [torch.randperm(ti)[: self.num_ref_frames] for _ in range(b)]
-                    ref_msk_values = torch.stack(
-                        [msk_values[bi, :, :, ridx[bi]] for bi in range(b)], 0
-                    )
+                    ref_msk_values = torch.stack([msk_values[bi, :, :, ridx[bi]] for bi in range(b)], 0)
                     ref_keys = torch.stack([keys[bi, :, ridx[bi]] for bi in range(b)], 0)
-                    ref_shrinkages = torch.stack(
-                        [shrinkages[bi, :, ridx[bi]] for bi in range(b)], 0
-                    )
+                    ref_shrinkages = torch.stack([shrinkages[bi, :, ridx[bi]] for bi in range(b)], 0)
 
                 # Segment frame ti
                 readout, aux_input = self.read_memory(
@@ -98,9 +90,7 @@ class CutieTrainWrapper(CUTIE):
                     selector,
                 )
                 aux_output = self.compute_aux(pix_feat[:, ti], aux_input, selector)
-                sensory, logits, masks = self.segment(
-                    get_ms_feat_ti(ti), readout, sensory, selector=selector
-                )
+                sensory, logits, masks = self.segment(get_ms_feat_ti(ti), readout, sensory, selector=selector)
                 # remove background
                 masks = masks[:, 1:]
 
@@ -111,11 +101,7 @@ class CutieTrainWrapper(CUTIE):
                         frames[:, ti], pix_feat[:, ti], sensory, masks, deep_update=deep_update
                     )
                     msk_values = torch.cat([msk_values, msk_val.unsqueeze(3)], 3)
-                    obj_values = (
-                        torch.cat([obj_values, obj_val.unsqueeze(2)], 2)
-                        if obj_val is not None
-                        else None
-                    )
+                    obj_values = torch.cat([obj_values, obj_val.unsqueeze(2)], 2) if obj_val is not None else None
 
                 out[f'masks_{ti}'] = masks
                 out[f'logits_{ti}'] = logits

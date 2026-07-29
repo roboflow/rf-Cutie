@@ -49,13 +49,9 @@ class ResultSaver:
         init_json=None,
     ):
         if save_scores and hkl is None:
-            raise ModuleNotFoundError(
-                'hickle is required to save scores; install cutie[evaluation].'
-            )
+            raise ModuleNotFoundError('hickle is required to save scores; install cutie[evaluation].')
         if 'burst' in dataset.lower() and mask_util is None:
-            raise ModuleNotFoundError(
-                'pycocotools is required for BURST results; install cutie[evaluation].'
-            )
+            raise ModuleNotFoundError('pycocotools is required for BURST results; install cutie[evaluation].')
 
         self.output_root = output_root
         self.video_name = video_name
@@ -103,9 +99,7 @@ class ResultSaver:
         path_to_image: str = None,
     ):
         if resize_needed:
-            prob = F.interpolate(prob.unsqueeze(1), shape, mode='bilinear', align_corners=False)[
-                :, 0
-            ]
+            prob = F.interpolate(prob.unsqueeze(1), shape, mode='bilinear', align_corners=False)[:, 0]
         # Probability mask -> index mask
         mask = torch.argmax(prob, dim=0)
         if self.save_scores:
@@ -258,9 +252,7 @@ def make_zip(dataset, run_dir, exp_id, mask_output_root):
     if dataset.startswith('y'):
         # YoutubeVOS
         log.info('Making zip for YouTubeVOS...')
-        shutil.make_archive(
-            path.join(run_dir, f'{exp_id}_{dataset}'), 'zip', run_dir, 'Annotations'
-        )
+        shutil.make_archive(path.join(run_dir, f'{exp_id}_{dataset}'), 'zip', run_dir, 'Annotations')
     elif dataset == 'd17-test-dev':
         # DAVIS 2017 test-dev -- zip from within the Annotation folder
         log.info('Making zip for DAVIS test-dev...')
@@ -272,8 +264,6 @@ def make_zip(dataset, run_dir, exp_id, mask_output_root):
     elif dataset == 'lvos-test':
         # LVOS test -- same as YouTubeVOS
         log.info('Making zip for LVOS test...')
-        shutil.make_archive(
-            path.join(run_dir, f'{exp_id}_{dataset}'), 'zip', run_dir, 'Annotations'
-        )
+        shutil.make_archive(path.join(run_dir, f'{exp_id}_{dataset}'), 'zip', run_dir, 'Annotations')
     else:
         log.info(f'Not making zip for {dataset}.')

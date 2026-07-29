@@ -8,9 +8,7 @@ from gui.resource_manager import ResourceManager
 
 
 class PropagationReader(Dataset):
-    def __init__(
-        self, res_man: ResourceManager, start_ti: int, direction: Literal['forward', 'backward']
-    ):
+    def __init__(self, res_man: ResourceManager, start_ti: int, direction: Literal['forward', 'backward']):
         self.res_man = res_man
         self.start_ti = start_ti
         self.direction = direction
@@ -48,12 +46,8 @@ class PropagationReader(Dataset):
 
 def get_data_loader(dataset: Dataset, num_workers: int):
     if 'linux' in sys.platform:
-        loader = DataLoader(
-            dataset, batch_size=None, shuffle=False, num_workers=num_workers, collate_fn=lambda x: x
-        )
+        loader = DataLoader(dataset, batch_size=None, shuffle=False, num_workers=num_workers, collate_fn=lambda x: x)
     else:
         print(f'Non-linux platform {sys.platform} detected, using single-threaded dataloader')
-        loader = DataLoader(
-            dataset, batch_size=None, shuffle=False, num_workers=0, collate_fn=lambda x: x
-        )
+        loader = DataLoader(dataset, batch_size=None, shuffle=False, num_workers=0, collate_fn=lambda x: x)
     return loader

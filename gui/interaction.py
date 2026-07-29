@@ -83,13 +83,9 @@ class ClickInteraction(Interaction):
         # Do the prediction
         if self.first_click:
             last_obj_mask = self.prev_mask[self.tar_obj].unsqueeze(0).unsqueeze(0)
-            self.obj_mask = self.controller.interact(
-                self.image.unsqueeze(0), x, y, not is_neg, prev_mask=last_obj_mask
-            )
+            self.obj_mask = self.controller.interact(self.image.unsqueeze(0), x, y, not is_neg, prev_mask=last_obj_mask)
         else:
-            self.obj_mask = self.controller.interact(
-                self.image.unsqueeze(0), x, y, not is_neg, prev_mask=None
-            )
+            self.obj_mask = self.controller.interact(self.image.unsqueeze(0), x, y, not is_neg, prev_mask=None)
 
         if self.first_click:
             self.first_click = False

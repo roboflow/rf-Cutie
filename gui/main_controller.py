@@ -84,9 +84,9 @@ class MainController:
         self.curr_image_np: np.ndarray = np.zeros((self.h, self.w, 3), dtype=np.uint8)
         self.curr_image_torch: torch.Tensor = None
         self.curr_mask: np.ndarray = np.zeros((self.h, self.w), dtype=np.uint8)
-        self.curr_prob: torch.Tensor = torch.zeros(
-            (self.num_objects + 1, self.h, self.w), dtype=torch.float
-        ).to(self.device)
+        self.curr_prob: torch.Tensor = torch.zeros((self.num_objects + 1, self.h, self.w), dtype=torch.float).to(
+            self.device
+        )
         self.curr_prob[0] = 1
 
         # visualization info
@@ -317,9 +317,7 @@ class MainController:
 
             self.gui.text(f'Propagation started at t={self.curr_ti}.')
             self.processor.clear_sensory_memory()
-            self.curr_prob = self.processor.step(
-                self.curr_image_torch, self.curr_prob[1:], idx_mask=False
-            )
+            self.curr_prob = self.processor.step(self.curr_image_torch, self.curr_prob[1:], idx_mask=False)
             self.curr_mask = torch_prob_to_numpy_mask(self.curr_prob)
             # clear
             self.interacted_prob = None
@@ -536,16 +534,12 @@ class MainController:
 
     def on_work_min_change(self):
         if self.initialized:
-            self.gui.work_mem_min.setValue(
-                min(self.gui.work_mem_min.value(), self.gui.work_mem_max.value() - 1)
-            )
+            self.gui.work_mem_min.setValue(min(self.gui.work_mem_min.value(), self.gui.work_mem_max.value() - 1))
             self.update_config()
 
     def on_work_max_change(self):
         if self.initialized:
-            self.gui.work_mem_max.setValue(
-                max(self.gui.work_mem_max.value(), self.gui.work_mem_min.value() + 1)
-            )
+            self.gui.work_mem_max.setValue(max(self.gui.work_mem_max.value(), self.gui.work_mem_min.value() + 1))
             self.update_config()
 
     def update_config(self):
@@ -585,9 +579,7 @@ class MainController:
 
         mask = self.res_man.import_mask(file_name, size=(self.h, self.w))
 
-        shape_condition = (
-            (len(mask.shape) == 2) and (mask.shape[-1] == self.w) and (mask.shape[-2] == self.h)
-        )
+        shape_condition = (len(mask.shape) == 2) and (mask.shape[-1] == self.w) and (mask.shape[-2] == self.h)
 
         object_condition = mask.max() <= self.num_objects
 

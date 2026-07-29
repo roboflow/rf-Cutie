@@ -16,9 +16,7 @@ log = logging.getLogger()
 
 
 class InferenceCore:
-    def __init__(
-        self, network: CUTIE, cfg: DictConfig, *, image_feature_store: ImageFeatureStore = None
-    ):
+    def __init__(self, network: CUTIE, cfg: DictConfig, *, image_feature_store: ImageFeatureStore = None):
         self.network = network
         self.cfg = cfg
         self.mem_every = cfg.mem_every
@@ -34,9 +32,7 @@ class InferenceCore:
         if stagger_updates >= self.mem_every:
             self.stagger_ti = set(range(1, self.mem_every + 1))
         else:
-            self.stagger_ti = set(
-                np.round(np.linspace(1, self.mem_every, stagger_updates)).astype(int)
-            )
+            self.stagger_ti = set(np.round(np.linspace(1, self.mem_every, stagger_updates)).astype(int))
         self.object_manager = ObjectManager()
         self.memory = MemoryManager(cfg=cfg, object_manager=self.object_manager)
 
@@ -151,9 +147,7 @@ class InferenceCore:
 
         if not self.memory.engaged:
             log.warn('Trying to segment without any memory!')
-            return torch.zeros(
-                (1, key.shape[-2] * 16, key.shape[-1] * 16), device=key.device, dtype=key.dtype
-            )
+            return torch.zeros((1, key.shape[-2] * 16, key.shape[-1] * 16), device=key.device, dtype=key.dtype)
 
         memory_readout = self.memory.read(pix_feat, key, selection, self.last_mask, self.network)
         memory_readout = self.object_manager.realize_dict(memory_readout)
@@ -167,9 +161,7 @@ class InferenceCore:
         # remove batch dim
         if self.flip_aug:
             # average predictions of the non-flipped and flipped version
-            pred_prob_with_bg = (
-                pred_prob_with_bg[0] + torch.flip(pred_prob_with_bg[1], dims=[-1])
-            ) / 2
+            pred_prob_with_bg = (pred_prob_with_bg[0] + torch.flip(pred_prob_with_bg[1], dims=[-1])) / 2
         else:
             pred_prob_with_bg = pred_prob_with_bg[0]
         if update_sensory:
@@ -221,9 +213,7 @@ class InferenceCore:
                 resize_needed = True
                 new_h = int(h / min_side * self.max_internal_size)
                 new_w = int(w / min_side * self.max_internal_size)
-                image = F.interpolate(
-                    image.unsqueeze(0), size=(new_h, new_w), mode='bilinear', align_corners=False
-                )[0]
+                image = F.interpolate(image.unsqueeze(0), size=(new_h, new_w), mode='bilinear', align_corners=False)[0]
                 if mask is not None:
                     if idx_mask:
                         mask = (
@@ -251,13 +241,9 @@ class InferenceCore:
             image = torch.cat([image, torch.flip(image, dims=[-1])], dim=0)
 
         # whether to update the working memory
-        is_mem_frame = (
-            (self.curr_ti - self.last_mem_ti >= self.mem_every) or (mask is not None)
-        ) and (not end)
+        is_mem_frame = ((self.curr_ti - self.last_mem_ti >= self.mem_every) or (mask is not None)) and (not end)
         # segment when there is no input mask or when the input mask is incomplete
-        need_segment = (mask is None) or (
-            self.object_manager.num_obj > 0 and not self.object_manager.has_all(objects)
-        )
+        need_segment = (mask is None) or (self.object_manager.num_obj > 0 and not self.object_manager.has_all(objects))
         update_sensory = ((self.curr_ti - self.last_mem_ti) in self.stagger_ti) and (not end)
 
         # encoding the image
@@ -266,9 +252,7 @@ class InferenceCore:
 
         # segmentation from memory if needed
         if need_segment:
-            pred_prob_with_bg = self._segment(
-                key, selection, pix_feat, ms_feat, update_sensory=update_sensory
-            )
+            pred_prob_with_bg = self._segment(key, selection, pix_feat, ms_feat, update_sensory=update_sensory)
 
         # use the input mask if provided
         if mask is not None:
@@ -320,9 +304,7 @@ class InferenceCore:
 
         self.last_mask = pred_prob_with_bg[1:].unsqueeze(0)
         if self.flip_aug:
-            self.last_mask = torch.cat(
-                [self.last_mask, torch.flip(self.last_mask, dims=[-1])], dim=0
-            )
+            self.last_mask = torch.cat([self.last_mask, torch.flip(self.last_mask, dims=[-1])], dim=0)
 
         # save as memory if needed
         if is_mem_frame or force_permanent:
@@ -342,9 +324,7 @@ class InferenceCore:
         output_prob = unpad(pred_prob_with_bg, self.pad)
         if resize_needed:
             # restore output to the original size
-            output_prob = F.interpolate(
-                output_prob.unsqueeze(0), size=(h, w), mode='bilinear', align_corners=False
-            )[0]
+            output_prob = F.interpolate(output_prob.unsqueeze(0), size=(h, w), mode='bilinear', align_corners=False)[0]
 
         return output_prob
 

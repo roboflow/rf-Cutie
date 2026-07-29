@@ -78,18 +78,12 @@ class VOSMergeTrainDataset(Dataset):
                     continue
                 self.frames[dataset][vid] = frames
                 self.videos[dataset].append(vid)
-                self.video_frames.extend(
-                    [(dataset, vid, i) for i, _ in enumerate(frames)] * multiplier
-                )
+                self.video_frames.extend([(dataset, vid, i) for i, _ in enumerate(frames)] * multiplier)
                 total_frames += len(frames)
 
             if local_rank == 0:
-                log.info(
-                    f'{dataset}: {len(self.videos[dataset])}/{len(vid_list)} videos will be used in {im_root}.'
-                )
-                log.info(
-                    f'{dataset}: {total_frames} frames found. Multiplied to {total_frames * multiplier} frames.'
-                )
+                log.info(f'{dataset}: {len(self.videos[dataset])}/{len(vid_list)} videos will be used in {im_root}.')
+                log.info(f'{dataset}: {total_frames} frames found. Multiplied to {total_frames * multiplier} frames.')
 
         if local_rank == 0:
             log.info(f'Total number of video-frames: {len(self.video_frames)}.')
@@ -113,9 +107,7 @@ class VOSMergeTrainDataset(Dataset):
         self.sequence_image_dual_transform = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomAffine(
-                    degrees=25, shear=20, interpolation=InterpolationMode.BILINEAR, fill=im_mean
-                ),
+                transforms.RandomAffine(degrees=25, shear=20, interpolation=InterpolationMode.BILINEAR, fill=im_mean),
                 transforms.RandomResizedCrop(
                     (self.size, self.size),
                     scale=(0.36, 1.0),
@@ -127,9 +119,7 @@ class VOSMergeTrainDataset(Dataset):
         self.sequence_mask_dual_transform = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomAffine(
-                    degrees=25, shear=20, interpolation=InterpolationMode.NEAREST, fill=0
-                ),
+                transforms.RandomAffine(degrees=25, shear=20, interpolation=InterpolationMode.NEAREST, fill=0),
                 transforms.RandomResizedCrop(
                     (self.size, self.size),
                     scale=(0.36, 1.0),
@@ -192,9 +182,7 @@ class VOSMergeTrainDataset(Dataset):
                                 min(length, sampled_frames[-1] + this_max_skip + 1),
                             )
                         )
-                        acceptable_set = acceptable_set.union(new_set).difference(
-                            set(sampled_frames)
-                        )
+                        acceptable_set = acceptable_set.union(new_set).difference(set(sampled_frames))
 
                     sampled_frames = sorted(sampled_frames)
                     if np.random.rand() < 0.5:

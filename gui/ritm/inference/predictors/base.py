@@ -52,9 +52,7 @@ class BasePredictor(object):
         clicks_list = clicker.get_clicks()
 
         if self.click_models is not None:
-            model_indx = (
-                min(clicker.click_indx_offset + len(clicks_list), len(self.click_models)) - 1
-            )
+            model_indx = min(clicker.click_indx_offset + len(clicks_list), len(self.click_models)) - 1
             if model_indx != self.model_indx:
                 self.model_indx = model_indx
                 self.net = self.click_models[model_indx]
@@ -67,9 +65,7 @@ class BasePredictor(object):
         image_nd, clicks_lists, is_image_changed = self.apply_transforms(input_image, [clicks_list])
 
         pred_logits = self._get_prediction(image_nd, clicks_lists, is_image_changed)
-        prediction = F.interpolate(
-            pred_logits, mode='bilinear', align_corners=True, size=image_nd.size()[2:]
-        )
+        prediction = F.interpolate(pred_logits, mode='bilinear', align_corners=True, size=image_nd.size()[2:])
 
         for t in reversed(self.transforms):
             prediction = t.inv_transform(prediction)
@@ -104,9 +100,7 @@ class BasePredictor(object):
     def get_points_nd(self, clicks_lists):
         total_clicks = []
         num_pos_clicks = [sum(x.is_positive for x in clicks_list) for clicks_list in clicks_lists]
-        num_neg_clicks = [
-            len(clicks_list) - num_pos for clicks_list, num_pos in zip(clicks_lists, num_pos_clicks)
-        ]
+        num_neg_clicks = [len(clicks_list) - num_pos for clicks_list, num_pos in zip(clicks_lists, num_pos_clicks)]
         num_max_points = max(num_pos_clicks + num_neg_clicks)
         if self.net_clicks_limit is not None:
             num_max_points = min(self.net_clicks_limit, num_max_points)

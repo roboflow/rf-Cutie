@@ -86,9 +86,7 @@ class CUTIE(nn.Module):
             chunk_size=chunk_size,
         )
         if self.object_transformer_enabled:
-            object_summaries, object_logits = self.object_summarizer(
-                masks, mask_value, need_weights
-            )
+            object_summaries, object_logits = self.object_summarizer(masks, mask_value, need_weights)
         else:
             object_summaries, object_logits = None, None
         return mask_value, new_sensory, object_summaries, object_logits
@@ -138,9 +136,7 @@ class CUTIE(nn.Module):
 
             # B * (num_objects*CV) * H * W
             pixel_readout = readout(affinity, msk_value)
-            pixel_readout = pixel_readout.view(
-                batch_size, num_objects, self.value_dim, *pixel_readout.shape[-2:]
-            )
+            pixel_readout = pixel_readout.view(batch_size, num_objects, self.value_dim, *pixel_readout.shape[-2:])
         pixel_readout = self.pixel_fusion(pix_feat, pixel_readout, sensory, last_mask)
 
         # read from query transformer
@@ -165,9 +161,7 @@ class CUTIE(nn.Module):
     ) -> torch.Tensor:
         last_mask = F.interpolate(last_mask, size=sensory.shape[-2:], mode='area')
         last_others = self._get_others(last_mask)
-        fused = self.pixel_fuser(
-            pix_feat, pixel, sensory, last_mask, last_others, chunk_size=chunk_size
-        )
+        fused = self.pixel_fuser(pix_feat, pixel, sensory, last_mask, last_others, chunk_size=chunk_size)
         return fused
 
     def readout_query(
@@ -175,9 +169,7 @@ class CUTIE(nn.Module):
     ) -> (torch.Tensor, Dict[str, torch.Tensor]):
         if not self.object_transformer_enabled:
             return pixel_readout, None
-        return self.object_transformer(
-            pixel_readout, obj_memory, selector=selector, need_weights=need_weights
-        )
+        return self.object_transformer(pixel_readout, obj_memory, selector=selector, need_weights=need_weights)
 
     def segment(
         self,

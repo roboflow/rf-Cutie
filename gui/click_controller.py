@@ -35,9 +35,7 @@ class ClickController:
     def unanchor(self):
         self.anchored = False
 
-    def interact(
-        self, image: torch.Tensor, x: int, y: int, is_positive: bool, prev_mask: torch.Tensor
-    ):
+    def interact(self, image: torch.Tensor, x: int, y: int, is_positive: bool, prev_mask: torch.Tensor):
         if not self.anchored:
             image = image.to(self.device, non_blocking=True)
             self.controller.set_image(image)

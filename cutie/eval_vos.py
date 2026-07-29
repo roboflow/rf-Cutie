@@ -47,9 +47,7 @@ def eval_vos(cfg: DictConfig):
     size_dir = data_cfg.get('size_directory')
     if is_burst:
         # BURST style -- masks stored in a json file
-        meta_dataset = BURSTTestDataset(
-            image_dir, json_dir, size=data_cfg.size, skip_frames=data_cfg.skip_frames
-        )
+        meta_dataset = BURSTTestDataset(image_dir, json_dir, size=data_cfg.size, skip_frames=data_cfg.skip_frames)
         burst_handler = BURSTResultHandler(meta_dataset.json)
     else:
         # DAVIS/YouTubeVOS/MOSE style -- masks stored as PNGs

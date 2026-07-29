@@ -24,17 +24,13 @@ class ImageFeatureStore:
         key, shrinkage, selection = self.network.transform_key(ms_features[0])
         self._store[index] = (ms_features, pix_feat, key, shrinkage, selection)
 
-    def get_features(
-        self, index: int, image: torch.Tensor
-    ) -> (Iterable[torch.Tensor], torch.Tensor):
+    def get_features(self, index: int, image: torch.Tensor) -> (Iterable[torch.Tensor], torch.Tensor):
         if index not in self._store:
             self._encode_feature(index, image)
 
         return self._store[index][:2]
 
-    def get_key(
-        self, index: int, image: torch.Tensor
-    ) -> (torch.Tensor, torch.Tensor, torch.Tensor):
+    def get_key(self, index: int, image: torch.Tensor) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         if index not in self._store:
             self._encode_feature(index, image)
 

@@ -59,17 +59,13 @@ class QueryTransformerBlock(nn.Module):
         x = self.self_attn(x, query_pe)
         x = self.ffn(x)
 
-        pixel_flat, p_weights = self.read_from_query(
-            pixel_flat, x, pixel_pe, query_pe, need_weights=need_weights
-        )
+        pixel_flat, p_weights = self.read_from_query(pixel_flat, x, pixel_pe, query_pe, need_weights=need_weights)
         pixel = self.pixel_ffn(pixel, pixel_flat)
 
         if need_weights:
             bs, num_objects, _, h, w = pixel.shape
             q_weights = q_weights.view(bs, num_objects, self.num_heads, self.num_queries, h, w)
-            p_weights = p_weights.transpose(2, 3).view(
-                bs, num_objects, self.num_heads, self.num_queries, h, w
-            )
+            p_weights = p_weights.transpose(2, 3).view(bs, num_objects, self.num_heads, self.num_queries, h, w)
 
         return x, pixel, q_weights, p_weights
 
@@ -106,12 +102,9 @@ class QueryTransformer(nn.Module):
 
         # transformer blocks
         self.num_blocks = this_cfg.num_blocks
-        self.blocks = nn.ModuleList(
-            QueryTransformerBlock(model_cfg) for _ in range(self.num_blocks)
-        )
+        self.blocks = nn.ModuleList(QueryTransformerBlock(model_cfg) for _ in range(self.num_blocks))
         self.mask_pred = nn.ModuleList(
-            nn.Sequential(nn.ReLU(), GConv2d(self.embed_dim, 1, kernel_size=1))
-            for _ in range(self.num_blocks + 1)
+            nn.Sequential(nn.ReLU(), GConv2d(self.embed_dim, 1, kernel_size=1)) for _ in range(self.num_blocks + 1)
         )
 
         self.act = nn.ReLU(inplace=True)
@@ -130,9 +123,7 @@ class QueryTransformer(nn.Module):
 
         # normalize object values
         # the last channel is the cumulative area of the object
-        obj_summaries = obj_summaries.view(
-            bs * num_objects, T, self.num_queries, self.embed_dim + 1
-        )
+        obj_summaries = obj_summaries.view(bs * num_objects, T, self.num_queries, self.embed_dim + 1)
         # sum over time
         # during inference, T=1 as we already did streaming average in memory_manager
         obj_sums = obj_summaries[:, :, :, :-1].sum(dim=1)
@@ -176,9 +167,7 @@ class QueryTransformer(nn.Module):
 
         if self.training:
             # no need to save all heads
-            aux_features['attn_mask'] = attn_mask.view(
-                bs, num_objects, self.num_heads, self.num_queries, H, W
-            )[:, :, 0]
+            aux_features['attn_mask'] = attn_mask.view(bs, num_objects, self.num_heads, self.num_queries, H, W)[:, :, 0]
 
         return pixel, aux_features
 

@@ -44,23 +44,16 @@ class HighResolutionModule(nn.Module):
             raise ValueError(error_msg)
 
         if num_branches != len(num_channels):
-            error_msg = 'NUM_BRANCHES({}) <> NUM_CHANNELS({})'.format(
-                num_branches, len(num_channels)
-            )
+            error_msg = 'NUM_BRANCHES({}) <> NUM_CHANNELS({})'.format(num_branches, len(num_channels))
             raise ValueError(error_msg)
 
         if num_branches != len(num_inchannels):
-            error_msg = 'NUM_BRANCHES({}) <> NUM_INCHANNELS({})'.format(
-                num_branches, len(num_inchannels)
-            )
+            error_msg = 'NUM_BRANCHES({}) <> NUM_INCHANNELS({})'.format(num_branches, len(num_inchannels))
             raise ValueError(error_msg)
 
     def _make_one_branch(self, branch_index, block, num_blocks, num_channels, stride=1):
         downsample = None
-        if (
-            stride != 1
-            or self.num_inchannels[branch_index] != num_channels[branch_index] * block.expansion
-        ):
+        if stride != 1 or self.num_inchannels[branch_index] != num_channels[branch_index] * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(
                     self.num_inchannels[branch_index],
@@ -227,9 +220,7 @@ class HighResolutionNet(nn.Module):
 
         self.stage2_num_branches = 2
         num_channels = [width, 2 * width]
-        num_inchannels = [
-            num_channels[i] * BasicBlockV1b.expansion for i in range(len(num_channels))
-        ]
+        num_inchannels = [num_channels[i] * BasicBlockV1b.expansion for i in range(len(num_channels))]
         self.transition1 = self._make_transition_layer([stage1_out_channel], num_inchannels)
         self.stage2, pre_stage_channels = self._make_stage(
             BasicBlockV1b,
@@ -242,9 +233,7 @@ class HighResolutionNet(nn.Module):
 
         self.stage3_num_branches = 3
         num_channels = [width, 2 * width, 4 * width]
-        num_inchannels = [
-            num_channels[i] * BasicBlockV1b.expansion for i in range(len(num_channels))
-        ]
+        num_inchannels = [num_channels[i] * BasicBlockV1b.expansion for i in range(len(num_channels))]
         self.transition2 = self._make_transition_layer(pre_stage_channels, num_inchannels)
         self.stage3, pre_stage_channels = self._make_stage(
             BasicBlockV1b,
@@ -257,9 +246,7 @@ class HighResolutionNet(nn.Module):
 
         self.stage4_num_branches = 4
         num_channels = [width, 2 * width, 4 * width, 8 * width]
-        num_inchannels = [
-            num_channels[i] * BasicBlockV1b.expansion for i in range(len(num_channels))
-        ]
+        num_inchannels = [num_channels[i] * BasicBlockV1b.expansion for i in range(len(num_channels))]
         self.transition3 = self._make_transition_layer(pre_stage_channels, num_inchannels)
         self.stage4, pre_stage_channels = self._make_stage(
             BasicBlockV1b,
@@ -291,26 +278,20 @@ class HighResolutionNet(nn.Module):
                 norm_layer=norm_layer,
                 align_corners=align_corners,
             )
-            self.cls_head = nn.Conv2d(
-                ocr_mid_channels, num_classes, kernel_size=1, stride=1, padding=0, bias=True
-            )
+            self.cls_head = nn.Conv2d(ocr_mid_channels, num_classes, kernel_size=1, stride=1, padding=0, bias=True)
 
             self.aux_head = nn.Sequential(
                 nn.Conv2d(last_inp_channels, last_inp_channels, kernel_size=1, stride=1, padding=0),
                 norm_layer(last_inp_channels),
                 nn.ReLU(inplace=relu_inplace),
-                nn.Conv2d(
-                    last_inp_channels, num_classes, kernel_size=1, stride=1, padding=0, bias=True
-                ),
+                nn.Conv2d(last_inp_channels, num_classes, kernel_size=1, stride=1, padding=0, bias=True),
             )
         else:
             self.cls_head = nn.Sequential(
                 nn.Conv2d(last_inp_channels, last_inp_channels, kernel_size=3, stride=1, padding=1),
                 norm_layer(last_inp_channels),
                 nn.ReLU(inplace=relu_inplace),
-                nn.Conv2d(
-                    last_inp_channels, num_classes, kernel_size=1, stride=1, padding=0, bias=True
-                ),
+                nn.Conv2d(last_inp_channels, num_classes, kernel_size=1, stride=1, padding=0, bias=True),
             )
 
     def _make_transition_layer(self, num_channels_pre_layer, num_channels_cur_layer):
@@ -341,9 +322,7 @@ class HighResolutionNet(nn.Module):
                 conv3x3s = []
                 for j in range(i + 1 - num_branches_pre):
                     inchannels = num_channels_pre_layer[-1]
-                    outchannels = (
-                        num_channels_cur_layer[i] if j == i - num_branches_pre else inchannels
-                    )
+                    outchannels = num_channels_cur_layer[i] if j == i - num_branches_pre else inchannels
                     conv3x3s.append(
                         nn.Sequential(
                             nn.Conv2d(
@@ -366,16 +345,12 @@ class HighResolutionNet(nn.Module):
         downsample = None
         if stride != 1 or inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2d(
-                    inplanes, planes * block.expansion, kernel_size=1, stride=stride, bias=False
-                ),
+                nn.Conv2d(inplanes, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
                 self.norm_layer(planes * block.expansion),
             )
 
         layers = []
-        layers.append(
-            block(inplanes, planes, stride, downsample=downsample, norm_layer=self.norm_layer)
-        )
+        layers.append(block(inplanes, planes, stride, downsample=downsample, norm_layer=self.norm_layer))
         inplanes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(block(inplanes, planes, norm_layer=self.norm_layer))
@@ -479,15 +454,9 @@ class HighResolutionNet(nn.Module):
     def aggregate_hrnet_features(self, x):
         # Upsampling
         x0_h, x0_w = x[0].size(2), x[0].size(3)
-        x1 = F.interpolate(
-            x[1], size=(x0_h, x0_w), mode='bilinear', align_corners=self.align_corners
-        )
-        x2 = F.interpolate(
-            x[2], size=(x0_h, x0_w), mode='bilinear', align_corners=self.align_corners
-        )
-        x3 = F.interpolate(
-            x[3], size=(x0_h, x0_w), mode='bilinear', align_corners=self.align_corners
-        )
+        x1 = F.interpolate(x[1], size=(x0_h, x0_w), mode='bilinear', align_corners=self.align_corners)
+        x2 = F.interpolate(x[2], size=(x0_h, x0_w), mode='bilinear', align_corners=self.align_corners)
+        x3 = F.interpolate(x[3], size=(x0_h, x0_w), mode='bilinear', align_corners=self.align_corners)
 
         return torch.cat([x[0], x1, x2, x3], 1)
 
@@ -504,8 +473,7 @@ class HighResolutionNet(nn.Module):
             exit(1)
         pretrained_dict = torch.load(pretrained_path, map_location={'cuda:0': 'cpu'})
         pretrained_dict = {
-            k.replace('last_layer', 'aux_head').replace('model.', ''): v
-            for k, v in pretrained_dict.items()
+            k.replace('last_layer', 'aux_head').replace('model.', ''): v for k, v in pretrained_dict.items()
         }
 
         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}

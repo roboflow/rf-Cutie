@@ -102,9 +102,7 @@ class ScaleBiasOptimizer(BaseOptimizer):
 
     def unpack_opt_params(self, opt_params):
         scale, bias = torch.chunk(opt_params, 2, dim=0)
-        reg_loss = self.reg_weight * (
-            torch.sum(scale**2) + self.reg_bias_weight * torch.sum(bias**2)
-        )
+        reg_loss = self.reg_weight * (torch.sum(scale**2) + self.reg_bias_weight * torch.sum(bias**2))
 
         if self.scale_act == 'tanh':
             scale = torch.tanh(scale)

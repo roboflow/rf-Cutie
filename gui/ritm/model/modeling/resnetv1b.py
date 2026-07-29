@@ -174,19 +174,13 @@ class ResNetV1b(nn.Module):
                 nn.Conv2d(stem_width, stem_width, kernel_size=3, stride=1, padding=1, bias=False),
                 norm_layer(stem_width),
                 nn.ReLU(True),
-                nn.Conv2d(
-                    stem_width, 2 * stem_width, kernel_size=3, stride=1, padding=1, bias=False
-                ),
+                nn.Conv2d(stem_width, 2 * stem_width, kernel_size=3, stride=1, padding=1, bias=False),
             )
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(True)
         self.maxpool = nn.MaxPool2d(3, stride=2, padding=1)
-        self.layer1 = self._make_layer(
-            block, 64, layers[0], avg_down=avg_down, norm_layer=norm_layer
-        )
-        self.layer2 = self._make_layer(
-            block, 128, layers[1], stride=2, avg_down=avg_down, norm_layer=norm_layer
-        )
+        self.layer1 = self._make_layer(block, 64, layers[0], avg_down=avg_down, norm_layer=norm_layer)
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, avg_down=avg_down, norm_layer=norm_layer)
         if dilated:
             self.layer3 = self._make_layer(
                 block,
@@ -207,21 +201,15 @@ class ResNetV1b(nn.Module):
                 norm_layer=norm_layer,
             )
         else:
-            self.layer3 = self._make_layer(
-                block, 256, layers[2], stride=2, avg_down=avg_down, norm_layer=norm_layer
-            )
-            self.layer4 = self._make_layer(
-                block, 512, layers[3], stride=2, avg_down=avg_down, norm_layer=norm_layer
-            )
+            self.layer3 = self._make_layer(block, 256, layers[2], stride=2, avg_down=avg_down, norm_layer=norm_layer)
+            self.layer4 = self._make_layer(block, 512, layers[3], stride=2, avg_down=avg_down, norm_layer=norm_layer)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.drop = None
         if final_drop > 0.0:
             self.drop = nn.Dropout(final_drop)
         self.fc = nn.Linear(512 * block.expansion, classes)
 
-    def _make_layer(
-        self, block, planes, blocks, stride=1, dilation=1, avg_down=False, norm_layer=nn.BatchNorm2d
-    ):
+    def _make_layer(self, block, planes, blocks, stride=1, dilation=1, avg_down=False, norm_layer=nn.BatchNorm2d):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = []
@@ -236,11 +224,7 @@ class ResNetV1b(nn.Module):
                         )
                     )
                 else:
-                    downsample.append(
-                        nn.AvgPool2d(
-                            kernel_size=1, stride=1, ceil_mode=True, count_include_pad=False
-                        )
-                    )
+                    downsample.append(nn.AvgPool2d(kernel_size=1, stride=1, ceil_mode=True, count_include_pad=False))
                 downsample.extend(
                     [
                         nn.Conv2d(
@@ -343,9 +327,7 @@ def resnet34_v1b(pretrained=False, **kwargs):
     if pretrained:
         model_dict = model.state_dict()
         filtered_orig_dict = _safe_state_dict_filtering(
-            torch.hub.load(
-                GLUON_RESNET_TORCH_HUB, 'gluon_resnet34_v1b', pretrained=True
-            ).state_dict(),
+            torch.hub.load(GLUON_RESNET_TORCH_HUB, 'gluon_resnet34_v1b', pretrained=True).state_dict(),
             model_dict.keys(),
         )
         model_dict.update(filtered_orig_dict)
@@ -358,9 +340,7 @@ def resnet50_v1s(pretrained=False, **kwargs):
     if pretrained:
         model_dict = model.state_dict()
         filtered_orig_dict = _safe_state_dict_filtering(
-            torch.hub.load(
-                GLUON_RESNET_TORCH_HUB, 'gluon_resnet50_v1s', pretrained=True
-            ).state_dict(),
+            torch.hub.load(GLUON_RESNET_TORCH_HUB, 'gluon_resnet50_v1s', pretrained=True).state_dict(),
             model_dict.keys(),
         )
         model_dict.update(filtered_orig_dict)
@@ -373,9 +353,7 @@ def resnet101_v1s(pretrained=False, **kwargs):
     if pretrained:
         model_dict = model.state_dict()
         filtered_orig_dict = _safe_state_dict_filtering(
-            torch.hub.load(
-                GLUON_RESNET_TORCH_HUB, 'gluon_resnet101_v1s', pretrained=True
-            ).state_dict(),
+            torch.hub.load(GLUON_RESNET_TORCH_HUB, 'gluon_resnet101_v1s', pretrained=True).state_dict(),
             model_dict.keys(),
         )
         model_dict.update(filtered_orig_dict)
@@ -388,9 +366,7 @@ def resnet152_v1s(pretrained=False, **kwargs):
     if pretrained:
         model_dict = model.state_dict()
         filtered_orig_dict = _safe_state_dict_filtering(
-            torch.hub.load(
-                GLUON_RESNET_TORCH_HUB, 'gluon_resnet152_v1s', pretrained=True
-            ).state_dict(),
+            torch.hub.load(GLUON_RESNET_TORCH_HUB, 'gluon_resnet152_v1s', pretrained=True).state_dict(),
             model_dict.keys(),
         )
         model_dict.update(filtered_orig_dict)

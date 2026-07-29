@@ -47,9 +47,7 @@ class SyntheticVideoDataset(Dataset):
                     self.im_list.extend(joint_list * multiplier)
 
             elif method == 1:
-                self.im_list.extend(
-                    [path.join(root, im) for im in os.listdir(root) if '.jpg' in im] * multiplier
-                )
+                self.im_list.extend([path.join(root, im) for im in os.listdir(root) if '.jpg' in im] * multiplier)
 
         if local_rank == 0:
             log.info(f'SyntheticVideoDataset: {len(self.im_list)} images found in total.')

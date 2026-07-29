@@ -99,9 +99,7 @@ def get_uncertain_point_coords_with_randomness(
     idx = torch.topk(point_uncertainties[:, 0, :], k=num_uncertain_points, dim=1)[1]
     shift = num_sampled * torch.arange(num_boxes, dtype=torch.long, device=coarse_logits.device)
     idx += shift[:, None]
-    point_coords = point_coords.view(-1, 2)[idx.view(-1), :].view(
-        num_boxes, num_uncertain_points, 2
-    )
+    point_coords = point_coords.view(-1, 2)[idx.view(-1), :].view(num_boxes, num_uncertain_points, 2)
     if num_random_points > 0:
         point_coords = cat(
             [

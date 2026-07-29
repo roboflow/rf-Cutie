@@ -49,9 +49,7 @@ class MemoryManager:
         # a dictionary indexed by object ids, each of shape bs * T * Q * C
         self.obj_v = {}
 
-        self.work_mem = KeyValueMemoryStore(
-            save_selection=self.use_long_term, save_usage=self.use_long_term
-        )
+        self.work_mem = KeyValueMemoryStore(save_selection=self.use_long_term, save_usage=self.use_long_term)
         if self.use_long_term:
             self.long_mem = KeyValueMemoryStore(save_usage=self.count_long_term_usage)
 
@@ -143,17 +141,11 @@ class MemoryManager:
             if self.use_long_term and self.long_mem.engaged(bucket_id):
                 # Use long-term memory
                 long_mem_size = self.long_mem.size(bucket_id)
-                memory_key = torch.cat(
-                    [self.long_mem.key[bucket_id], self.work_mem.key[bucket_id]], -1
-                )
-                shrinkage = torch.cat(
-                    [self.long_mem.shrinkage[bucket_id], self.work_mem.shrinkage[bucket_id]], -1
-                )
+                memory_key = torch.cat([self.long_mem.key[bucket_id], self.work_mem.key[bucket_id]], -1)
+                shrinkage = torch.cat([self.long_mem.shrinkage[bucket_id], self.work_mem.shrinkage[bucket_id]], -1)
 
                 similarity = get_similarity(memory_key, shrinkage, query_key, selection)
-                affinity, usage = do_softmax(
-                    similarity, top_k=self.top_k, inplace=True, return_usage=True
-                )
+                affinity, usage = do_softmax(similarity, top_k=self.top_k, inplace=True, return_usage=True)
                 # Record memory usage for working and long-term memory.
                 # ignore the index return for long-term memory
                 work_usage = usage[:, long_mem_size:]
@@ -170,9 +162,7 @@ class MemoryManager:
                 similarity = get_similarity(memory_key, shrinkage, query_key, selection)
 
                 if self.use_long_term:
-                    affinity, usage = do_softmax(
-                        similarity, top_k=self.top_k, inplace=True, return_usage=True
-                    )
+                    affinity, usage = do_softmax(similarity, top_k=self.top_k, inplace=True, return_usage=True)
                     self.work_mem.update_bucket_usage(bucket_id, usage)
                 else:
                     affinity = do_softmax(similarity, top_k=self.top_k, inplace=True)
@@ -180,20 +170,14 @@ class MemoryManager:
             if self.chunk_size < 1:
                 object_chunks = [bucket]
             else:
-                object_chunks = [
-                    bucket[i : i + self.chunk_size] for i in range(0, len(bucket), self.chunk_size)
-                ]
+                object_chunks = [bucket[i : i + self.chunk_size] for i in range(0, len(bucket), self.chunk_size)]
 
             for objects in object_chunks:
                 this_sensory = self._get_sensory_by_ids(objects)
                 this_last_mask = self._get_mask_by_ids(last_mask, objects)
                 this_msk_value = self._get_visual_values_by_ids(objects)  # (1/2)*num_objects*C*N
-                visual_readout = self._readout(affinity, this_msk_value).view(
-                    bs, len(objects), self.CV, h, w
-                )
-                pixel_readout = network.pixel_fusion(
-                    pix_feat, visual_readout, this_sensory, this_last_mask
-                )
+                visual_readout = self._readout(affinity, this_msk_value).view(bs, len(objects), self.CV, h, w)
+                pixel_readout = network.pixel_fusion(pix_feat, visual_readout, this_sensory, this_last_mask)
                 this_obj_mem = self._get_object_mem_by_ids(objects)
                 this_obj_mem = this_obj_mem.unsqueeze(2) if this_obj_mem is not None else None
                 readout_memory, aux_features = network.readout_query(pixel_readout, this_obj_mem)
@@ -264,18 +248,14 @@ class MemoryManager:
                     last_acc = self.obj_v[obj][:, :, -1]
                     new_acc = last_acc + obj_value[:, obj_id, :, -1]
 
-                    self.obj_v[obj][:, :, :-1] = (
-                        self.obj_v[obj][:, :, :-1] + obj_value[:, obj_id, :, :-1]
-                    )
+                    self.obj_v[obj][:, :, :-1] = self.obj_v[obj][:, :, :-1] + obj_value[:, obj_id, :, :-1]
                     self.obj_v[obj][:, :, -1] = new_acc
                 else:
                     self.obj_v[obj] = obj_value[:, obj_id]
 
         # convert mask value tensor into a dict for insertion
         msk_values = {obj: msk_value[:, obj_id] for obj_id, obj in enumerate(objects)}
-        self.work_mem.add(
-            key, msk_values, shrinkage, selection=selection, as_permanent=as_permanent
-        )
+        self.work_mem.add(key, msk_values, shrinkage, selection=selection, as_permanent=as_permanent)
 
         for bucket_id in self.work_mem.buckets:
             # long-term memory cleanup
@@ -283,9 +263,7 @@ class MemoryManager:
                 # Do memory compressed if needed
                 if self.work_mem.non_perm_size(bucket_id) >= self.max_work_tokens:
                     # Remove obsolete features if needed
-                    if self.long_mem.non_perm_size(bucket_id) >= (
-                        self.max_long_tokens - self.num_prototypes
-                    ):
+                    if self.long_mem.non_perm_size(bucket_id) >= (self.max_long_tokens - self.num_prototypes):
                         self.long_mem.remove_obsolete_features(
                             bucket_id,
                             self.max_long_tokens - self.num_prototypes - self.buffer_tokens,
@@ -316,9 +294,7 @@ class MemoryManager:
         )
 
         # remove consolidated working memory
-        self.work_mem.sieve_by_range(
-            bucket_id, 0, -self.min_work_tokens, min_size=self.min_work_tokens
-        )
+        self.work_mem.sieve_by_range(bucket_id, 0, -self.min_work_tokens, min_size=self.min_work_tokens)
 
         # add to long-term memory
         self.long_mem.add(
@@ -351,9 +327,7 @@ class MemoryManager:
         prototype_key = torch.stack(prototype_key, dim=0)
         prototype_selection = torch.stack(prototype_selection, dim=0)
         # Potentiate selected prototypes before reading their values.
-        similarity = get_similarity(
-            candidate_key, candidate_shrinkage, prototype_key, prototype_selection
-        )
+        similarity = get_similarity(candidate_key, candidate_shrinkage, prototype_key, prototype_selection)
         affinity = do_softmax(similarity)
 
         # readout the values
@@ -369,9 +343,7 @@ class MemoryManager:
             if obj not in self.sensory:
                 # also initializes the sensory memory
                 bs, _, h, w = sample_key.shape
-                self.sensory[obj] = torch.zeros(
-                    (bs, self.sensory_dim, h, w), device=sample_key.device
-                )
+                self.sensory[obj] = torch.zeros((bs, self.sensory_dim, h, w), device=sample_key.device)
 
     def update_sensory(self, sensory: torch.Tensor, ids: List[int]):
         # sensory: 1*num_objects*C*H*W

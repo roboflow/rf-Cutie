@@ -80,9 +80,7 @@ def do_softmax(
     return affinity
 
 
-def get_affinity(
-    mk: torch.Tensor, ms: torch.Tensor, qk: torch.Tensor, qe: torch.Tensor
-) -> torch.Tensor:
+def get_affinity(mk: torch.Tensor, ms: torch.Tensor, qk: torch.Tensor, qe: torch.Tensor) -> torch.Tensor:
     # shorthand used in training with no top-k
     similarity = get_similarity(mk, ms, qk, qe)
     affinity = do_softmax(similarity)

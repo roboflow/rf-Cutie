@@ -15,9 +15,7 @@ def test_object_lifecycle_compacts_temporary_ids_and_remaps_masks() -> None:
     manager.delete_objects(30)
 
     assert manager.get_tmp_to_obj_mapping() == {10: 1, 50: 2}
-    assert torch.equal(
-        manager.tmp_to_obj_cls(torch.tensor([[0, 1, 2]])), torch.tensor([[0, 10, 50]])
-    )
+    assert torch.equal(manager.tmp_to_obj_cls(torch.tensor([[0, 1, 2]])), torch.tensor([[0, 10, 50]]))
 
     manager.find_object_by_id(50).poke()
     manager.find_object_by_id(50).poke()

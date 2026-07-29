@@ -112,9 +112,7 @@ def process_video(cfg: DictConfig):
                 mask_torch = index_numpy_to_one_hot_torch(mask_np, num_objects + 1).to(device)
 
                 # the background mask is fed into the model
-                prob = processor.step(
-                    frame_torch, mask_torch[1:], idx_mask=False, force_permanent=True
-                )
+                prob = processor.step(frame_torch, mask_torch[1:], idx_mask=False, force_permanent=True)
 
                 pbar.update(1)
 
@@ -246,9 +244,7 @@ def get_arguments():
         help='Directory where processed mask files will be saved.',
         default=None,
     )
-    parser.add_argument(
-        '-d', '--device', help='Target device for processing [cuda, cpu].', default='cuda'
-    )
+    parser.add_argument('-d', '--device', help='Target device for processing [cuda, cpu].', default='cuda')
     parser.add_argument(
         '--mem_every',
         help='How often to update working memory; higher number speeds up processing.',

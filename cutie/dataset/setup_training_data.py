@@ -27,8 +27,7 @@ def setup_pre_training_datasets(cfg):
     datasets = cfg.data.pre_training.datasets
     dataset_configs = [cfg.data.image_datasets[d] for d in datasets]
     dataset_tuples = [
-        (path.join(root, d_cfg.directory), d_cfg.data_structure, d_cfg.multiplier)
-        for d_cfg in dataset_configs
+        (path.join(root, d_cfg.directory), d_cfg.data_structure, d_cfg.multiplier) for d_cfg in dataset_configs
     ]
     dataset = SyntheticVideoDataset(
         dataset_tuples,
@@ -79,9 +78,7 @@ def setup_main_training_datasets(cfg, max_skip):
 
 
 def construct_loader(dataset, batch_size, num_workers, local_rank):
-    train_sampler = torch.utils.data.distributed.DistributedSampler(
-        dataset, rank=local_rank, shuffle=True
-    )
+    train_sampler = torch.utils.data.distributed.DistributedSampler(dataset, rank=local_rank, shuffle=True)
     train_loader = DataLoader(
         dataset,
         batch_size,

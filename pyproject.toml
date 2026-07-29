@@ -48,7 +48,7 @@ ignore = [
 
 [project]
 name = "rf-cutie"
-version = "1.0.0.rc0"
+version = "1.0.0.rc1"
 authors = [{ name = "Rex Cheng", email = "hkchengrex@gmail.com" }]
 description = ""
 readme = "README.md"
@@ -82,7 +82,7 @@ evaluation = [
 ]
 train = [
   'gitpython >= 3.1',
-  'thinplate@git+https://github.com/cheind/py-thin-plate-spline',
+  'thin-plate-spline >= 1.2.2',
   'tensorboard >= 2.11',
   'Pillow >= 9.5',
   'opencv-python >= 4.8',
@@ -140,5 +140,5 @@ namespaces = true
 "cutie" = ["config/**/*.yaml", "utils/subsets/*.txt"]
 
 [project.urls]
-"Homepage" = "https://github.com/hkchengrex/Cutie"
-"Bug Tracker" = "https://github.com/hkchengrex/Cutie/issues"
+"Homepage" = "https://github.com/roboflow/rf-Cutie"
+"Bug Tracker" = "https://github.com/roboflow/rf-Cutie/issues"

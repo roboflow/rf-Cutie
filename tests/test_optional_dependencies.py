@@ -20,7 +20,7 @@ OPTIONAL_MODULES = (
     'requests',
     'scipy',
     'tensorboard',
-    'thinplate',
+    'tps',
     'torchvision',
     'tqdm',
 )

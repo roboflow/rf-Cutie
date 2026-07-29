@@ -1,32 +1,43 @@
 import numpy as np
 from PIL import Image
 import cv2
-import thinplate as tps
+from tps import ThinPlateSpline
 
 cv2.setNumThreads(0)
 
 
 def pick_random_points(h, w, n_samples):
+    """Select independent normalized x and y coordinates without replacement."""
     y_idx = np.random.choice(np.arange(h), size=n_samples, replace=False)
     x_idx = np.random.choice(np.arange(w), size=n_samples, replace=False)
     return y_idx / h, x_idx / w
 
 
+def inverse_tps_grid(c_src, c_dst, dshape):
+    """Return normalized source coordinates for every destination image pixel."""
+    height, width = dshape[:2]
+    destination_x, destination_y = np.meshgrid(
+        np.linspace(0.0, 1.0, width), np.linspace(0.0, 1.0, height)
+    )
+    destination_grid = np.stack((destination_x, destination_y), axis=-1)
+
+    spline = ThinPlateSpline()
+    spline.fit(c_dst, c_src)
+    return spline.transform(destination_grid.reshape(-1, 2)).reshape(height, width, 2)
+
+
 def warp_dual_cv(img, mask, c_src, c_dst):
-    dshape = img.shape
-    theta = tps.tps_theta_from_points(c_src, c_dst, reduced=True)
-    grid = tps.tps_grid(theta, c_dst, dshape)
-    mapx, mapy = tps.tps_grid_to_remap(grid, img.shape)
+    """Warp an image and mask with a shared TPS coordinate map."""
+    grid = inverse_tps_grid(c_src, c_dst, img.shape)
+    mapx = (grid[:, :, 0] * img.shape[1]).astype(np.float32)
+    mapy = (grid[:, :, 1] * img.shape[0]).astype(np.float32)
     return cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR), cv2.remap(
         mask, mapx, mapy, cv2.INTER_NEAREST
     )
 
 
 def random_tps_warp(img, mask, scale, n_ctrl_pts=12):
-    """
-    Apply a random TPS warp of the input image and mask
-    Uses randomness from numpy
-    """
+    """Apply a random NumPy-driven TPS warp to an image and its mask."""
     img = np.asarray(img)
     mask = np.asarray(mask)
 

@@ -1,4 +1,3 @@
-from typing import List, Dict
 import logging
 from omegaconf import DictConfig
 import torch
@@ -52,11 +51,7 @@ class CUTIE(nn.Module):
             return None
 
         num_objects = masks.shape[1]
-        if num_objects >= 1:
-            others = (masks.sum(dim=1, keepdim=True) - masks).clamp(0, 1)
-        else:
-            others = torch.zeros_like(masks)
-        return others
+        return (masks.sum(dim=1, keepdim=True) - masks).clamp(0, 1) if num_objects >= 1 else torch.zeros_like(masks)
 
     def encode_image(self, image: torch.Tensor) -> (Iterable[torch.Tensor], torch.Tensor):
         image = (image - self.pixel_mean) / self.pixel_std
@@ -66,7 +61,7 @@ class CUTIE(nn.Module):
     def encode_mask(
         self,
         image: torch.Tensor,
-        ms_features: List[torch.Tensor],
+        ms_features: list[torch.Tensor],
         sensory: torch.Tensor,
         masks: torch.Tensor,
         *,
@@ -111,7 +106,7 @@ class CUTIE(nn.Module):
         sensory: torch.Tensor,
         last_mask: torch.Tensor,
         selector: torch.Tensor,
-    ) -> (torch.Tensor, Dict[str, torch.Tensor]):
+    ) -> (torch.Tensor, dict[str, torch.Tensor]):
         """
         query_key       : B * CK * H * W
         query_selection : B * CK * H * W
@@ -161,19 +156,18 @@ class CUTIE(nn.Module):
     ) -> torch.Tensor:
         last_mask = F.interpolate(last_mask, size=sensory.shape[-2:], mode='area')
         last_others = self._get_others(last_mask)
-        fused = self.pixel_fuser(pix_feat, pixel, sensory, last_mask, last_others, chunk_size=chunk_size)
-        return fused
+        return self.pixel_fuser(pix_feat, pixel, sensory, last_mask, last_others, chunk_size=chunk_size)
 
     def readout_query(
         self, pixel_readout, obj_memory, *, selector=None, need_weights=False
-    ) -> (torch.Tensor, Dict[str, torch.Tensor]):
+    ) -> (torch.Tensor, dict[str, torch.Tensor]):
         if not self.object_transformer_enabled:
             return pixel_readout, None
         return self.object_transformer(pixel_readout, obj_memory, selector=selector, need_weights=need_weights)
 
     def segment(
         self,
-        ms_image_feat: List[torch.Tensor],
+        ms_image_feat: list[torch.Tensor],
         memory_readout: torch.Tensor,
         sensory: torch.Tensor,
         *,
@@ -209,8 +203,8 @@ class CUTIE(nn.Module):
         return sensory, logits, prob
 
     def compute_aux(
-        self, pix_feat: torch.Tensor, aux_inputs: Dict[str, torch.Tensor], selector: torch.Tensor
-    ) -> Dict[str, torch.Tensor]:
+        self, pix_feat: torch.Tensor, aux_inputs: dict[str, torch.Tensor], selector: torch.Tensor
+    ) -> dict[str, torch.Tensor]:
         return self.aux_computer(pix_feat, aux_inputs, selector)
 
     def forward(self, *args, **kwargs):
@@ -230,16 +224,15 @@ class CUTIE(nn.Module):
                         else:
                             log.info(f'Zero-initialized padding for {k}.')
                         src_dict[k] = torch.cat([src_dict[k], pads], 1)
-                elif k == 'pixel_fuser.sensory_compress.weight':
-                    if src_dict[k].shape[1] == self.sensory_dim + 1:
-                        log.info(f'Converting {k} from single object to multiple objects.')
-                        pads = torch.zeros((self.value_dim, 1, 1, 1), device=src_dict[k].device)
-                        if not init_as_zero_if_needed:
-                            nn.init.orthogonal_(pads)
-                            log.info(f'Randomly initialized padding for {k}.')
-                        else:
-                            log.info(f'Zero-initialized padding for {k}.')
-                        src_dict[k] = torch.cat([src_dict[k], pads], 1)
+                elif k == 'pixel_fuser.sensory_compress.weight' and src_dict[k].shape[1] == self.sensory_dim + 1:
+                    log.info(f'Converting {k} from single object to multiple objects.')
+                    pads = torch.zeros((self.value_dim, 1, 1, 1), device=src_dict[k].device)
+                    if not init_as_zero_if_needed:
+                        nn.init.orthogonal_(pads)
+                        log.info(f'Randomly initialized padding for {k}.')
+                    else:
+                        log.info(f'Zero-initialized padding for {k}.')
+                    src_dict[k] = torch.cat([src_dict[k], pads], 1)
         elif self.single_object:
             # Support finetuning a multi-object model on single-object datasets by dropping conv1's
             # final channel. Standard single-object training does not enter this compatibility path.

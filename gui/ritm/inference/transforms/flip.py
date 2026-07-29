@@ -1,12 +1,11 @@
 import torch
 
-from typing import List
 from ...inference.clicker import Click
 from .base import BaseTransform
 
 
 class AddHorizontalFlip(BaseTransform):
-    def transform(self, image_nd, clicks_lists: List[List[Click]]):
+    def transform(self, image_nd, clicks_lists: list[list[Click]]):
         assert len(image_nd.shape) == 4
         image_nd = torch.cat([image_nd, torch.flip(image_nd, dims=[3])], dim=0)
 

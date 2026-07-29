@@ -1,4 +1,3 @@
-from typing import Dict, List, Optional, Literal
 from collections import defaultdict
 import torch
 
@@ -35,12 +34,12 @@ class KeyValueMemoryStore:
         self.save_usage = save_usage
 
         self.global_bucket_id = 0  # does not reduce even if buckets are removed
-        self.buckets: Dict[int, List[int]] = {}  # indexed by bucket id
-        self.k: Dict[int, torch.Tensor] = {}  # indexed by bucket id
-        self.v: Dict[int, torch.Tensor] = {}  # indexed by object id
+        self.buckets: dict[int, list[int]] = {}  # indexed by bucket id
+        self.k: dict[int, torch.Tensor] = {}  # indexed by bucket id
+        self.v: dict[int, torch.Tensor] = {}  # indexed by object id
 
         # indexed by bucket id; the end point of permanent memory
-        self.perm_end_pt: Dict[int, int] = defaultdict(int)
+        self.perm_end_pt: dict[int, int] = defaultdict(int)
 
         # shrinkage and selection are just like the keys
         self.s = {}
@@ -55,7 +54,7 @@ class KeyValueMemoryStore:
     def add(
         self,
         key: torch.Tensor,
-        values: Dict[int, torch.Tensor],
+        values: dict[int, torch.Tensor],
         shrinkage: torch.Tensor,
         selection: torch.Tensor,
         supposed_bucket_id: int = -1,
@@ -247,12 +246,11 @@ class KeyValueMemoryStore:
         # return normalized usage
         if not self.save_usage:
             raise RuntimeError('I did not count usage!')
-        usage = self.use_cnt[bucket_id] / self.life_cnt[bucket_id]
-        return usage
+        return self.use_cnt[bucket_id] / self.life_cnt[bucket_id]
 
     def get_all_sliced(
         self, bucket_id: int, start: int, end: int
-    ) -> (torch.Tensor, torch.Tensor, torch.Tensor, Dict[int, torch.Tensor], torch.Tensor):
+    ) -> (torch.Tensor, torch.Tensor, torch.Tensor, dict[int, torch.Tensor], torch.Tensor):
         # return k, sk, ek, value, normalized usage in order, sliced by start and end
         # this only queries the temporary memory
 
@@ -278,7 +276,7 @@ class KeyValueMemoryStore:
 
         return k, sk, ek, value, usage
 
-    def purge_except(self, obj_keep_idx: List[int]):
+    def purge_except(self, obj_keep_idx: list[int]):
         # purge certain objects from the memory except the one listed
         obj_keep_idx = set(obj_keep_idx)
 
@@ -323,7 +321,7 @@ class KeyValueMemoryStore:
     def non_perm_size(self, bucket_id: int) -> int:
         return self.size(bucket_id) - self.perm_size(bucket_id)
 
-    def engaged(self, bucket_id: Optional[int] = None) -> bool:
+    def engaged(self, bucket_id: int | None = None) -> bool:
         if bucket_id is None:
             return len(self.buckets) > 0
         else:
@@ -334,19 +332,19 @@ class KeyValueMemoryStore:
         return len(self.v)
 
     @property
-    def key(self) -> Dict[int, torch.Tensor]:
+    def key(self) -> dict[int, torch.Tensor]:
         return self.k
 
     @property
-    def value(self) -> Dict[int, torch.Tensor]:
+    def value(self) -> dict[int, torch.Tensor]:
         return self.v
 
     @property
-    def shrinkage(self) -> Dict[int, torch.Tensor]:
+    def shrinkage(self) -> dict[int, torch.Tensor]:
         return self.s
 
     @property
-    def selection(self) -> Dict[int, torch.Tensor]:
+    def selection(self) -> dict[int, torch.Tensor]:
         return self.e
 
     def __contains__(self, key):

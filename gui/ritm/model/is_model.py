@@ -125,7 +125,7 @@ class ISModel(nn.Module):
     def get_coord_features(self, image, prev_mask, points):
         if self.clicks_groups is not None:
             points_groups = split_points_by_order(points, groups=(2,) + (1,) * (len(self.clicks_groups) - 2) + (-1,))
-            coord_features = [dist_map(image, pg) for dist_map, pg in zip(self.dist_maps, points_groups)]
+            coord_features = [dist_map(image, pg) for dist_map, pg in zip(self.dist_maps, points_groups, strict=False)]
             coord_features = torch.cat(coord_features, dim=1)
         else:
             coord_features = self.dist_maps(image, points)
@@ -165,6 +165,4 @@ def split_points_by_order(tpoints: torch.Tensor, groups):
 
             group_points[group_id][bindx, new_point_indx, :] = point
 
-    group_points = [torch.tensor(x, dtype=tpoints.dtype, device=tpoints.device) for x in group_points]
-
-    return group_points
+    return [torch.tensor(x, dtype=tpoints.dtype, device=tpoints.device) for x in group_points]

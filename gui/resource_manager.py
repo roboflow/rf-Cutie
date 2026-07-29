@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from queue import Queue
 from threading import Thread
 from omegaconf import DictConfig, open_dict
-from typing import Dict, Optional, Tuple, Literal, Union
 import cv2
 from PIL import Image
 
@@ -47,7 +46,7 @@ class LRU:
 @dataclass
 class SaveItem:
     type: Literal['mask', 'visualization', 'soft_mask']
-    data: Union[Image.Image, np.ndarray]
+    data: Image.Image | np.ndarray
     name: str = None  # only used for soft_mask
 
 
@@ -241,8 +240,7 @@ class ResourceManager:
         assert 0 <= ti < self.length
 
         image = Image.open(path.join(self.image_dir, self.names[ti] + '.jpg')).convert('RGB')
-        image = np.array(image)
-        return image
+        return np.array(image)
 
     def _get_mask_unbuffered(self, ti: int):
         # returns H*W uint8 array
@@ -251,21 +249,19 @@ class ResourceManager:
         mask_path = path.join(self.mask_dir, self.names[ti] + '.png')
         if path.exists(mask_path):
             mask = Image.open(mask_path)
-            mask = np.array(mask)
-            return mask
+            return np.array(mask)
         else:
             return None
 
-    def import_mask(self, file_name: str, size: Optional[Tuple[int, int]] = None):
+    def import_mask(self, file_name: str, size: tuple[int, int] | None = None):
         # read an mask file and resize it to exactly match the canvas size
         image = Image.open(file_name)
         if size is not None:
             # PIL uses (width, height)
             image = image.resize((size[1], size[0]), resample=Image.Resampling.NEAREST)
-        image = np.array(image)
-        return image
+        return np.array(image)
 
-    def import_layer(self, file_name: str, size: Tuple[int, int]):
+    def import_layer(self, file_name: str, size: tuple[int, int]):
         # read a RGBA/RGB file and resize it such that the entire layer is visible in the canvas
         # and then pad it to the canvas size (h, w)
         image = Image.open(file_name).convert('RGBA')
@@ -285,14 +281,12 @@ class ResourceManager:
         # padding
         pad_h = (size[0] - new_h) // 2
         pad_w = (size[1] - new_w) // 2
-        image = np.pad(
+        return np.pad(
             image,
             ((pad_h, size[0] - new_h - pad_h), (pad_w, size[1] - new_w - pad_w), (0, 0)),
             mode='constant',
             constant_values=0,
         )
-
-        return image
 
     def invalidate(self, ti: int):
         # the image buffer is never invalidated

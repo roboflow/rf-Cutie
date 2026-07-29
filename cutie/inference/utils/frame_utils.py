@@ -1,4 +1,3 @@
-from typing import Dict, List, Tuple
 import torch
 
 from inference.object_info import ObjectInfo
@@ -9,9 +8,9 @@ class FrameInfo:
         self,
         image: torch.Tensor,
         mask: torch.Tensor,
-        segments_info: List[ObjectInfo],
+        segments_info: list[ObjectInfo],
         ti: int,
-        info: Dict,
+        info: dict,
     ):
         self.image = image
         self.mask = mask
@@ -24,7 +23,7 @@ class FrameInfo:
         return self.info['frame']
 
     @property
-    def shape(self) -> Tuple(int):
+    def shape(self) -> tuple(int):
         return self.info['shape']
 
     @property

@@ -22,8 +22,7 @@ class SpatialGather_Module(nn.Module):
         feats = feats.view(batch_size, feats.size(1), -1)
         feats = feats.permute(0, 2, 1)  # batch x hw x c
         probs = F.softmax(self.scale * probs, dim=2)  # batch x k x hw
-        ocr_context = torch.matmul(probs, feats).permute(0, 2, 1).unsqueeze(3)  # batch x k x c
-        return ocr_context
+        return torch.matmul(probs, feats).permute(0, 2, 1).unsqueeze(3)  # batch x k x c
 
 
 class SpatialOCR_Module(nn.Module):
@@ -55,9 +54,7 @@ class SpatialOCR_Module(nn.Module):
     def forward(self, feats, proxy_feats):
         context = self.object_context_block(feats, proxy_feats)
 
-        output = self.conv_bn_dropout(torch.cat([context, feats], 1))
-
-        return output
+        return self.conv_bn_dropout(torch.cat([context, feats], 1))
 
 
 class ObjectAttentionBlock2D(nn.Module):

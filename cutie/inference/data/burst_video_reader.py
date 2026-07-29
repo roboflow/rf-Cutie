@@ -6,7 +6,6 @@ from torchvision.transforms import InterpolationMode
 from PIL import Image
 import numpy as np
 import pycocotools.mask as mask_utils
-from typing import Dict
 
 from cutie.utils.palette import davis_palette
 
@@ -20,7 +19,7 @@ class BURSTVideoReader(Dataset):
     def __init__(
         self,
         image_root: str,
-        sequence_json: Dict,
+        sequence_json: dict,
         *,
         size: int = -1,
         skip_frames: int = -1,

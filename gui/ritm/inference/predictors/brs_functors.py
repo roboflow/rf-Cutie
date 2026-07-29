@@ -12,11 +12,13 @@ class BaseOptimizer:
         prob_thresh=0.49,
         reg_weight=1e-3,
         min_iou_diff=0.01,
-        brs_loss=BRSMaskLoss(),
+        brs_loss=None,
         with_flip=False,
         flip_average=False,
         **kwargs,
     ):
+        if brs_loss is None:
+            brs_loss = BRSMaskLoss()
         self.brs_loss = brs_loss
         self.optimizer_params = optimizer_params
         self.prob_thresh = prob_thresh

@@ -11,7 +11,7 @@ def serialize(init):
     @wraps(init)
     def new_init(self, *args, **kwargs):
         params = deepcopy(kwargs)
-        for pname, value in zip(parameters[1:], args):
+        for pname, value in zip(parameters[1:], args, strict=False):
             params[pname] = value
 
         config = {'class': get_classname(self.__class__), 'params': dict()}
@@ -33,7 +33,7 @@ def serialize(init):
                 'specified': name in specified_params,
             }
 
-        setattr(self, '_config', config)
+        self._config = config
         init(self, *args, **kwargs)
 
     return new_init

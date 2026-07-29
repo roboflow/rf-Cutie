@@ -25,19 +25,13 @@ def search_options(options, name):
 
 def process_vid(vid):
     vid_path = search_options(all_options, vid)
-    if vid_path is not None:
-        backward_mapping = hkl.load(path.join(vid_path, 'backward.hkl'))
-    else:
-        backward_mapping = None
+    backward_mapping = hkl.load(path.join(vid_path, 'backward.hkl')) if vid_path is not None else None
 
     frames = os.listdir(path.join(all_options[0], vid))
     frames = [f for f in frames if 'backward' not in f]
 
     print(vid)
-    if 'Y' in args.dataset:
-        this_out_path = path.join(out_path, 'Annotations', vid)
-    else:
-        this_out_path = path.join(out_path, vid)
+    this_out_path = path.join(out_path, 'Annotations', vid) if 'Y' in args.dataset else path.join(out_path, vid)
     os.makedirs(this_out_path, exist_ok=True)
 
     for f in frames:
@@ -59,8 +53,8 @@ def process_vid(vid):
         # Remap the indices to the original domain
         if backward_mapping is not None:
             idx_mask = np.zeros_like(result_sum, dtype=np.uint8)
-            for l, i in backward_mapping.items():
-                idx_mask[result_sum == i] = l
+            for label, idx in backward_mapping.items():
+                idx_mask[result_sum == idx] = label
         else:
             idx_mask = result_sum.astype(np.uint8)
 
@@ -112,7 +106,7 @@ if __name__ == '__main__':
         all_vid.append(k)
 
     for k, v in count_to_vid.items():
-        print('Videos with count %d: %d' % (k, v))
+        print(f'Videos with count {k}: {v}')
 
     all_vid = sorted(all_vid)
     print('Total number of videos: ', len(all_vid))

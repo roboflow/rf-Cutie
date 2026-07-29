@@ -1,4 +1,3 @@
-from typing import List, Dict
 from omegaconf import DictConfig
 from collections import defaultdict
 import torch
@@ -66,7 +65,7 @@ class LossComputer:
 
         return loss_ce, loss_dice
 
-    def compute(self, data: Dict[str, torch.Tensor], num_objects: List[int]) -> Dict[str, torch.Tensor]:
+    def compute(self, data: dict[str, torch.Tensor], num_objects: list[int]) -> dict[str, torch.Tensor]:
         batch_size, num_frames = data['rgb'].shape[:2]
         losses = defaultdict(float)
         t_range = range(1, num_frames)
@@ -89,11 +88,11 @@ class LossComputer:
             if 'q_logits' in aux[0]:
                 num_levels = aux[0]['q_logits'].shape[2]
 
-                for l in range(num_levels):
-                    query_log = torch.stack([a['q_logits'][bi, : num_objects[bi] + 1, l] for a in aux], dim=0)
+                for level_idx in range(num_levels):
+                    query_log = torch.stack([a['q_logits'][bi, : num_objects[bi] + 1, level_idx] for a in aux], dim=0)
                     loss_ce, loss_dice = self.mask_loss(query_log, soft_gt)
-                    losses[f'aux_query_ce_l{l}'] += loss_ce / batch_size * self.query_weight
-                    losses[f'aux_query_dice_l{l}'] += loss_dice / batch_size * self.query_weight
+                    losses[f'aux_query_ce_l{level_idx}'] += loss_ce / batch_size * self.query_weight
+                    losses[f'aux_query_dice_l{level_idx}'] += loss_dice / batch_size * self.query_weight
 
         losses['total_loss'] = sum(losses.values())
 

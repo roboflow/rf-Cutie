@@ -1,6 +1,6 @@
 # Modified from PyTorch nn.Transformer
 
-from typing import List, Callable
+from collections.abc import Callable
 
 import torch
 from torch import Tensor
@@ -16,7 +16,7 @@ class SelfAttention(nn.Module):
         nhead: int,
         dropout: float = 0.0,
         batch_first: bool = True,
-        add_pe_to_qkv: List[bool] | None = None,
+        add_pe_to_qkv: list[bool] | None = None,
     ):
         super().__init__()
         self.self_attn = nn.MultiheadAttention(dim, nhead, dropout=dropout, batch_first=batch_first)
@@ -53,7 +53,7 @@ class CrossAttention(nn.Module):
         nhead: int,
         dropout: float = 0.0,
         batch_first: bool = True,
-        add_pe_to_qkv: List[bool] | None = None,
+        add_pe_to_qkv: list[bool] | None = None,
         residual: bool = True,
         norm: bool = True,
     ):
@@ -78,10 +78,7 @@ class CrossAttention(nn.Module):
         need_weights: bool = False,
     ) -> (torch.Tensor, torch.Tensor):
         x = self.norm(x)
-        if self.add_pe_to_qkv[0]:
-            q = x + x_pe
-        else:
-            q = x
+        q = x + x_pe if self.add_pe_to_qkv[0] else x
 
         if any(self.add_pe_to_qkv[1:]):
             mem_with_pe = mem + mem_pe
@@ -116,8 +113,7 @@ class FFN(nn.Module):
         r = x
         x = self.norm(x)
         x = self.linear2(self.activation(self.linear1(x)))
-        x = r + x
-        return x
+        return r + x
 
 
 class PixelFFN(nn.Module):
@@ -134,8 +130,7 @@ class PixelFFN(nn.Module):
         pixel_flat = pixel_flat.permute(0, 3, 1, 2).contiguous()
 
         x = self.conv(pixel_flat)
-        x = x.view(bs, num_objects, self.dim, h, w)
-        return x
+        return x.view(bs, num_objects, self.dim, h, w)
 
 
 class OutputFFN(nn.Module):
@@ -150,8 +145,7 @@ class OutputFFN(nn.Module):
             self.activation = activation
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.linear2(self.activation(self.linear1(x)))
-        return x
+        return self.linear2(self.activation(self.linear1(x)))
 
 
 def _get_activation_fn(activation: str) -> Callable[[Tensor], Tensor]:

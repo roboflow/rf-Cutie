@@ -27,8 +27,7 @@ def get_arguments():
     parser.add_argument('--num_objects', type=int, default=1)
     parser.add_argument('--workspace_init_only', action='store_true', help='initialize the workspace and exit')
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 if __name__ in '__main__':

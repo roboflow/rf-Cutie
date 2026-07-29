@@ -1,4 +1,4 @@
-from typing import List, Optional, Iterable, Dict
+from collections.abc import Iterable
 import logging
 from omegaconf import DictConfig
 
@@ -88,13 +88,10 @@ class InferenceCore:
         """
         if prob.shape[1] == 0:
             # nothing to add
-            log.warn('Trying to add an empty object mask to memory!')
+            log.warning('Trying to add an empty object mask to memory!')
             return
 
-        if force_permanent:
-            as_permanent = 'all'
-        else:
-            as_permanent = 'first'
+        as_permanent = 'all' if force_permanent else 'first'
 
         self.memory.initialize_sensory_if_needed(key, self.object_manager.all_obj_ids)
         msk_value, sensory, obj_value, _ = self.network.encode_mask(
@@ -146,7 +143,7 @@ class InferenceCore:
             assert bs == 1
 
         if not self.memory.engaged:
-            log.warn('Trying to segment without any memory!')
+            log.warning('Trying to segment without any memory!')
             return torch.zeros((1, key.shape[-2] * 16, key.shape[-1] * 16), device=key.device, dtype=key.dtype)
 
         memory_readout = self.memory.read(pix_feat, key, selection, self.last_mask, self.network)
@@ -171,8 +168,8 @@ class InferenceCore:
     def step(
         self,
         image: torch.Tensor,
-        mask: Optional[torch.Tensor] = None,
-        objects: Optional[List[int]] = None,
+        mask: torch.Tensor | None = None,
+        objects: list[int] | None = None,
         *,
         idx_mask: bool = True,
         end: bool = False,
@@ -273,10 +270,7 @@ class InferenceCore:
 
                 new_masks = []
                 for mask_id, tmp_id in enumerate(corresponding_tmp_ids):
-                    if idx_mask:
-                        this_mask = (mask == objects[mask_id]).type_as(pred_prob_no_bg)
-                    else:
-                        this_mask = mask[tmp_id]
+                    this_mask = (mask == objects[mask_id]).type_as(pred_prob_no_bg) if idx_mask else mask[tmp_id]
                     if tmp_id > pred_prob_no_bg.shape[0]:
                         new_masks.append(this_mask.unsqueeze(0))
                     else:
@@ -289,7 +283,7 @@ class InferenceCore:
                 if len(objects) == 0:
                     if delete_buffer:
                         self.image_feature_store.delete(self.curr_ti)
-                    log.warn('Trying to insert an empty mask as memory!')
+                    log.warning('Trying to insert an empty mask as memory!')
                     return torch.zeros(
                         (1, key.shape[-2] * 16, key.shape[-1] * 16),
                         device=key.device,
@@ -328,7 +322,7 @@ class InferenceCore:
 
         return output_prob
 
-    def delete_objects(self, objects: List[int]) -> None:
+    def delete_objects(self, objects: list[int]) -> None:
         """
         Delete the given objects from the memory.
         """

@@ -91,30 +91,29 @@ def process_video(cfg: DictConfig):
         print(f'No mask frames found!')
         exit()
 
-    with torch.inference_mode():
-        with torch.amp.autocast(device, enabled=(use_amp and device == 'cuda')):
-            pbar = tqdm(total=num_masks)
-            pbar.set_description('Commiting masks into permenent memory')
-            for mask_name in all_mask_frames:
-                mask = Image.open(path.join(mask_dir, mask_name))
-                frame_number = int(mask_name[:-4])
-                cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
+    with torch.inference_mode(), torch.amp.autocast(device, enabled=(use_amp and device == 'cuda')):
+        pbar = tqdm(total=num_masks)
+        pbar.set_description('Commiting masks into permenent memory')
+        for mask_name in all_mask_frames:
+            mask = Image.open(path.join(mask_dir, mask_name))
+            frame_number = int(mask_name[:-4])
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
 
-                # load frame matching mask
-                _, frame = cap.read()
-                if frame is None:
-                    break
+            # load frame matching mask
+            _, frame = cap.read()
+            if frame is None:
+                break
 
-                # convert numpy array to pytorch tensor format
-                frame_torch = image_to_torch(frame, device=device)
+            # convert numpy array to pytorch tensor format
+            frame_torch = image_to_torch(frame, device=device)
 
-                mask_np = np.array(mask)
-                mask_torch = index_numpy_to_one_hot_torch(mask_np, num_objects + 1).to(device)
+            mask_np = np.array(mask)
+            mask_torch = index_numpy_to_one_hot_torch(mask_np, num_objects + 1).to(device)
 
-                # the background mask is fed into the model
-                prob = processor.step(frame_torch, mask_torch[1:], idx_mask=False, force_permanent=True)
+            # the background mask is fed into the model
+            prob = processor.step(frame_torch, mask_torch[1:], idx_mask=False, force_permanent=True)
 
-                pbar.update(1)
+            pbar.update(1)
 
     # Next start inference on video
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # reset frame reading
@@ -131,69 +130,68 @@ def process_video(cfg: DictConfig):
     )
     mem_cleanup_ratio = cfg['mem_cleanup_ratio']
 
-    with torch.inference_mode():
-        with torch.amp.autocast(device, enabled=(use_amp and device == 'cuda')):
-            pbar = tqdm(total=total_frame_count)
-            pbar.set_description(f'Processing video {video}')
-            while cap.isOpened():
-                # load frame-by-frame
-                _, frame = cap.read()
-                if frame is None or current_frame_index > total_frame_count:
-                    break
+    with torch.inference_mode(), torch.amp.autocast(device, enabled=(use_amp and device == 'cuda')):
+        pbar = tqdm(total=total_frame_count)
+        pbar.set_description(f'Processing video {video}')
+        while cap.isOpened():
+            # load frame-by-frame
+            _, frame = cap.read()
+            if frame is None or current_frame_index > total_frame_count:
+                break
 
-                # timing start
-                if 'cuda' in device:
-                    torch.cuda.synchronize(device)
-                    start = torch.cuda.Event(enable_timing=True) if device == 'cuda' else None
-                    end = torch.cuda.Event(enable_timing=True) if device == 'cuda' else None
-                    start.record()
-                else:
-                    a = perf_counter()
+            # timing start
+            if 'cuda' in device:
+                torch.cuda.synchronize(device)
+                start = torch.cuda.Event(enable_timing=True) if device == 'cuda' else None
+                end = torch.cuda.Event(enable_timing=True) if device == 'cuda' else None
+                start.record()
+            else:
+                a = perf_counter()
 
-                frame_name = f'{current_frame_index:07d}' + '.png'
+            frame_name = f'{current_frame_index:07d}' + '.png'
 
-                # check if we have a mask to load
-                mask = None
-                mask_path = path.join(mask_dir, frame_name)
-                if path.exists(mask_path):
-                    mask = Image.open(mask_path)
+            # check if we have a mask to load
+            mask = None
+            mask_path = path.join(mask_dir, frame_name)
+            if path.exists(mask_path):
+                mask = Image.open(mask_path)
 
-                # convert numpy array to pytorch tensor format
-                frame_torch = image_to_torch(frame, device=device)
-                if mask is not None:
-                    # initialize with the mask
-                    mask_np = np.array(mask)
-                    mask_torch = index_numpy_to_one_hot_torch(mask_np, num_objects + 1).to(device)
-                    # the background mask is fed into the model
-                    prob = processor.step(frame_torch, mask_torch[1:], idx_mask=False)
-                else:
-                    # propagate only
-                    prob = processor.step(frame_torch)
+            # convert numpy array to pytorch tensor format
+            frame_torch = image_to_torch(frame, device=device)
+            if mask is not None:
+                # initialize with the mask
+                mask_np = np.array(mask)
+                mask_torch = index_numpy_to_one_hot_torch(mask_np, num_objects + 1).to(device)
+                # the background mask is fed into the model
+                prob = processor.step(frame_torch, mask_torch[1:], idx_mask=False)
+            else:
+                # propagate only
+                prob = processor.step(frame_torch)
 
-                # timing end
-                if 'cuda' in device:
-                    end.record()
-                    torch.cuda.synchronize(device)
-                    total_process_time += start.elapsed_time(end) / 1000
-                else:
-                    b = perf_counter()
-                    total_process_time += b - a
+            # timing end
+            if 'cuda' in device:
+                end.record()
+                torch.cuda.synchronize(device)
+                total_process_time += start.elapsed_time(end) / 1000
+            else:
+                b = perf_counter()
+                total_process_time += b - a
 
-                saver.process(
-                    prob,
-                    frame_name,
-                    resize_needed=False,
-                    shape=None,
-                    last_frame=(current_frame_index == total_frame_count - 1),
-                    path_to_image=None,
-                )
+            saver.process(
+                prob,
+                frame_name,
+                resize_needed=False,
+                shape=None,
+                last_frame=(current_frame_index == total_frame_count - 1),
+                path_to_image=None,
+            )
 
-                check_to_clear_non_permanent_cuda_memory(
-                    processor=processor, device=device, mem_cleanup_ratio=mem_cleanup_ratio
-                )
+            check_to_clear_non_permanent_cuda_memory(
+                processor=processor, device=device, mem_cleanup_ratio=mem_cleanup_ratio
+            )
 
-                current_frame_index += 1
-                pbar.update(1)
+            current_frame_index += 1
+            pbar.update(1)
 
     pbar.close()
     cap.release()  # Release the video capture object
@@ -213,20 +211,19 @@ def process_video(cfg: DictConfig):
 
 
 def check_to_clear_non_permanent_cuda_memory(processor: InferenceCore, device, mem_cleanup_ratio):
-    if 'cuda' in device:
-        if 0 < mem_cleanup_ratio <= 1:
-            info = torch.cuda.mem_get_info()
+    if 'cuda' in device and 0 < mem_cleanup_ratio <= 1:
+        info = torch.cuda.mem_get_info()
 
-            global_free, global_total = info
-            global_free /= 2**30  # GB
-            global_total /= 2**30  # GB
-            global_used = global_total - global_free
-            # mem_ratio = round(global_used / global_total * 100)
-            mem_ratio = global_used / global_total
-            if mem_ratio > mem_cleanup_ratio:
-                print(f'GPU cleanup triggered: {mem_ratio} > {mem_cleanup_ratio}')
-                processor.clear_non_permanent_memory()
-                torch.cuda.empty_cache()
+        global_free, global_total = info
+        global_free /= 2**30  # GB
+        global_total /= 2**30  # GB
+        global_used = global_total - global_free
+        # mem_ratio = round(global_used / global_total * 100)
+        mem_ratio = global_used / global_total
+        if mem_ratio > mem_cleanup_ratio:
+            print(f'GPU cleanup triggered: {mem_ratio} > {mem_cleanup_ratio}')
+            processor.clear_non_permanent_memory()
+            torch.cuda.empty_cache()
 
 
 def get_arguments():
@@ -264,8 +261,7 @@ def get_arguments():
         default='-1',
     )
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 if __name__ == '__main__':

@@ -1,4 +1,3 @@
-from typing import List, Dict, Optional
 from omegaconf import DictConfig
 
 import torch
@@ -53,7 +52,7 @@ class ObjectSummarizer(nn.Module):
 
     def forward(
         self, masks: torch.Tensor, value: torch.Tensor, need_weights: bool = False
-    ) -> (torch.Tensor, Optional[torch.Tensor]):
+    ) -> (torch.Tensor, torch.Tensor | None):
         # masks: B*num_objects*(H0)*(W0)
         # value: B*num_objects*value_dim*H*W
         # -> B*num_objects*H*W*value_dim

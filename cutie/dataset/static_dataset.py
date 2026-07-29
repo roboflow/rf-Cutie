@@ -170,10 +170,7 @@ class SyntheticVideoDataset(Dataset):
 
         for i, list_id in enumerate(indices):
             images, masks = self._get_sample(list_id)
-            if merged_images is None:
-                merged_images = images
-            else:
-                merged_images = merged_images * (1 - masks) + images * masks
+            merged_images = images if merged_images is None else merged_images * (1 - masks) + images * masks
             merged_masks[masks[:, 0] > 0.5] = i + 1
 
         masks = merged_masks
@@ -186,8 +183,8 @@ class SyntheticVideoDataset(Dataset):
         # Generate one-hot ground-truth
         cls_gt = np.zeros((self.seq_length, self.size, self.size), dtype=np.int64)
         first_frame_gt = np.zeros((1, self.max_num_obj, self.size, self.size), dtype=np.int64)
-        for i, l in enumerate(target_objects):
-            this_mask = masks == l
+        for i, label in enumerate(target_objects):
+            this_mask = masks == label
             cls_gt[this_mask] = i + 1
             first_frame_gt[0, i] = this_mask[0]
         cls_gt = np.expand_dims(cls_gt, 1)
@@ -200,15 +197,13 @@ class SyntheticVideoDataset(Dataset):
         selector = [1 if i < info['num_objects'] else 0 for i in range(self.max_num_obj)]
         selector = torch.FloatTensor(selector)
 
-        data = {
+        return {
             'rgb': merged_images,
             'first_frame_gt': first_frame_gt,
             'cls_gt': cls_gt,
             'selector': selector,
             'info': info,
         }
-
-        return data
 
     def __len__(self):
         return len(self.im_list)

@@ -153,11 +153,9 @@ class SoftIoU(nn.Module):
         if not self._from_sigmoid:
             pred = torch.sigmoid(pred)
 
-        loss = 1.0 - torch.sum(pred * label * sample_weight, dim=(1, 2, 3)) / (
+        return 1.0 - torch.sum(pred * label * sample_weight, dim=(1, 2, 3)) / (
             torch.sum(torch.max(pred, label) * sample_weight, dim=(1, 2, 3)) + 1e-8
         )
-
-        return loss
 
 
 class SigmoidBinaryCrossEntropyLoss(nn.Module):

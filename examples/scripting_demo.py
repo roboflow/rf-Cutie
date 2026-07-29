@@ -47,13 +47,7 @@ def main():
         image = Image.open(os.path.join(image_path, image_name))
         image = to_tensor(image).cuda().float()
 
-        if ti == 0:
-            # if mask is passed in, it is memorized
-            # if not all objects are specified, we propagate the unspecified objects using memory
-            output_prob = processor.step(image, mask, objects=objects)
-        else:
-            # otherwise, we propagate the mask from memory
-            output_prob = processor.step(image)
+        output_prob = processor.step(image, mask, objects=objects) if ti == 0 else processor.step(image)
 
         # convert output probabilities to an object mask
         mask = processor.output_prob_to_mask(output_prob)

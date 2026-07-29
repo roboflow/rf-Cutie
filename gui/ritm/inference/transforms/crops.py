@@ -2,8 +2,6 @@ import math
 
 import torch
 import numpy as np
-from typing import List
-
 from ...inference.clicker import Click
 from .base import BaseTransform
 
@@ -18,7 +16,7 @@ class Crops(BaseTransform):
         self.y_offsets = None
         self._counts = None
 
-    def transform(self, image_nd, clicks_lists: List[List[Click]]):
+    def transform(self, image_nd, clicks_lists: list[list[Click]]):
         assert image_nd.shape[0] == 1 and len(clicks_lists) == 1
         image_height, image_width = image_nd.shape[2:4]
         self._counts = None
@@ -59,9 +57,7 @@ class Crops(BaseTransform):
             for dx in self.x_offsets:
                 new_prob_map[0, 0, dy : dy + self.crop_height, dx : dx + self.crop_width] += prob_map[crop_indx, 0]
                 crop_indx += 1
-        new_prob_map = torch.div(new_prob_map, self._counts)
-
-        return new_prob_map
+        return torch.div(new_prob_map, self._counts)
 
     def get_state(self):
         return self.x_offsets, self.y_offsets, self._counts
@@ -86,7 +82,7 @@ def get_offsets(length, crop_size, min_overlap_ratio=0.2):
     overlap_width = int(crop_size * overlap_ratio)
 
     offsets = [0]
-    for i in range(1, N):
+    for _i in range(1, N):
         new_offset = offsets[-1] + crop_size - overlap_width
         if new_offset + crop_size > length:
             new_offset = length - crop_size

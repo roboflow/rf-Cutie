@@ -98,8 +98,7 @@ class FeatureBRSPredictor(BRSBasePredictor):
                 scaled_backbone_features = self.net.feature_extractor.head(scaled_backbone_features)
 
             pred_logits = self.net.head(scaled_backbone_features)
-            pred_logits = F.interpolate(pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True)
-            return pred_logits
+            return F.interpolate(pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True)
 
         self.opt_functor.init_click(get_prediction_logits, pos_mask, neg_mask, self.device)
         if num_clicks > self.optimize_after_n_clicks:
@@ -195,8 +194,7 @@ class HRNetFeatureBRSPredictor(BRSBasePredictor):
             else:
                 raise NotImplementedError
 
-            pred_logits = F.interpolate(pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True)
-            return pred_logits
+            return F.interpolate(pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True)
 
         self.opt_functor.init_click(get_prediction_logits, pos_mask, neg_mask, self.device)
         if num_clicks > self.optimize_after_n_clicks:
@@ -285,9 +283,7 @@ class InputBRSPredictor(BRSBasePredictor):
                 coord_features = self.net.maps_transform(dmaps)
 
             pred_logits = self.net.backbone_forward(x, coord_features=coord_features)['instances']
-            pred_logits = F.interpolate(pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True)
-
-            return pred_logits
+            return F.interpolate(pred_logits, size=image_nd.size()[2:], mode='bilinear', align_corners=True)
 
         self.opt_functor.init_click(get_prediction_logits, pos_mask, neg_mask, self.device, shape=self.opt_data.shape)
         if num_clicks > self.optimize_after_n_clicks:

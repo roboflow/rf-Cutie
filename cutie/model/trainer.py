@@ -109,12 +109,11 @@ class Trainer:
 
             # Logging
             self.integrator.add_dict(losses)
-            if self._is_train:
-                if self.local_rank == 0 and it % self.log_image_interval == 0 and it != 0:
-                    images = {**data, **out}
-                    self.log.log_image(self.stage, 'vis', vis(images, self.size, num_filled_objects), it)
-                    # self.log.log_image(self.stage, 'vis-debug',
-                    #                    vis_debug(images, self.size, num_filled_objects), 0)
+            if self._is_train and self.local_rank == 0 and it % self.log_image_interval == 0 and it != 0:
+                images = {**data, **out}
+                self.log.log_image(self.stage, 'vis', vis(images, self.size, num_filled_objects), it)
+                # self.log.log_image(self.stage, 'vis-debug',
+                #                    vis_debug(images, self.size, num_filled_objects), 0)
 
         if self._is_train:
             if it % self.log_text_interval == 0 and it != 0:
@@ -122,13 +121,11 @@ class Trainer:
                 self.train_integrator.finalize(self.exp_id, self.stage, it)
                 self.train_integrator.reset_except_hooks()
 
-            if it % self.save_weights_interval == 0 and it != 0:
-                if self.log is not None:
-                    self.save_weights(it)
+            if it % self.save_weights_interval == 0 and it != 0 and self.log is not None:
+                self.save_weights(it)
 
-            if it % self.save_checkpoint_interval == 0 and it != 0:
-                if self.log is not None:
-                    self.save_checkpoint(it)
+            if it % self.save_checkpoint_interval == 0 and it != 0 and self.log is not None:
+                self.save_checkpoint(it)
 
         # Backward pass
         self.optimizer.zero_grad(set_to_none=True)
@@ -201,7 +198,7 @@ class Trainer:
 
     def load_checkpoint(self, path):
         # This method loads everything and should be used to resume training
-        map_location = 'cuda:%d' % self.local_rank
+        map_location = f'cuda:{self.local_rank}'
         checkpoint = torch.load(path, map_location={'cuda:0': map_location})
 
         it = checkpoint['it']
@@ -209,7 +206,7 @@ class Trainer:
         optimizer = checkpoint['optimizer']
         scheduler = checkpoint['scheduler']
 
-        map_location = 'cuda:%d' % self.local_rank
+        map_location = f'cuda:{self.local_rank}'
         self.cutie.module.load_state_dict(weights)
         self.optimizer.load_state_dict(optimizer)
         self.scheduler.load_state_dict(scheduler)
@@ -224,7 +221,7 @@ class Trainer:
 
     def load_weights(self, path):
         # This method loads only the network weight and should be used to load a pretrained model
-        map_location = 'cuda:%d' % self.local_rank
+        map_location = f'cuda:{self.local_rank}'
         src_dict = torch.load(path, map_location={'cuda:0': map_location})
 
         self.log.info(f'Importing network weights from {path}...')

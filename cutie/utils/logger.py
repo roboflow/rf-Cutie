@@ -5,7 +5,6 @@ Dumps things to tensorboard and console
 import os
 import logging
 import datetime
-from typing import Dict
 import git
 import numpy as np
 from PIL import Image
@@ -15,8 +14,7 @@ from cutie.utils.time_estimator import TimeEstimator
 
 
 def tensor_to_numpy(image):
-    image_np = (image.numpy() * 255).astype('uint8')
-    return image_np
+    return (image.numpy() * 255).astype('uint8')
 
 
 def detach_to_cpu(x):
@@ -54,7 +52,7 @@ class TensorboardLogger:
             return
         self.tb_log.add_scalar(tag, x, it)
 
-    def log_metrics(self, exp_id, prefix, metrics: Dict, it):
+    def log_metrics(self, exp_id, prefix, metrics: dict, it):
         msg = f'{exp_id}-{prefix} - it {it:6d}: '
         metrics_msg = ''
         for k, v in sorted(metrics.items()):

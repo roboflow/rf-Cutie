@@ -1,6 +1,5 @@
 import torch
 
-from typing import List
 from ...inference.clicker import Click
 from ...utils.misc import get_bbox_iou, get_bbox_from_mask, expand_bbox, clamp_bbox
 from .base import BaseTransform
@@ -29,7 +28,7 @@ class ZoomIn(BaseTransform):
         self._object_roi = None
         self._roi_image = None
 
-    def transform(self, image_nd, clicks_lists: List[List[Click]]):
+    def transform(self, image_nd, clicks_lists: list[list[Click]]):
         assert image_nd.shape[0] == 1 and len(clicks_lists) == 1
         self.image_changed = False
 
@@ -54,11 +53,11 @@ class ZoomIn(BaseTransform):
                 current_object_roi = 0, image_nd.shape[2] - 1, 0, image_nd.shape[3] - 1
 
         update_object_roi = False
-        if self._object_roi is None:
-            update_object_roi = True
-        elif not check_object_roi(self._object_roi, clicks_list):
-            update_object_roi = True
-        elif get_bbox_iou(current_object_roi, self._object_roi) < self.recompute_thresh_iou:
+        if (
+            self._object_roi is None
+            or not check_object_roi(self._object_roi, clicks_list)
+            or get_bbox_iou(current_object_roi, self._object_roi) < self.recompute_thresh_iou
+        ):
             update_object_roi = True
 
         if update_object_roi:
@@ -153,9 +152,7 @@ def get_object_roi(pred_mask, clicks_list, expansion_ratio, min_crop_size):
     bbox = get_bbox_from_mask(pred_mask)
     bbox = expand_bbox(bbox, expansion_ratio, min_crop_size)
     h, w = pred_mask.shape[0], pred_mask.shape[1]
-    bbox = clamp_bbox(bbox, 0, h - 1, 0, w - 1)
-
-    return bbox
+    return clamp_bbox(bbox, 0, h - 1, 0, w - 1)
 
 
 def get_roi_image_nd(image_nd, object_roi, target_size):
@@ -173,11 +170,9 @@ def get_roi_image_nd(image_nd, object_roi, target_size):
 
     with torch.no_grad():
         roi_image_nd = image_nd[:, :, rmin : rmax + 1, cmin : cmax + 1]
-        roi_image_nd = torch.nn.functional.interpolate(
+        return torch.nn.functional.interpolate(
             roi_image_nd, size=(new_height, new_width), mode='bilinear', align_corners=True
         )
-
-    return roi_image_nd
 
 
 def check_object_roi(object_roi, clicks_list):

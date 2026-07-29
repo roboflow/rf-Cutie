@@ -1,5 +1,4 @@
 import os
-from typing import List
 
 from PIL import Image
 import numpy as np
@@ -43,7 +42,7 @@ def convert_frames_to_video(
 
 
 def convert_mask_to_binary(
-    mask_folder: str, output_path: str, target_objects: List[int], progress_callback=None
+    mask_folder: str, output_path: str, target_objects: list[int], progress_callback=None
 ) -> None:
     masks = [img for img in sorted(os.listdir(mask_folder)) if img.endswith('.png')]
 

@@ -1,5 +1,3 @@
-from typing import Union, List, Dict
-
 import torch
 from cutie.inference.object_info import ObjectInfo
 
@@ -12,16 +10,16 @@ class ObjectManager:
     """
 
     def __init__(self):
-        self.obj_to_tmp_id: Dict[ObjectInfo, int] = {}
-        self.tmp_id_to_obj: Dict[int, ObjectInfo] = {}
-        self.obj_id_to_obj: Dict[int, ObjectInfo] = {}
+        self.obj_to_tmp_id: dict[ObjectInfo, int] = {}
+        self.tmp_id_to_obj: dict[int, ObjectInfo] = {}
+        self.obj_id_to_obj: dict[int, ObjectInfo] = {}
 
-        self.all_historical_object_ids: List[int] = []
+        self.all_historical_object_ids: list[int] = []
 
     def _recompute_obj_id_to_obj_mapping(self) -> None:
         self.obj_id_to_obj = {obj.id: obj for obj in self.obj_to_tmp_id}
 
-    def add_new_objects(self, objects: Union[List[ObjectInfo], ObjectInfo, List[int]]) -> (List[int], List[int]):
+    def add_new_objects(self, objects: list[ObjectInfo] | ObjectInfo | list[int]) -> (list[int], list[int]):
         if not isinstance(objects, list):
             objects = [objects]
 
@@ -51,7 +49,7 @@ class ObjectManager:
         assert corresponding_tmp_ids == sorted(corresponding_tmp_ids)
         return corresponding_tmp_ids, corresponding_obj_ids
 
-    def delete_objects(self, obj_ids_to_remove: Union[int, List[int]]) -> None:
+    def delete_objects(self, obj_ids_to_remove: int | list[int]) -> None:
         # delete an object or a list of objects
         # re-sort the tmp ids
         if isinstance(obj_ids_to_remove, int):
@@ -74,7 +72,7 @@ class ObjectManager:
         self.tmp_id_to_obj = local_tmp_to_obj_id
         self._recompute_obj_id_to_obj_mapping()
 
-    def purge_inactive_objects(self, max_missed_detection_count: int) -> (bool, List[int], List[int]):
+    def purge_inactive_objects(self, max_missed_detection_count: int) -> (bool, list[int], list[int]):
         # remove tmp ids of objects that are removed
         obj_id_to_be_deleted = []
         tmp_id_to_be_deleted = []
@@ -101,7 +99,7 @@ class ObjectManager:
             new_mask[mask == tmp_id] = obj.id
         return new_mask
 
-    def get_tmp_to_obj_mapping(self) -> Dict[int, int]:
+    def get_tmp_to_obj_mapping(self) -> dict[int, int]:
         """Return a mapping from stable object IDs to their temporary IDs."""
         return {obj.id: tmp_id for tmp_id, obj in self.tmp_id_to_obj.items()}
 
@@ -112,8 +110,7 @@ class ObjectManager:
             if obj.id not in obj_dict:
                 raise NotImplementedError
             output.append(obj_dict[obj.id])
-        output = torch.stack(output, dim=dim)
-        return output
+        return torch.stack(output, dim=dim)
 
     def make_one_hot(self, cls_mask) -> torch.Tensor:
         output = []
@@ -126,18 +123,15 @@ class ObjectManager:
         return output
 
     @property
-    def all_obj_ids(self) -> List[int]:
+    def all_obj_ids(self) -> list[int]:
         return [k.id for k in self.obj_to_tmp_id]
 
     @property
     def num_obj(self) -> int:
         return len(self.obj_to_tmp_id)
 
-    def has_all(self, objects: List[int]) -> bool:
-        for obj in objects:
-            if obj not in self.obj_to_tmp_id:
-                return False
-        return True
+    def has_all(self, objects: list[int]) -> bool:
+        return all(obj in self.obj_to_tmp_id for obj in objects)
 
     def find_object_by_id(self, obj_id) -> ObjectInfo:
         return self.obj_id_to_obj[obj_id]

@@ -1,4 +1,3 @@
-from typing import Tuple, Optional, Dict
 import logging
 import os
 import shutil
@@ -94,7 +93,7 @@ class ResultSaver:
         prob: torch.Tensor,
         frame_name: str,
         resize_needed: bool = False,
-        shape: Optional[Tuple[int, int]] = None,
+        shape: tuple[int, int] | None = None,
         last_frame: bool = False,
         path_to_image: str = None,
     ):
@@ -102,11 +101,8 @@ class ResultSaver:
             prob = F.interpolate(prob.unsqueeze(1), shape, mode='bilinear', align_corners=False)[:, 0]
         # Probability mask -> index mask
         mask = torch.argmax(prob, dim=0)
-        if self.save_scores:
-            # also need to pass prob
-            prob = prob.cpu()
-        else:
-            prob = None
+        # also need to pass prob
+        prob = prob.cpu() if self.save_scores else None
 
         # remap indices
         if self.need_remapping:
@@ -141,8 +137,8 @@ class ResultArgs:
     mask: torch.Tensor
     frame_name: str
     path_to_image: str
-    tmp_id_to_obj: Dict[int, ObjectInfo]
-    obj_to_tmp_id: Dict[ObjectInfo, int]
+    tmp_id_to_obj: dict[int, ObjectInfo]
+    obj_to_tmp_id: dict[ObjectInfo, int]
     last_frame: bool
 
 
@@ -164,24 +160,23 @@ def save_result(queue: Queue):
         all_obj_ids = [k.id for k in obj_to_tmp_id]
 
         # record output in the json file
-        if saver.json_style == 'burst':
-            if frame_name in saver.annotated_frames:
-                frame_index = saver.annotated_frames.index(frame_name)
-                input_segments = saver.input_segmentations[frame_index]
-                frame_segments = saver.segmentations[frame_index]
+        if saver.json_style == 'burst' and frame_name in saver.annotated_frames:
+            frame_index = saver.annotated_frames.index(frame_name)
+            input_segments = saver.input_segmentations[frame_index]
+            frame_segments = saver.segmentations[frame_index]
 
-                for id in all_obj_ids:
-                    if id in input_segments:
-                        # if this frame has been given as input, just copy
-                        frame_segments[id] = input_segments[id]
-                        continue
+            for id in all_obj_ids:
+                if id in input_segments:
+                    # if this frame has been given as input, just copy
+                    frame_segments[id] = input_segments[id]
+                    continue
 
-                    segment = {}
-                    segment_mask = mask == id
-                    if segment_mask.sum() > 0:
-                        coco_mask = mask_util.encode(np.asfortranarray(segment_mask.numpy()))
-                        segment['rle'] = coco_mask['counts'].decode('utf-8')
-                        frame_segments[id] = segment
+                segment = {}
+                segment_mask = mask == id
+                if segment_mask.sum() > 0:
+                    coco_mask = mask_util.encode(np.asfortranarray(segment_mask.numpy()))
+                    segment['rle'] = coco_mask['counts'].decode('utf-8')
+                    frame_segments[id] = segment
 
         # save the mask to disk
         if saver.save_mask:

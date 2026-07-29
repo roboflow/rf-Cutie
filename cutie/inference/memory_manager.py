@@ -1,6 +1,5 @@
 import logging
 from omegaconf import DictConfig
-from typing import List, Dict
 import torch
 
 from cutie.inference.object_manager import ObjectManager
@@ -87,20 +86,20 @@ class MemoryManager:
             out = v @ affinity
             return out.view(bs, num_objects, C, -1)
 
-    def _get_mask_by_ids(self, mask: torch.Tensor, obj_ids: List[int]) -> torch.Tensor:
+    def _get_mask_by_ids(self, mask: torch.Tensor, obj_ids: list[int]) -> torch.Tensor:
         # -1 because the mask does not contain the background channel
         return mask[:, [self.object_manager.find_tmp_by_id(obj) - 1 for obj in obj_ids]]
 
-    def _get_sensory_by_ids(self, obj_ids: List[int]) -> torch.Tensor:
+    def _get_sensory_by_ids(self, obj_ids: list[int]) -> torch.Tensor:
         return torch.stack([self.sensory[obj] for obj in obj_ids], dim=1)
 
-    def _get_object_mem_by_ids(self, obj_ids: List[int]) -> torch.Tensor:
+    def _get_object_mem_by_ids(self, obj_ids: list[int]) -> torch.Tensor:
         if obj_ids[0] not in self.obj_v:
             # should only happen when the object transformer has been disabled
             return None
         return torch.stack([self.obj_v[obj] for obj in obj_ids], dim=1)
 
-    def _get_visual_values_by_ids(self, obj_ids: List[int]) -> torch.Tensor:
+    def _get_visual_values_by_ids(self, obj_ids: list[int]) -> torch.Tensor:
         # All the values that the object ids refer to should have the same shape
         value = torch.stack([self.work_mem.value[obj] for obj in obj_ids], dim=1)
         if self.use_long_term and obj_ids[0] in self.long_mem.value:
@@ -116,7 +115,7 @@ class MemoryManager:
         selection: torch.Tensor,
         last_mask: torch.Tensor,
         network: CUTIE,
-    ) -> Dict[int, torch.Tensor]:
+    ) -> dict[int, torch.Tensor]:
         """
         Read from all memory stores and returns a single memory readout tensor for each object
 
@@ -203,7 +202,7 @@ class MemoryManager:
         shrinkage: torch.Tensor,
         msk_value: torch.Tensor,
         obj_value: torch.Tensor,
-        objects: List[int],
+        objects: list[int],
         selection: torch.Tensor = None,
         *,
         as_permanent: bool = False,
@@ -274,7 +273,7 @@ class MemoryManager:
                 # FIFO
                 self.work_mem.remove_old_memory(bucket_id, self.max_work_tokens)
 
-    def purge_except(self, obj_keep_idx: List[int]) -> None:
+    def purge_except(self, obj_keep_idx: list[int]) -> None:
         # purge certain objects from the memory except the one listed
         self.work_mem.purge_except(obj_keep_idx)
         if self.use_long_term and self.long_mem.engaged():
@@ -310,9 +309,9 @@ class MemoryManager:
         candidate_key: torch.Tensor,
         candidate_shrinkage: torch.Tensor,
         candidate_selection: torch.Tensor,
-        candidate_value: Dict[int, torch.Tensor],
+        candidate_value: dict[int, torch.Tensor],
         usage: torch.Tensor,
-    ) -> (torch.Tensor, Dict[int, torch.Tensor], torch.Tensor):
+    ) -> (torch.Tensor, dict[int, torch.Tensor], torch.Tensor):
         # find the indices with max usage
         bs = candidate_key.shape[0]
         assert bs in [1, 2]
@@ -338,19 +337,19 @@ class MemoryManager:
 
         return prototype_key, prototype_value, prototype_shrinkage
 
-    def initialize_sensory_if_needed(self, sample_key: torch.Tensor, ids: List[int]):
+    def initialize_sensory_if_needed(self, sample_key: torch.Tensor, ids: list[int]):
         for obj in ids:
             if obj not in self.sensory:
                 # also initializes the sensory memory
                 bs, _, h, w = sample_key.shape
                 self.sensory[obj] = torch.zeros((bs, self.sensory_dim, h, w), device=sample_key.device)
 
-    def update_sensory(self, sensory: torch.Tensor, ids: List[int]):
+    def update_sensory(self, sensory: torch.Tensor, ids: list[int]):
         # sensory: 1*num_objects*C*H*W
         for obj_id, obj in enumerate(ids):
             self.sensory[obj] = sensory[:, obj_id]
 
-    def get_sensory(self, ids: List[int]):
+    def get_sensory(self, ids: list[int]):
         # returns (1/2)*num_objects*C*H*W
         return self._get_sensory_by_ids(ids)
 

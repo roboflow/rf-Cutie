@@ -1,6 +1,5 @@
 import math
 import torch
-from typing import Optional, Union, Tuple
 
 
 # @torch.jit.script
@@ -40,20 +39,15 @@ def get_similarity(
         two_ab = 2 * (mk.transpose(1, 2) @ qk)
         similarity = -a_sq + two_ab
 
-    if ms is not None:
-        similarity = similarity * ms / math.sqrt(CK)  # B*N*HW
-    else:
-        similarity = similarity / math.sqrt(CK)  # B*N*HW
-
-    return similarity
+    return similarity * ms / math.sqrt(CK) if ms is not None else similarity / math.sqrt(CK)  # B*N*HW
 
 
 def do_softmax(
     similarity: torch.Tensor,
-    top_k: Optional[int] = None,
+    top_k: int | None = None,
     inplace: bool = False,
     return_usage: bool = False,
-) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
     # normalize similarity with top-k softmax
     # similarity: B x N x [HW/P]
     # use inplace with care
@@ -83,8 +77,7 @@ def do_softmax(
 def get_affinity(mk: torch.Tensor, ms: torch.Tensor, qk: torch.Tensor, qe: torch.Tensor) -> torch.Tensor:
     # shorthand used in training with no top-k
     similarity = get_similarity(mk, ms, qk, qe)
-    affinity = do_softmax(similarity)
-    return affinity
+    return do_softmax(similarity)
 
 
 def readout(affinity: torch.Tensor, mv: torch.Tensor) -> torch.Tensor:
@@ -92,6 +85,4 @@ def readout(affinity: torch.Tensor, mv: torch.Tensor) -> torch.Tensor:
 
     mo = mv.view(B, CV, T * H * W)
     mem = torch.bmm(mo, affinity)
-    mem = mem.view(B, CV, H, W)
-
-    return mem
+    return mem.view(B, CV, H, W)

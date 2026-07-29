@@ -2,7 +2,6 @@
 For computing auxiliary outputs for auxiliary losses
 """
 
-from typing import Dict
 from omegaconf import DictConfig
 import torch
 import torch.nn as nn
@@ -23,8 +22,7 @@ class LinearPredictor(nn.Module):
         x = self.projection(x)
 
         pix_feat = pix_feat.unsqueeze(1).expand(-1, num_objects, -1, -1, -1)
-        logits = (pix_feat * x[:, :, :-1]).sum(dim=2) + x[:, :, -1]
-        return logits
+        return (pix_feat * x[:, :, :-1]).sum(dim=2) + x[:, :, -1]
 
 
 class DirectPredictor(nn.Module):
@@ -34,8 +32,7 @@ class DirectPredictor(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: B*num_objects*x_dim*H*W
-        logits = self.projection(x).squeeze(2)
-        return logits
+        return self.projection(x).squeeze(2)
 
 
 class AuxComputer(nn.Module):
@@ -57,12 +54,11 @@ class AuxComputer(nn.Module):
         prob = torch.sigmoid(logits)
         if selector is not None:
             prob = prob * selector
-        logits = aggregate(prob, dim=1)
-        return logits
+        return aggregate(prob, dim=1)
 
     def forward(
-        self, pix_feat: torch.Tensor, aux_input: Dict[str, torch.Tensor], selector: torch.Tensor
-    ) -> Dict[str, torch.Tensor]:
+        self, pix_feat: torch.Tensor, aux_input: dict[str, torch.Tensor], selector: torch.Tensor
+    ) -> dict[str, torch.Tensor]:
         sensory = aux_input['sensory']
         q_logits = aux_input['q_logits']
 

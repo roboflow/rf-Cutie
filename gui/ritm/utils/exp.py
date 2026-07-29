@@ -154,10 +154,7 @@ def load_config(model_path):
     model_name = model_path.stem
     config_path = model_path.parent / (model_name + '.yml')
 
-    if config_path.exists():
-        cfg = load_config_file(config_path)
-    else:
-        cfg = dict()
+    cfg = load_config_file(config_path) if config_path.exists() else dict()
 
     cwd = Path.cwd()
     config_parent = config_path.parent.absolute()
@@ -176,7 +173,7 @@ def load_config(model_path):
 
 
 def load_config_file(config_path, model_name=None, return_edict=False):
-    with open(config_path, 'r') as f:
+    with open(config_path) as f:
         cfg = yaml.safe_load(f)
 
     if 'SUBCONFIGS' in cfg:

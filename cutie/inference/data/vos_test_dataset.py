@@ -1,7 +1,8 @@
 import os
 from os import path
 import json
-from typing import Iterable, Optional
+from typing import Optional
+from collections.abc import Iterable
 
 from cutie.inference.data.video_reader import VideoReader
 
@@ -13,10 +14,10 @@ class VOSTestDataset:
         mask_dir: str,
         *,
         use_all_masks: bool,
-        req_frames_json: Optional[str] = None,
+        req_frames_json: str | None = None,
         size: int = -1,
-        size_dir: Optional[str] = None,
-        subset: Optional[str] = None,
+        size_dir: str | None = None,
+        subset: str | None = None,
     ):
         self.image_dir = image_dir
         self.mask_dir = mask_dir

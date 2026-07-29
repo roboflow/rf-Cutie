@@ -27,7 +27,7 @@ args = parser.parse_args()
 frames_path = args.frames_path
 output_path = args.output_path
 
-with open(args.json_path, 'r') as f:
+with open(args.json_path) as f:
     global_json = json.load(f)
 
 
@@ -45,7 +45,7 @@ def process_video(sequence):
     output_mask_folder = path.join(output_path, 'Annotations', new_seq_name)
     os.makedirs(output_image_folder, exist_ok=True)
     os.makedirs(output_mask_folder, exist_ok=True)
-    for segmentation, image_path in zip(segmentations, annotated_image_paths):
+    for segmentation, image_path in zip(segmentations, annotated_image_paths, strict=False):
         output_mask_path = path.join(output_mask_folder, image_path)[:-4] + '.png'
 
         output_mask = np.zeros((height, width), dtype=np.uint8)

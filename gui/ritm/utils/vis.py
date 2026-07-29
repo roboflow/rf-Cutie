@@ -65,10 +65,7 @@ def draw_points(image, points, color, radius=3):
     for p in points:
         if p[0] < 0:
             continue
-        if len(p) == 3:
-            pradius = {0: 8, 1: 6, 2: 4}[p[2]] if p[2] < 3 else 2
-        else:
-            pradius = radius
+        pradius = ({0: 8, 1: 6, 2: 4}[p[2]] if p[2] < 3 else 2) if len(p) == 3 else radius
         image = cv2.circle(image, (int(p[1]), int(p[0])), pradius, color, -1)
 
     return image
@@ -87,8 +84,7 @@ def blend_mask(image, mask, alpha=0.6):
         mask = mask.copy() + 1
 
     imap = draw_instance_map(mask)
-    result = (image * (1 - alpha) + alpha * imap).astype(np.uint8)
-    return result
+    return (image * (1 - alpha) + alpha * imap).astype(np.uint8)
 
 
 def get_boundaries(instances_masks, boundaries_width=1):

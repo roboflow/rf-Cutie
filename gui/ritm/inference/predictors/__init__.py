@@ -28,10 +28,7 @@ def get_predictor(
 
     predictor_params_ = {'optimize_after_n_clicks': 1}
 
-    if zoom_in_params is not None:
-        zoom_in = ZoomIn(**zoom_in_params)
-    else:
-        zoom_in = None
+    zoom_in = ZoomIn(**zoom_in_params) if zoom_in_params is not None else None
 
     if lbfgs_params is not None:
         lbfgs_params_.update(lbfgs_params)

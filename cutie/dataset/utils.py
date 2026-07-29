@@ -16,7 +16,7 @@ def all_to_onehot(masks, labels):
     else:
         Ms = np.zeros((len(labels), masks.shape[0], masks.shape[1]), dtype=np.uint8)
 
-    for ni, l in enumerate(labels):
-        Ms[ni] = (masks == l).astype(np.uint8)
+    for ni, label in enumerate(labels):
+        Ms[ni] = (masks == label).astype(np.uint8)
 
     return Ms

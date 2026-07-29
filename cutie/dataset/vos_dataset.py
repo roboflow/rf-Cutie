@@ -1,8 +1,6 @@
 import os
 from os import path
 import logging
-from typing import Dict, List, Tuple
-
 import torch
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms
@@ -43,7 +41,6 @@ class VOSMergeTrainDataset(Dataset):
     """
 
     def __init__(self, data_configs, seq_length=3, max_num_obj=3, size=480, merge_probability=0.0):
-
         self.configs = data_configs
         self.seq_length = seq_length
         self.max_num_obj = max_num_obj
@@ -54,9 +51,9 @@ class VOSMergeTrainDataset(Dataset):
         self.max_seed_trials = 5  # number of attempts at changing the initial seed frame
         self.max_seq_trials = 100  # number of attempts at generating a sequence from the seed frame
 
-        self.videos: Dict[List[str]] = {}
-        self.frames: Dict[Dict[str, List[str]]] = {}
-        self.video_frames: List[Tuple(str, str, int)] = []
+        self.videos: dict[list[str]] = {}
+        self.frames: dict[dict[str, list[str]]] = {}
+        self.video_frames: list[tuple(str, str, int)] = []
 
         for dataset, config in data_configs.items():
             self.frames[dataset] = {}
@@ -70,9 +67,8 @@ class VOSMergeTrainDataset(Dataset):
             # Find all videos
             vid_list = sorted(os.listdir(im_root))
             for vid in vid_list:
-                if subset is not None:
-                    if vid not in subset:
-                        continue
+                if subset is not None and vid not in subset:
+                    continue
                 frames = sorted(os.listdir(os.path.join(im_root, vid)))
                 if len(frames) < seq_length:
                     continue
@@ -274,7 +270,6 @@ class VOSMergeTrainDataset(Dataset):
             dataset, video, frame_idx = self.video_frames[idx]
 
     def __getitem__(self, idx):
-
         info, images, masks = self._get_sample(idx)
         labels = np.unique(masks[0])
         labels = labels[labels != 0].tolist()
@@ -285,13 +280,13 @@ class VOSMergeTrainDataset(Dataset):
             _, images2, masks2 = self._get_sample()
             labels2 = np.unique(masks2[0])
             labels2 = labels2[labels2 != 0].tolist()
-            for l2 in labels2:
-                obj_masks2 = masks2 == l2
+            for label2 in labels2:
+                obj_masks2 = masks2 == label2
                 blur_masks = obj_masks2.astype(np.float32).transpose(1, 2, 0)
                 blur_masks = cv2.GaussianBlur(blur_masks, [5, 5], 1.0).transpose(2, 0, 1)[:, None]
                 images = images * (1 - blur_masks) + images2 * blur_masks
 
-                new_label = (l2 + 10) % 255
+                new_label = (label2 + 10) % 255
                 while new_label in labels:
                     new_label = (new_label + 1) % 255
                 masks[obj_masks2] = new_label
@@ -313,8 +308,8 @@ class VOSMergeTrainDataset(Dataset):
         # Generate one-hot ground-truth
         cls_gt = np.zeros((self.seq_length, self.size, self.size), dtype=np.int64)
         first_frame_gt = np.zeros((1, self.max_num_obj, self.size, self.size), dtype=np.int64)
-        for i, l in enumerate(target_objects):
-            this_mask = masks == l
+        for i, label in enumerate(target_objects):
+            this_mask = masks == label
             cls_gt[this_mask] = i + 1
             first_frame_gt[0, i] = this_mask[0]
         cls_gt = np.expand_dims(cls_gt, 1)
@@ -323,15 +318,13 @@ class VOSMergeTrainDataset(Dataset):
         selector = [1 if i < info['num_objects'] else 0 for i in range(self.max_num_obj)]
         selector = torch.FloatTensor(selector)
 
-        data = {
+        return {
             'rgb': images,
             'first_frame_gt': first_frame_gt,
             'cls_gt': cls_gt,
             'selector': selector,
             'info': info,
         }
-
-        return data
 
     def __len__(self):
         return len(self.video_frames)

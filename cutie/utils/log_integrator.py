@@ -4,7 +4,7 @@ Typically used for loss computation / logging to tensorboard
 Call finalize and create a new Integrator when you want to display/log
 """
 
-from typing import Dict, Callable, Tuple
+from collections.abc import Callable
 import torch
 from cutie.utils.logger import TensorboardLogger
 
@@ -35,11 +35,11 @@ class Integrator:
             else:
                 self.values[key] += tensor.mean().item()
 
-    def add_dict(self, tensor_dict: Dict[str, torch.Tensor]):
+    def add_dict(self, tensor_dict: dict[str, torch.Tensor]):
         for k, v in tensor_dict.items():
             self.add_tensor(k, v)
 
-    def add_hook(self, hook: Callable[[torch.Tensor], Tuple[str, torch.Tensor]]):
+    def add_hook(self, hook: Callable[[torch.Tensor], tuple[str, torch.Tensor]]):
         """
         Adds a custom hook, i.e. compute new metrics using values in the dict
         The hook takes the dict as argument, and returns a (k, v) tuple
@@ -56,7 +56,6 @@ class Integrator:
 
     # Average and output the metrics
     def finalize(self, exp_id: str, prefix: str, it: int) -> None:
-
         for hook in self.hooks:
             k, v = hook(self.values)
             self.add_tensor(k, v)

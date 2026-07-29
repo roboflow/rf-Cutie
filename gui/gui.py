@@ -206,7 +206,7 @@ class GUI(QWidget):
         self.tips.setReadOnly(True)
         self.tips.setTextInteractionFlags(Qt.NoTextInteraction)
         self.tips.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        with open(Path(__file__).parent / 'TIPS.md', 'r') as f:
+        with open(Path(__file__).parent / 'TIPS.md') as f:
             self.tips.setMarkdown(f.read())
 
         # navigator
@@ -427,9 +427,7 @@ class GUI(QWidget):
     def is_pos_out_of_bound(self, x, y):
         x, y = self.pixel_pos_to_image_pos(x, y)
 
-        out_of_bound = (x < 0) or (y < 0) or (x > self.w - 1) or (y > self.h - 1)
-
-        return out_of_bound
+        return (x < 0) or (y < 0) or (x > self.w - 1) or (y > self.h - 1)
 
     def get_scaled_pos(self, x, y):
         x, y = self.pixel_pos_to_image_pos(x, y)

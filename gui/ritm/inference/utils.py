@@ -18,10 +18,7 @@ def get_time_metrics(all_ious, elapsed_time):
 
 
 def load_is_model(checkpoint, device, **kwargs):
-    if isinstance(checkpoint, (str, Path)):
-        state_dict = torch.load(checkpoint, map_location='cpu')
-    else:
-        state_dict = checkpoint
+    state_dict = torch.load(checkpoint, map_location='cpu') if isinstance(checkpoint, (str, Path)) else checkpoint
 
     if isinstance(state_dict, list):
         model = load_single_is_model(state_dict[0], device, **kwargs)
@@ -76,7 +73,6 @@ def get_iou(gt_mask, pred_mask, ignore_label=-1):
 
 
 def compute_noc_metric(all_ious, iou_thrs, max_clicks=20):
-
     def _get_noc(iou_arr, iou_thr):
         vals = iou_arr >= iou_thr
         return np.argmax(vals) + 1 if np.any(vals) else max_clicks
@@ -106,10 +102,7 @@ def find_checkpoint(weights_folder, checkpoint_name):
         model_folder = weights_folder
 
     if checkpoint_name.endswith('.pth'):
-        if Path(checkpoint_name).exists():
-            checkpoint_path = checkpoint_name
-        else:
-            checkpoint_path = weights_folder / checkpoint_name
+        checkpoint_path = checkpoint_name if Path(checkpoint_name).exists() else weights_folder / checkpoint_name
     else:
         model_checkpoints = list(model_folder.rglob(f'{checkpoint_name}*.pth'))
         assert len(model_checkpoints) == 1

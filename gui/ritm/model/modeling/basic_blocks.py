@@ -16,7 +16,7 @@ class ConvHead(nn.Module):
         super(ConvHead, self).__init__()
         convhead = []
 
-        for i in range(num_layers):
+        for _i in range(num_layers):
             convhead.extend(
                 [
                     nn.Conv2d(in_channels, in_channels, kernel_size, padding=padding),

@@ -1,4 +1,3 @@
-from typing import Dict, Optional
 from omegaconf import DictConfig
 
 import torch
@@ -113,9 +112,9 @@ class QueryTransformer(nn.Module):
         self,
         pixel: torch.Tensor,
         obj_summaries: torch.Tensor,
-        selector: Optional[torch.Tensor] = None,
+        selector: torch.Tensor | None = None,
         need_weights: bool = False,
-    ) -> (torch.Tensor, Dict[str, torch.Tensor]):
+    ) -> (torch.Tensor, dict[str, torch.Tensor]):
         # pixel: B*num_objects*embed_dim*H*W
         # obj_summaries: B*num_objects*T*num_queries*embed_dim
         T = obj_summaries.shape[2]
@@ -177,10 +176,7 @@ class QueryTransformer(nn.Module):
         # returns a mask of shape (batch_size*num_objects*num_heads)*num_queries*(H*W)
         # where True means the attention is blocked
 
-        if selector is None:
-            prob = logits.sigmoid()
-        else:
-            prob = logits.sigmoid() * selector
+        prob = logits.sigmoid() if selector is None else logits.sigmoid() * selector
         logits = aggregate(prob, dim=1)
 
         is_foreground = logits[:, 1:] >= logits.max(dim=1, keepdim=True)[0]

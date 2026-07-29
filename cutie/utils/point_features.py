@@ -2,12 +2,11 @@
 # such that users do not need to install detectron2 just for these two functions
 # Copyright (c) Facebook, Inc. and its affiliates.
 
-from typing import List
 import torch
 from torch.nn import functional as F
 
 
-def cat(tensors: List[torch.Tensor], dim: int = 0):
+def cat(tensors: list[torch.Tensor], dim: int = 0):
     """
     Efficient version of torch.cat that avoids a copy if there is only a single element in a list
     """

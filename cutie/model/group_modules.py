@@ -13,8 +13,7 @@ def interpolate_groups(g: torch.Tensor, ratio: float, mode: str, align_corners: 
         mode=mode,
         align_corners=align_corners,
     )
-    g = g.view(batch_size, num_objects, *g.shape[1:])
-    return g
+    return g.view(batch_size, num_objects, *g.shape[1:])
 
 
 def upsample_groups(
@@ -60,8 +59,8 @@ class GroupResBlock(nn.Module):
 class MainToGroupDistributor(nn.Module):
     def __init__(
         self,
-        x_transform: Optional[nn.Module] = None,
-        g_transform: Optional[nn.Module] = None,
+        x_transform: nn.Module | None = None,
+        g_transform: nn.Module | None = None,
         method: str = 'cat',
         reverse_order: bool = False,
     ):
@@ -84,10 +83,7 @@ class MainToGroupDistributor(nn.Module):
         if not skip_expand:
             x = x.unsqueeze(1).expand(-1, num_objects, -1, -1, -1)
         if self.method == 'cat':
-            if self.reverse_order:
-                g = torch.cat([g, x], 2)
-            else:
-                g = torch.cat([x, g], 2)
+            g = torch.cat([g, x], 2) if self.reverse_order else torch.cat([x, g], 2)
         elif self.method == 'add':
             g = x + g
         elif self.method == 'mulcat':
@@ -121,6 +117,4 @@ class GroupFeatureFusionBlock(nn.Module):
         g = self.block1(g)
         g = self.block2(g)
 
-        g = g.view(batch_size, num_objects, *g.shape[1:])
-
-        return g
+        return g.view(batch_size, num_objects, *g.shape[1:])

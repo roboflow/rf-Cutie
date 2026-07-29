@@ -13,10 +13,7 @@ def get_dims_with_exclusion(dim, exclude=None):
 
 
 def save_checkpoint(net, checkpoints_path, epoch=None, prefix='', verbose=True, multi_gpu=False):
-    if epoch is None:
-        checkpoint_name = 'last_checkpoint.pth'
-    else:
-        checkpoint_name = f'{epoch:03d}.pth'
+    checkpoint_name = 'last_checkpoint.pth' if epoch is None else f'{epoch:03d}.pth'
 
     if prefix:
         checkpoint_name = f'{prefix}_{checkpoint_name}'
@@ -29,7 +26,7 @@ def save_checkpoint(net, checkpoints_path, epoch=None, prefix='', verbose=True, 
         logger.info(f'Save checkpoint to {str(checkpoint_path)}')
 
     net = net.module if multi_gpu else net
-    torch.save({'state_dict': net.state_dict(), 'config': getattr(net, '_config')}, str(checkpoint_path))
+    torch.save({'state_dict': net.state_dict(), 'config': net._config}, str(checkpoint_path))
 
 
 def get_bbox_from_mask(mask):

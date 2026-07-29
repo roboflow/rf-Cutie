@@ -20,17 +20,17 @@ testpaths = ["tests"]
 # Ruff-only baseline. `PL` enables Ruff's Pylint-origin rules; explicit codes
 # cover reviewed Pylint equivalents outside that family.
 select = [
-  "A001", "A002", "A003", "A004",
-  "ARG001", "ARG002", "ARG003", "ARG004", "ARG005",
-  "B006", "B018",
-  "E402", "E501", "E721", "E722",
+  "A",
+  "ARG",
+  "B",
+  "E",
   "F",
-  "G001", "G002", "G004",
-  "I001",
+  "G",
+  "I",
   "PL",
-  "RET505", "RET506", "RET508",
-  "SIM113", "SIM118",
-  "UP004", "UP008", "UP032", "UP034",
+  "RET",
+  "SIM",
+  "UP",
 ]
 ignore = [
   # Direct equivalents for disabled Pylint rules.

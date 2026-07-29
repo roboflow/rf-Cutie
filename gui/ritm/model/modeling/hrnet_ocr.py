@@ -76,7 +76,7 @@ class HighResolutionModule(nn.Module):
             )
         )
         self.num_inchannels[branch_index] = num_channels[branch_index] * block.expansion
-        for i in range(1, num_blocks[branch_index]):
+        for _i in range(1, num_blocks[branch_index]):
             layers.append(
                 block(
                     self.num_inchannels[branch_index],
@@ -352,7 +352,7 @@ class HighResolutionNet(nn.Module):
         layers = []
         layers.append(block(inplanes, planes, stride, downsample=downsample, norm_layer=self.norm_layer))
         inplanes = planes * block.expansion
-        for i in range(1, blocks):
+        for _i in range(1, blocks):
             layers.append(block(inplanes, planes, norm_layer=self.norm_layer))
 
         return nn.Sequential(*layers)
@@ -371,10 +371,7 @@ class HighResolutionNet(nn.Module):
         modules = []
         for i in range(num_modules):
             # multi_scale_output is only used last module
-            if not multi_scale_output and i == num_modules - 1:
-                reset_multi_scale_output = False
-            else:
-                reset_multi_scale_output = True
+            reset_multi_scale_output = not (not multi_scale_output and i == num_modules - 1)
             modules.append(
                 HighResolutionModule(
                     num_branches,

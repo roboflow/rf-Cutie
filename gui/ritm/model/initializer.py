@@ -69,10 +69,7 @@ class Bilinear(Initializer):
         bilinear_kernel = self.get_bilinear_kernel(self.scale)
         weight = torch.zeros_like(data)
         for i in range(self.in_channels):
-            if self.groups == 1:
-                j = i
-            else:
-                j = 0
+            j = i if self.groups == 1 else 0
             weight[i, j] = bilinear_kernel
         data[:] = weight
 
@@ -98,7 +95,7 @@ class XavierGluon(Initializer):
         self.magnitude = float(magnitude)
 
     def _init_weight(self, data):
-        fan_in, fan_out = getattr(nn.init, '_calculate_fan_in_and_fan_out')(data)
+        fan_in, fan_out = nn.init._calculate_fan_in_and_fan_out(data)
 
         if self.factor_type == 'avg':
             factor = (fan_in + fan_out) / 2.0

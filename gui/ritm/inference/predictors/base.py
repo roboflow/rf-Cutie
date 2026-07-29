@@ -86,7 +86,7 @@ class BasePredictor(object):
 
     def _set_transform_states(self, states):
         assert len(states) == len(self.transforms)
-        for state, transform in zip(states, self.transforms):
+        for state, transform in zip(states, self.transforms, strict=False):
             transform.set_state(state)
 
     def apply_transforms(self, image_nd, clicks_lists):
@@ -100,7 +100,9 @@ class BasePredictor(object):
     def get_points_nd(self, clicks_lists):
         total_clicks = []
         num_pos_clicks = [sum(x.is_positive for x in clicks_list) for clicks_list in clicks_lists]
-        num_neg_clicks = [len(clicks_list) - num_pos for clicks_list, num_pos in zip(clicks_lists, num_pos_clicks)]
+        num_neg_clicks = [
+            len(clicks_list) - num_pos for clicks_list, num_pos in zip(clicks_lists, num_pos_clicks, strict=False)
+        ]
         num_max_points = max(num_pos_clicks + num_neg_clicks)
         if self.net_clicks_limit is not None:
             num_max_points = min(self.net_clicks_limit, num_max_points)

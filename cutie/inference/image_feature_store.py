@@ -1,5 +1,5 @@
 import warnings
-from typing import Iterable
+from collections.abc import Iterable
 import torch
 from cutie.model.cutie import CUTIE
 
@@ -45,4 +45,4 @@ class ImageFeatureStore:
 
     def __del__(self):
         if len(self._store) > 0 and not self.no_warning:
-            warnings.warn(f'Leaking {self._store.keys()} in the image feature store')
+            warnings.warn(f'Leaking {self._store.keys()} in the image feature store', stacklevel=2)

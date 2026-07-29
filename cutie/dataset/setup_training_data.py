@@ -57,7 +57,7 @@ def setup_main_training_datasets(cfg, max_skip):
             'empty_masks': load_empty_masks(d_cfg.empty_masks) if d_cfg.empty_masks else None,
             'multiplier': d_cfg.multiplier,
         }
-        for name, d_cfg in zip(datasets, dataset_configs)
+        for name, d_cfg in zip(datasets, dataset_configs, strict=False)
     }
 
     dataset = VOSMergeTrainDataset(

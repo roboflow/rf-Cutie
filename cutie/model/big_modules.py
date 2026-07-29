@@ -131,10 +131,7 @@ class MaskEncoder(nn.Module):
     ) -> (torch.Tensor, torch.Tensor):
         # ms_features are from the key encoder
         # we only use the first one (lowest resolution), following XMem
-        if self.single_object:
-            g = masks.unsqueeze(2)
-        else:
-            g = torch.stack([masks, others], dim=2)
+        g = masks.unsqueeze(2) if self.single_object else torch.stack([masks, others], dim=2)
 
         g = self.distributor(image, g)
 
@@ -144,19 +141,13 @@ class MaskEncoder(nn.Module):
             fast_path = True
             new_sensory = sensory
         else:
-            if deep_update:
-                new_sensory = torch.empty_like(sensory)
-            else:
-                new_sensory = sensory
+            new_sensory = torch.empty_like(sensory) if deep_update else sensory
             fast_path = False
 
         # chunk-by-chunk inference
         all_g = []
         for i in range(0, num_objects, chunk_size):
-            if fast_path:
-                g_chunk = g
-            else:
-                g_chunk = g[:, i : i + chunk_size]
+            g_chunk = g if fast_path else g[:, i : i + chunk_size]
             actual_chunk_size = g_chunk.shape[1]
             g_chunk = g_chunk.flatten(start_dim=0, end_dim=1)
 
@@ -216,10 +207,7 @@ class PixelFeatureFuser(nn.Module):
     ) -> torch.Tensor:
         batch_size, num_objects = pixel_memory.shape[:2]
 
-        if self.single_object:
-            last_mask = last_mask.unsqueeze(2)
-        else:
-            last_mask = torch.stack([last_mask, last_others], dim=2)
+        last_mask = last_mask.unsqueeze(2) if self.single_object else torch.stack([last_mask, last_others], dim=2)
 
         if chunk_size < 1:
             chunk_size = num_objects
@@ -233,9 +221,7 @@ class PixelFeatureFuser(nn.Module):
             p16 = pixel_memory[:, i : i + chunk_size] + sensory_readout
             p16 = self.fuser(pix_feat, p16)
             all_p16.append(p16)
-        p16 = torch.cat(all_p16, dim=1)
-
-        return p16
+        return torch.cat(all_p16, dim=1)
 
 
 class MaskDecoder(nn.Module):
@@ -265,7 +251,6 @@ class MaskDecoder(nn.Module):
         chunk_size: int = -1,
         update_sensory: bool = True,
     ) -> (torch.Tensor, torch.Tensor):
-
         batch_size, num_objects = memory_readout.shape[:2]
         f8, f4 = self.decoder_feat_proc(ms_image_feat[1:])
         if chunk_size < 1 or chunk_size >= num_objects:
@@ -273,19 +258,13 @@ class MaskDecoder(nn.Module):
             fast_path = True
             new_sensory = sensory
         else:
-            if update_sensory:
-                new_sensory = torch.empty_like(sensory)
-            else:
-                new_sensory = sensory
+            new_sensory = torch.empty_like(sensory) if update_sensory else sensory
             fast_path = False
 
         # chunk-by-chunk inference
         all_logits = []
         for i in range(0, num_objects, chunk_size):
-            if fast_path:
-                p16 = memory_readout
-            else:
-                p16 = memory_readout[:, i : i + chunk_size]
+            p16 = memory_readout if fast_path else memory_readout[:, i : i + chunk_size]
             actual_chunk_size = p16.shape[1]
 
             p8 = self.up_16_8(p16, f8)

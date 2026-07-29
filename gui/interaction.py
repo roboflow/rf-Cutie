@@ -6,7 +6,6 @@ You can inherit the Interaction class to create new interaction types
 undo is (sometimes partially) supported
 """
 
-from typing import Tuple
 import torch
 import torch.nn.functional as F
 
@@ -33,7 +32,7 @@ class Interaction:
         self,
         image: torch.Tensor,
         prev_mask: torch.Tensor,
-        true_size: Tuple[int, int],
+        true_size: tuple[int, int],
         controller: ClickController,
     ):
         self.image = image
@@ -54,7 +53,7 @@ class ClickInteraction(Interaction):
         self,
         image: torch.Tensor,
         prev_mask: torch.Tensor,
-        true_size: Tuple[int, int],
+        true_size: tuple[int, int],
         controller: ClickController,
         tar_obj: int,
     ):

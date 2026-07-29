@@ -31,9 +31,4 @@ class CAResBlock(nn.Module):
         w = self.pool(x).view(b, 1, c)
         w = self.conv(w).transpose(-1, -2).unsqueeze(-1).sigmoid()  # B*C*1*1
 
-        if self.residual:
-            x = x * w + self.downsample(r)
-        else:
-            x = x * w
-
-        return x
+        return x * w + self.downsample(r) if self.residual else x * w

@@ -15,19 +15,18 @@ def load_weights_add_extra_dim(target, source_state, extra_dim=1):
     new_dict = OrderedDict()
 
     for k1, v1 in target.state_dict().items():
-        if not 'num_batches_tracked' in k1:
-            if k1 in source_state:
-                tar_v = source_state[k1]
+        if 'num_batches_tracked' not in k1 and k1 in source_state:
+            tar_v = source_state[k1]
 
-                if v1.shape != tar_v.shape:
-                    # Init the new segmentation channel with zeros
-                    # print(v1.shape, tar_v.shape)
-                    c, _, w, h = v1.shape
-                    pads = torch.zeros((c, extra_dim, w, h), device=tar_v.device)
-                    nn.init.orthogonal_(pads)
-                    tar_v = torch.cat([tar_v, pads], 1)
+            if v1.shape != tar_v.shape:
+                # Init the new segmentation channel with zeros
+                # print(v1.shape, tar_v.shape)
+                c, _, w, h = v1.shape
+                pads = torch.zeros((c, extra_dim, w, h), device=tar_v.device)
+                nn.init.orthogonal_(pads)
+                tar_v = torch.cat([tar_v, pads], 1)
 
-                new_dict[k1] = tar_v
+            new_dict[k1] = tar_v
 
     target.load_state_dict(new_dict)
 
@@ -77,9 +76,7 @@ class BasicBlock(nn.Module):
             residual = self.downsample(x)
 
         out += residual
-        out = self.relu(out)
-
-        return out
+        return self.relu(out)
 
 
 class Bottleneck(nn.Module):
@@ -123,9 +120,7 @@ class Bottleneck(nn.Module):
             residual = self.downsample(x)
 
         out += residual
-        out = self.relu(out)
-
-        return out
+        return self.relu(out)
 
 
 class ResNet(nn.Module):
@@ -165,7 +160,7 @@ class ResNet(nn.Module):
 
         layers = [block(self.inplanes, planes, stride, downsample)]
         self.inplanes = planes * block.expansion
-        for i in range(1, blocks):
+        for _i in range(1, blocks):
             layers.append(block(self.inplanes, planes, dilation=dilation))
 
         return nn.Sequential(*layers)

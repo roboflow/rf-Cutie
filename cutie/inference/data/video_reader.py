@@ -1,4 +1,3 @@
-from typing import List, Optional
 import os
 from os import path
 import copy
@@ -23,14 +22,14 @@ class VideoReader(Dataset):
         mask_dir: str,
         *,
         size: int = -1,
-        to_save: Optional[List[str]] = None,
+        to_save: list[str] | None = None,
         use_all_masks: bool = False,
-        size_dir: Optional[str] = None,
+        size_dir: str | None = None,
         start: int = -1,
         end: int = -1,
         reverse: bool = False,
         object_name: str = None,
-        enabled_frame_list: Optional[List[str]] = None,
+        enabled_frame_list: list[str] | None = None,
     ):
         """
         image_dir - points to a directory of jpg images
@@ -112,12 +111,7 @@ class VideoReader(Dataset):
             size_im = Image.open(size_path).convert('RGB')
             output_shape = np.array(size_im).shape[:2]
 
-        # resize if the input image is too large
-        if self.image_dir != self.size_dir:
-            # might be different from shape if size_dir is used
-            input_shape = np.array(img).shape[:2]
-        else:
-            input_shape = output_shape
+        input_shape = np.array(img).shape[:2] if self.image_dir != self.size_dir else output_shape
         resize_needed = (input_shape != output_shape) or ((self.size > 0) and (min(input_shape) > self.size))
         img = self.im_transform(img)
         if resize_needed:

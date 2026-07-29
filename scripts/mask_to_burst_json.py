@@ -12,7 +12,7 @@ gt_json_path = sys.argv[1]
 input_mask_path = sys.argv[2]
 output_json_path = sys.argv[3]
 
-with open(gt_json_path, 'r') as f:
+with open(gt_json_path) as f:
     json_dict = json.load(f)
 
 videos = defaultdict(list)

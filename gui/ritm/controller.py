@@ -1,9 +1,8 @@
 import torch
+import contextlib
 
-try:
+with contextlib.suppress(ImportError):
     from torch import mps
-except ImportError:
-    pass
 from torchvision import transforms
 
 from ..ritm.inference import clicker

@@ -89,9 +89,7 @@ class DeepLabV3Plus(nn.Module):
             x = self.aspp(c4)
             x = F.interpolate(x, c1.size()[2:], mode='bilinear', align_corners=True)
             x = torch.cat((x, c1), dim=1)
-            x = self.head(x)
-
-        return x
+            return self.head(x)
 
 
 class _SkipProject(nn.Module):
@@ -194,7 +192,7 @@ class _AsppPooling(nn.Module):
 
 
 def _ASPPConv(in_channels, out_channels, atrous_rate, norm_layer):
-    block = nn.Sequential(
+    return nn.Sequential(
         nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -206,5 +204,3 @@ def _ASPPConv(in_channels, out_channels, atrous_rate, norm_layer):
         norm_layer(out_channels),
         nn.ReLU(),
     )
-
-    return block

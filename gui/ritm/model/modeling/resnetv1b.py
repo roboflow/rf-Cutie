@@ -57,9 +57,7 @@ class BasicBlockV1b(nn.Module):
             residual = self.downsample(x)
 
         out = out + residual
-        out = self.relu(out)
-
-        return out
+        return self.relu(out)
 
 
 class BottleneckV1b(nn.Module):
@@ -115,9 +113,7 @@ class BottleneckV1b(nn.Module):
             residual = self.downsample(x)
 
         out = out + residual
-        out = self.relu(out)
-
-        return out
+        return self.relu(out)
 
 
 class ResNetV1b(nn.Module):
@@ -307,9 +303,7 @@ class ResNetV1b(nn.Module):
         x = x.view(x.size(0), -1)
         if self.drop is not None:
             x = self.drop(x)
-        x = self.fc(x)
-
-        return x
+        return self.fc(x)
 
 
 def _safe_state_dict_filtering(orig_dict, model_dict_keys):

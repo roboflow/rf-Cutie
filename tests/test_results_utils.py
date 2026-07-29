@@ -1,18 +1,7 @@
 """Optional evaluation dependency contracts for result saving."""
 
-import importlib.util
-
 import pytest
-
-
-PIL_AVAILABLE = importlib.util.find_spec('PIL') is not None
-pytestmark = pytest.mark.skipif(
-    not PIL_AVAILABLE,
-    reason='ResultSaver tests require the inference extra (Pillow).',
-)
-
-if PIL_AVAILABLE:
-    from cutie.inference.utils import results_utils
+from cutie.inference.utils import results_utils
 
 
 def test_score_saving_requires_evaluation_extra(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:

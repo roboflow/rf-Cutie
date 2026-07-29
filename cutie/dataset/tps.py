@@ -1,7 +1,8 @@
 import numpy as np
 from PIL import Image
 import cv2
-from tps import ThinPlateSpline
+
+from thin_plate_spline import ThinPlateSpline
 
 cv2.setNumThreads(0)
 

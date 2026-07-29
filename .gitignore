@@ -149,3 +149,6 @@ dmypy.json
 
 # AI assets
 .reports/
+
+# env files
+uv.lock

@@ -1,9 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.metadata]
-allow-direct-references = true
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [tool.ruff]
 line-length = 100
@@ -50,8 +47,8 @@ ignore = [
 ]
 
 [project]
-name = "cutie"
-version = "1.0.0"
+name = "rf-cutie"
+version = "1.0.0.rc0"
 authors = [{ name = "Rex Cheng", email = "hkchengrex@gmail.com" }]
 description = ""
 readme = "README.md"
@@ -121,7 +118,9 @@ data = [
 
 [dependency-groups]
 build = [
+  'build>=1.2',
   'cython',
+  'twine>=6.0',
 ]
 tests = [
   'coverage==7.13.2',
@@ -132,8 +131,13 @@ tests = [
 [tool.uv.dependency-groups]
 tests = { requires-python = '>=3.10' }
 
-[tool.hatch.build.targets.wheel]
-packages = ["cutie"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cutie*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+"cutie" = ["config/**/*.yaml", "utils/subsets/*.txt"]
 
 [project.urls]
 "Homepage" = "https://github.com/hkchengrex/Cutie"

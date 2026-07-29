@@ -22,8 +22,12 @@ jobs:
         with:
           version: '0.9.26'
           python-version: '3.12'
+          activate-environment: true
       - name: Build distributions
-        run: uv build
+        run: |
+          uv pip install --group build --strict
+          python -m build
+          python -m twine check --strict dist/*
       - name: Upload distributions
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -31,6 +35,8 @@ jobs:
           path: dist/*
           if-no-files-found: error
           retention-days: 7
+
+
   install-and-import:
     name: Install and import wheel
     needs: build

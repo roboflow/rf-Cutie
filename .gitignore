@@ -148,6 +148,7 @@ dmypy.json
 .idea/
 
 # AI assets
+.developments/
 .reports/
 
 # env files

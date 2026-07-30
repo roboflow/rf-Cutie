@@ -244,11 +244,8 @@ class MemoryManager:
             for obj_id, obj in enumerate(objects):
                 if obj in self.obj_v:
                     # Keep embedding sums and counts for the object transformer's streaming average.
-                    last_acc = self.obj_v[obj][:, :, -1]
-                    new_acc = last_acc + obj_value[:, obj_id, :, -1]
-
-                    self.obj_v[obj][:, :, :-1] = self.obj_v[obj][:, :, :-1] + obj_value[:, obj_id, :, :-1]
-                    self.obj_v[obj][:, :, -1] = new_acc
+                    self.obj_v[obj][:, :, :-1].add_(obj_value[:, obj_id, :, :-1])
+                    self.obj_v[obj][:, :, -1].add_(obj_value[:, obj_id, :, -1])
                 else:
                     self.obj_v[obj] = obj_value[:, obj_id]
 

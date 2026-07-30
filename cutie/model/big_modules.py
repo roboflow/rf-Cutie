@@ -80,7 +80,7 @@ class KeyProjection(nn.Module):
 
     def forward(self, x: torch.Tensor, *, need_s: bool, need_e: bool) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         x = self.pix_feat_proj(x)
-        shrinkage = self.d_proj(x) ** 2 + 1 if (need_s) else None
+        shrinkage = self.d_proj(x).pow(2).add_(1) if (need_s) else None
         selection = torch.sigmoid(self.e_proj(x)) if (need_e) else None
 
         return self.key_proj(x), shrinkage, selection

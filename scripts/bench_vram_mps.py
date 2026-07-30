@@ -36,6 +36,8 @@ def _run_once(mk: torch.Tensor, ms: torch.Tensor, qk: torch.Tensor, qe: torch.Te
 
 
 def bench(*, batch: int, ck: int, num_memory_frames: int, hw: int, iters: int) -> None:
+    if iters < 1:
+        raise ValueError('iters must be >= 1')
     if not torch.backends.mps.is_available():
         print('MPS not available on this machine — nothing to bench.')
         return

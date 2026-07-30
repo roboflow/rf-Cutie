@@ -17,7 +17,7 @@ jobs:
     uses: ./.github/workflows/build-package.yml
 
 
-  test:
+  tests-cpu:
     name: Pytest
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
@@ -43,11 +43,11 @@ jobs:
           PYTHONHASHSEED: '0'
           PYTHONPATH: .
         run: |
-          uv run --no-sync python -m coverage run --branch --source=cutie -m pytest tests -q
+          uv run --no-sync python -m coverage run --branch --source=cutie -m pytest tests
           uv run --no-sync python -m coverage report --show-missing
 
 
-  test-gpu:
+  tests-gpu:
     name: Pytest (GPU)
     runs-on: Roboflow-GPU-VM-Runner
     timeout-minutes: 30
@@ -71,4 +71,4 @@ jobs:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONHASHSEED: '0'
           PYTHONPATH: .
-        run: uv run --no-sync pytest tests -q
+        run: uv run --no-sync pytest tests

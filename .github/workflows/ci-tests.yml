@@ -43,3 +43,30 @@ jobs:
         run: |
           uv run --no-sync python -m coverage run --branch --source=cutie -m pytest tests -q
           uv run --no-sync python -m coverage report --show-missing
+
+
+  test-gpu:
+    name: Pytest (GPU)
+    runs-on: Roboflow-GPU-VM-Runner
+    timeout-minutes: 30
+    env:
+      UV_TORCH_BACKEND: auto
+    steps:
+      - name: Print GPU information
+        run: nvidia-smi
+      - name: Check out source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up UV and Python
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: '0.9.26'
+          python-version: '3.12'
+          activate-environment: true
+      - name: Install all extras and test dependency group
+        run: uv pip install --group tests --strict '.[inference,evaluation,train,gui,video,data]'
+      - name: Run GPU-accelerated device-parity tests
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONHASHSEED: '0'
+          PYTHONPATH: .
+        run: uv run --no-sync pytest tests -q

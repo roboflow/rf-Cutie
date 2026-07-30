@@ -14,7 +14,11 @@ quote-style = "single"
 ignore-words-list = ["MOSE", "concurent", "indx"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["cutie", "tests"]
+addopts = [
+  "--color=yes",
+  "--doctest-modules",
+]
 
 [tool.ruff.lint]
 # Ruff-only baseline. `PL` enables Ruff's Pylint-origin rules; explicit codes

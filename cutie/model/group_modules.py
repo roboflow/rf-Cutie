@@ -89,7 +89,7 @@ class MainToGroupDistributor(nn.Module):
         elif self.method == 'mulcat':
             g = torch.cat([x * g, g], dim=2)
         elif self.method == 'muladd':
-            g = x * g + g
+            g = torch.addcmul(g, x, g)
         else:
             raise NotImplementedError
 

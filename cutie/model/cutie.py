@@ -54,7 +54,8 @@ class CUTIE(nn.Module):
         return (masks.sum(dim=1, keepdim=True) - masks).clamp(0, 1) if num_objects >= 1 else torch.zeros_like(masks)
 
     def encode_image(self, image: torch.Tensor) -> (Iterable[torch.Tensor], torch.Tensor):
-        image = (image - self.pixel_mean) / self.pixel_std
+        # sub() copies (never mutates the caller's frame); only the fresh copy is div_'d in place
+        image = image.sub(self.pixel_mean).div_(self.pixel_std)
         ms_image_feat = self.pixel_encoder(image)
         return ms_image_feat, self.pix_feat_proj(ms_image_feat[0])
 
@@ -69,7 +70,7 @@ class CUTIE(nn.Module):
         chunk_size: int = -1,
         need_weights: bool = False,
     ) -> (torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
-        image = (image - self.pixel_mean) / self.pixel_std
+        image = image.sub(self.pixel_mean).div_(self.pixel_std)
         others = self._get_others(masks)
         mask_value, new_sensory = self.mask_encoder(
             image,

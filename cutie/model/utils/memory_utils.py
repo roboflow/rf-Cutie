@@ -30,16 +30,18 @@ def get_similarity(
         # See XMem's appendix for derivation
         mk = mk.transpose(1, 2)
         a_sq = mk.pow(2) @ qe
-        two_ab = 2 * (mk @ (qk * qe))
+        two_ab = (mk @ (qk * qe)).mul_(2)
         b_sq = (qe * qk.pow(2)).sum(1, keepdim=True)
-        similarity = -a_sq + two_ab - b_sq
+        similarity = two_ab.sub_(a_sq).sub_(b_sq)
     else:
         # similar to STCN if we don't have the selection term
         a_sq = mk.pow(2).sum(1).unsqueeze(2)
-        two_ab = 2 * (mk.transpose(1, 2) @ qk)
-        similarity = -a_sq + two_ab
+        two_ab = (mk.transpose(1, 2) @ qk).mul_(2)
+        similarity = two_ab.sub_(a_sq)
 
-    return similarity * ms / math.sqrt(CK) if ms is not None else similarity / math.sqrt(CK)  # B*N*HW
+    if ms is not None:
+        return similarity.mul_(ms).div_(math.sqrt(CK))
+    return similarity.div_(math.sqrt(CK))  # B*N*HW
 
 
 def do_softmax(
@@ -63,7 +65,10 @@ def do_softmax(
             affinity = torch.zeros_like(similarity).scatter_(1, indices, x_exp)  # B*N*HW
     else:
         maxes = torch.max(similarity, dim=1, keepdim=True)[0]
-        x_exp = torch.exp(similarity - maxes)
+        # exp_() is safe (sub() output is a fresh throwaway tensor); div_() is NOT —
+        # Exp's backward needs its own output value preserved, so the final
+        # normalization must stay out-of-place (confirmed by backward-parity test).
+        x_exp = similarity.sub(maxes).exp_()
         x_exp_sum = torch.sum(x_exp, dim=1, keepdim=True)
         affinity = x_exp / x_exp_sum
         indices = None

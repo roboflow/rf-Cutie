@@ -31,4 +31,4 @@ class CAResBlock(nn.Module):
         w = self.pool(x).view(b, 1, c)
         w = self.conv(w).transpose(-1, -2).unsqueeze(-1).sigmoid()  # B*C*1*1
 
-        return x * w + self.downsample(r) if self.residual else x * w
+        return torch.addcmul(self.downsample(r), x, w) if self.residual else x * w

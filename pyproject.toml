@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
@@ -90,14 +90,33 @@ ignore = []
 
 [project]
 name = "rf-cutie"
-version = "1.0.0"
+version = "1.0.1"
 authors = [{ name = "Rex Cheng", email = "hkchengrex@gmail.com" }]
-description = ""
+maintainers = [{ name = "Roboflow", email = "help@roboflow.com" }]
+description = "Cutie: a video object segmentation framework (Roboflow-maintained fork for reliable packaging and PyPI releases)."
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = [
+  "video-object-segmentation",
+  "computer-vision",
+  "deep-learning",
+  "pytorch",
+  "segmentation",
+  "cutie",
+]
 classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 dependencies = [
   'torch',
@@ -181,4 +200,10 @@ namespaces = true
 
 [project.urls]
 "Homepage" = "https://github.com/roboflow/rf-Cutie"
+"Source" = "https://github.com/roboflow/rf-Cutie"
+"Repository" = "https://github.com/roboflow/rf-Cutie.git"
+"Issues" = "https://github.com/roboflow/rf-Cutie/issues"
 "Bug Tracker" = "https://github.com/roboflow/rf-Cutie/issues"
+"Changelog" = "https://github.com/roboflow/rf-Cutie/releases"
+"Upstream Project" = "https://github.com/hkchengrex/Cutie"
+"Paper" = "https://arxiv.org/abs/2310.12982"
